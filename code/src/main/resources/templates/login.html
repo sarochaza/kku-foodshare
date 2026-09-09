@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ - KKU FoodShare</title>
+</head>
+
+<body>
+
+    <h1>เข้าสู่ระบบ</h1>
+
+    <div th:if="${param.error}">
+        อีเมลหรือรหัสผ่านไม่ถูกต้อง
+    </div>
+
+    <div th:if="${param.logout}">
+        ออกจากระบบเรียบร้อยแล้ว
+    </div>
+
+    <form th:action="@{/login}" method="post">
+
+        <div>
+            <label>Email</label>
+            <input type="email"
+                   name="email"
+                   required>
+        </div>
+
+        <div>
+            <label>Password</label>
+            <input type="password"
+                   name="password"
+                   required>
+        </div>
+
+        <button type="submit">
+            เข้าสู่ระบบ
+        </button>
+
+    </form>
+
+    <a th:href="@{/register}">
+        ยังไม่มีบัญชี? สมัครสมาชิก
+    </a>
+
+</body>
+</html>
