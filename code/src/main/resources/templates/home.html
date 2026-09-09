@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>KKU FoodShare</title>
+
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+
+<body>
+
+<header class="navbar">
+    <a href="/" class="logo">
+        <span class="logo-icon">🌱</span>
+        <span>KKU FoodShare</span>
+    </a>
+
+    <nav class="nav-links">
+        <a href="#home">หน้าแรก</a>
+        <a href="#about">เกี่ยวกับเรา</a>
+        <a href="#map">แผนที่อาหาร</a>
+        <a href="#how">วิธีการใช้งาน</a>
+        <a href="#contact">ติดต่อเรา</a>
+    </nav>
+</header>
+
+
+<main>
+
+    <section class="hero" id="home">
+
+        <!-- Background -->
+        <img
+            class="hero-background"
+            th:src="@{/images/hero-background.png}"
+            alt=""
+        >
+
+        <div class="hero-overlay"></div>
+
+        <!-- Text -->
+        <div class="hero-content">
+
+            <div class="hero-badge">
+                🌱 อาหารไม่ควรถูกทิ้ง แต่ควรได้ไปต่อ
+            </div>
+
+            <h1>
+                แบ่งปันอาหาร<br>
+                <span>ส่งต่อความสุข</span>
+            </h1>
+
+            <p>
+                พื้นที่แบ่งปันอาหารภายในมหาวิทยาลัย
+                ช่วยลดอาหารเหลือ และส่งต่ออาหารดี ๆ
+                ให้กับคนในชุมชนของเรา
+            </p>
+
+            <div class="hero-buttons">
+
+                <a th:href="@{/register}"
+                   class="btn btn-primary">
+                    สมัครสมาชิก
+                </a>
+
+                <a th:href="@{/login}"
+                   class="btn btn-secondary">
+                    เข้าสู่ระบบ
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- Character -->
+        <div class="hero-art">
+
+            <img
+                th:src="@{/images/hero-characters.png}"
+                alt="KKU FoodShare"
+                class="hero-characters"
+            >
+
+        </div>
+
+    </section>
+
+
+    <section class="benefits" id="about">
+
+        <div>
+            <span>🍱</span>
+            <h3>ลดอาหารเหลือ</h3>
+            <p>อาหารที่ยังดีไม่จำเป็นต้องถูกทิ้ง</p>
+        </div>
+
+        <div>
+            <span>🤝</span>
+            <h3>สร้างชุมชนที่ดี</h3>
+            <p>แบ่งปันและช่วยเหลือกันภายในมหาวิทยาลัย</p>
+        </div>
+
+        <div>
+            <span>🌱</span>
+            <h3>มหาวิทยาลัยยั่งยืน</h3>
+            <p>ช่วยลดขยะอาหารและใช้ทรัพยากรอย่างคุ้มค่า</p>
+        </div>
+
+        <div>
+            <span>🌎</span>
+            <h3>โลกที่น่าอยู่กว่าเดิม</h3>
+            <p>การแบ่งปันเล็ก ๆ สามารถสร้างการเปลี่ยนแปลงได้</p>
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>
