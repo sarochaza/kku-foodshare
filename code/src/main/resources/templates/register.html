@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>สมัครสมาชิก | KKU FoodShare</title>
+</head>
+
+<body>
+
+<h1>สมัครสมาชิก</h1>
+
+<form th:action="@{/register}"
+      th:object="${registerRequest}"
+      method="post">
+
+    <div>
+        <label>ชื่อที่แสดง</label>
+        <input type="text" th:field="*{displayName}">
+        <p th:if="${#fields.hasErrors('displayName')}"
+           th:errors="*{displayName}"></p>
+    </div>
+
+    <div>
+        <label>อีเมล</label>
+        <input type="email" th:field="*{email}">
+        <p th:if="${#fields.hasErrors('email')}"
+           th:errors="*{email}"></p>
+    </div>
+
+    <div>
+        <label>รหัสผ่าน</label>
+        <input type="password" th:field="*{password}">
+        <p th:if="${#fields.hasErrors('password')}"
+           th:errors="*{password}"></p>
+    </div>
+
+    <p th:if="${error}" th:text="${error}"></p>
+
+    <button type="submit">สมัครสมาชิก</button>
+
+</form>
+
+</body>
+</html>
