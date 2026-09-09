@@ -9,7 +9,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-    //เอาไว้ เข้ารหัส Password ก่อนเก็บลง DB
+
+    // เอาไว้เข้ารหัส Password ก่อนเก็บลง DB
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -17,15 +18,24 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        //หมายความว่า URL พวกนี้ ไม่ต้อง Login ก็เข้าได้ เช่น:
+
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/register", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers(
+                    "/",
+                    "/register",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**"
+                ).permitAll()
+
                 .anyRequest().authenticated()
             )
+
             .formLogin(form -> form
                 .permitAll()
             )
+
             .logout(logout -> logout
                 .permitAll()
             );
