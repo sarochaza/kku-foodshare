@@ -247,21 +247,20 @@
 
             <!-- GOOGLE -->
 
-            <button
-                type="button"
-                class="google-button"
-                title="Google Sign Up จะเพิ่มภายหลัง">
+            <a
+    th:href="@{/oauth2/authorization/google}"
+    class="google-button">
 
-                <img
-                    th:src="@{/images/logo_gg.png}"
-                    alt="Google"
-                    class="google-logo">
+    <img
+        th:src="@{/images/logo_gg.png}"
+        alt="Google"
+        class="google-logo">
 
-                <span>
-                    สมัครด้วย Google
-                </span>
+    <span>
+        สมัครด้วย Google
+    </span>
 
-            </button>
+</a>
 
 
             <!-- LOGIN LINK -->
