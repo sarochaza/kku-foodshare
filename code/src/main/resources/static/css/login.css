@@ -1,0 +1,538 @@
+/* ========================================
+   KKU FOODSHARE - LOGIN PAGE
+======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    color: #172554;
+}
+
+
+/* ========================================
+   BACKGROUND
+======================================== */
+
+.login-page {
+
+    position: relative;
+
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px 90px;
+
+    background-image:
+        linear-gradient(
+            rgba(239, 246, 255, 0.08),
+            rgba(239, 246, 255, 0.08)
+        ),
+        url("../images/login-background.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
+}
+
+
+/* ========================================
+   LOGIN CARD
+======================================== */
+
+.login-card {
+
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    max-width: 540px;
+
+    padding: 32px 48px 38px;
+
+    /*
+       สีขาว opacity 80%
+    */
+    background: rgba(255, 255, 255, 0.80);
+
+    border: 1px solid rgba(255, 255, 255, 0.90);
+
+    border-radius: 32px;
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 30px 70px rgba(30, 64, 175, 0.18),
+        0 8px 25px rgba(15, 23, 42, 0.08);
+}
+
+
+/* ========================================
+   LOGO
+======================================== */
+
+.logo-link {
+
+    display: flex;
+
+    justify-content: center;
+
+    text-decoration: none;
+}
+
+
+.login-logo {
+
+    display: block;
+
+    width: 190px;
+    max-width: 70%;
+
+    margin: 0 auto 8px;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.login-header {
+
+    text-align: center;
+
+    margin-bottom: 27px;
+}
+
+
+.login-header h1 {
+
+    margin-bottom: 8px;
+
+    font-size: 36px;
+
+    line-height: 1.25;
+
+    font-weight: 800;
+
+    color: #172554;
+}
+
+
+.login-header p {
+
+    font-size: 15px;
+
+    line-height: 1.7;
+
+    color: #64748b;
+}
+
+
+/* ========================================
+   ALERT
+======================================== */
+
+.alert {
+
+    padding: 12px 16px;
+
+    margin-bottom: 18px;
+
+    border-radius: 14px;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+.alert-error {
+
+    color: #b91c1c;
+
+    background: rgba(254, 226, 226, 0.9);
+}
+
+
+.alert-success {
+
+    color: #15803d;
+
+    background: rgba(220, 252, 231, 0.9);
+}
+
+
+/* ========================================
+   FORM
+======================================== */
+
+.login-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+.form-group label {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: #172554;
+}
+
+
+.form-group label span {
+
+    color: #ef4444;
+}
+
+
+/* ========================================
+   INPUT
+======================================== */
+
+.input-wrapper {
+
+    position: relative;
+}
+
+
+.input-icon {
+
+    position: absolute;
+
+    top: 50%;
+    left: 18px;
+
+    transform: translateY(-50%);
+
+    z-index: 2;
+
+    font-size: 17px;
+
+    color: #2563eb;
+
+    pointer-events: none;
+}
+
+
+.input-wrapper input {
+
+    width: 100%;
+    height: 57px;
+
+    padding: 0 18px 0 52px;
+
+    border: 1.5px solid rgba(96, 165, 250, 0.55);
+
+    border-radius: 16px;
+
+    outline: none;
+
+    background: rgba(255, 255, 255, 0.65);
+
+    color: #172554;
+
+    font-size: 15px;
+
+    transition: 0.2s ease;
+}
+
+
+.input-wrapper input::placeholder {
+
+    color: #94a3b8;
+}
+
+
+.input-wrapper input:focus {
+
+    border-color: #2563eb;
+
+    background: rgba(255, 255, 255, 0.95);
+
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.10);
+}
+
+
+/* ========================================
+   FORGOT PASSWORD
+======================================== */
+
+.forgot-password {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 9px;
+}
+
+
+.forgot-password a {
+
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+
+.forgot-password a:hover {
+
+    text-decoration: underline;
+}
+
+
+/* ========================================
+   LOGIN BUTTON
+======================================== */
+
+.login-button {
+
+    width: 100%;
+    height: 58px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    cursor: pointer;
+
+    color: #ffffff;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #3b82f6
+        );
+
+    box-shadow:
+        0 12px 25px rgba(37, 99, 235, 0.28);
+
+    transition: 0.2s ease;
+}
+
+
+.login-button span {
+
+    margin-left: 8px;
+}
+
+
+.login-button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 16px 30px rgba(37, 99, 235, 0.35);
+}
+
+
+.login-button:active {
+
+    transform: translateY(0);
+}
+
+
+/* ========================================
+   REGISTER
+======================================== */
+
+.register-area {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    margin-top: 25px;
+
+    font-size: 14px;
+
+    color: #64748b;
+}
+
+
+.register-area a {
+
+    color: #2563eb;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.register-area a:hover {
+
+    text-decoration: underline;
+}
+
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.login-footer {
+
+    position: absolute;
+
+    bottom: 22px;
+
+    z-index: 2;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 3px;
+
+    font-size: 12px;
+
+    color: #475569;
+
+    text-shadow:
+        0 1px 5px rgba(255, 255, 255, 0.9);
+}
+
+
+.login-footer strong {
+
+    color: #172554;
+}
+
+
+.login-footer span {
+
+    color: #2563eb;
+}
+
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 700px) {
+
+    .login-page {
+
+        align-items: flex-start;
+
+        padding:
+            30px
+            16px
+            90px;
+
+        background-position: 60% center;
+    }
+
+
+    .login-card {
+
+        margin-top: 15px;
+
+        padding:
+            28px
+            25px
+            32px;
+
+        border-radius: 26px;
+    }
+
+
+    .login-logo {
+
+        width: 170px;
+    }
+
+
+    .login-header h1 {
+
+        font-size: 31px;
+    }
+
+
+    .login-header p {
+
+        font-size: 14px;
+    }
+
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 420px) {
+
+    .login-card {
+
+        padding:
+            25px
+            18px
+            28px;
+    }
+
+
+    .login-logo {
+
+        width: 150px;
+    }
+
+
+    .login-header h1 {
+
+        font-size: 28px;
+    }
+
+
+    .register-area {
+
+        flex-direction: column;
+
+        align-items: center;
+
+        gap: 3px;
+    }
+
+}
