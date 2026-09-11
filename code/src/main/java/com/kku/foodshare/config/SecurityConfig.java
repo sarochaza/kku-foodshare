@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .usernameParameter("email")
 
                 // Login สำเร็จกลับหน้า Home
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/home", true)
 
                 .permitAll()
             )
