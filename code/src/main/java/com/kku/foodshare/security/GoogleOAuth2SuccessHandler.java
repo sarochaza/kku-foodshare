@@ -46,6 +46,6 @@ public class GoogleOAuth2SuccessHandler
                 name
         );
 
-        response.sendRedirect("/");
+        response.sendRedirect("/home");
     }
 }

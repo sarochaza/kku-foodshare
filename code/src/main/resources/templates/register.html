@@ -13,6 +13,21 @@
 <body>
 
 <main class="register-page">
+        <!-- Register Decoration -->
+    <div class="register-atmosphere" aria-hidden="true">
+
+        <span class="register-bubble register-bubble-one"></span>
+        <span class="register-bubble register-bubble-two"></span>
+        <span class="register-bubble register-bubble-three"></span>
+
+        <span class="register-leaf register-leaf-one">◆</span>
+        <span class="register-leaf register-leaf-two">◆</span>
+        <span class="register-leaf register-leaf-three">◆</span>
+
+        <span class="register-spark register-spark-one">✦</span>
+        <span class="register-spark register-spark-two">✦</span>
+
+    </div>
 
     <section class="register-container">
 
@@ -309,7 +324,69 @@
         }
     }
 
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
+        const registerPage =
+            document.querySelector(
+                ".register-page"
+            );
+
+        const reduceMotion =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches;
+
+        if (
+            !registerPage ||
+            reduceMotion
+        ) {
+            return;
+        }
+
+        registerPage.addEventListener(
+            "pointermove",
+            function (event) {
+
+                const mouseX =
+                    event.clientX /
+                    window.innerWidth - 0.5;
+
+                const mouseY =
+                    event.clientY /
+                    window.innerHeight - 0.5;
+
+                registerPage.style.setProperty(
+                    "--register-mouse-x",
+                    mouseX * 2
+                );
+
+                registerPage.style.setProperty(
+                    "--register-mouse-y",
+                    mouseY * 2
+                );
+            }
+        );
+
+        registerPage.addEventListener(
+            "pointerleave",
+            function () {
+
+                registerPage.style.setProperty(
+                    "--register-mouse-x",
+                    0
+                );
+
+                registerPage.style.setProperty(
+                    "--register-mouse-y",
+                    0
+                );
+            }
+        );
+
+    }
+);
 </script>
 
 </body>

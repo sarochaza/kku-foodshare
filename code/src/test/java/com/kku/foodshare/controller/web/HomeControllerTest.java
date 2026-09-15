@@ -10,10 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HomeControllerTest {
 
-    // =========================================================
-    // TEST 1: ทดสอบว่า HomeController เปิดหน้า home.html ถูกต้อง
-    // ผ่านเมื่อ: controller.home() คืนค่า "home"
-    // =========================================================
+    // ทดสอบว่าเปิดหน้า Landing Page ถูกต้อง
     @Test
     void homeShouldReturnHomeTemplate() {
 
@@ -29,16 +26,9 @@ class HomeControllerTest {
         );
     }
 
-
-    // =========================================================
-    // TEST 2: ทดสอบว่า Home Dashboard มีส่วน "รายการอาหารใกล้คุณ"
-    // ผ่านเมื่อ: home.html มีข้อความ "รายการอาหารใกล้คุณ"
-    //
-    // ตอนนี้คาดว่า FAIL (RED)
-    // เพราะเรายังไม่ได้สร้าง Home Dashboard เวอร์ชันใหม่
-    // =========================================================
+    // ทดสอบว่า Landing Page มี Hero หลัก
     @Test
-    void homeTemplateShouldContainNearbyFoodSection()
+    void homeTemplateShouldContainHeroSection()
             throws Exception {
 
         String html = Files.readString(
@@ -48,7 +38,53 @@ class HomeControllerTest {
         );
 
         assertTrue(
-                html.contains("รายการอาหารใกล้คุณ")
+                html.contains("แบ่งปันอาหาร")
         );
     }
+    // ทดสอบว่า Landing Page มี Hero สำหรับ interaction
+@Test
+void homeTemplateShouldContainInteractiveHero()
+        throws Exception {
+
+    String html = Files.readString(
+            Path.of(
+                "src/main/resources/templates/home.html"
+            )
+    );
+
+    assertTrue(
+            html.contains("interactive-hero")
+    );
+}
+// ทดสอบว่า Landing Page มีส่วนปัญหาอาหารเหลือ
+@Test
+void homeTemplateShouldContainProblemSection()
+        throws Exception {
+
+    String html = Files.readString(
+            Path.of(
+                "src/main/resources/templates/home.html"
+            )
+    );
+
+    assertTrue(
+            html.contains("problem-section")
+    );
+}
+
+// ทดสอบว่า Problem มีภาพมาสคอต
+@Test
+void problemSectionShouldContainMascotImage()
+        throws Exception {
+
+    String html = Files.readString(
+            Path.of(
+                    "src/main/resources/templates/home.html"
+            )
+    );
+
+    assertTrue(
+            html.contains("mascot_landing.png")
+    );
+}
 }

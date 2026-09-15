@@ -63,7 +63,8 @@ class GoogleOAuth2SuccessHandlerTest {
                         "Google User"
                 );
 
-        verify(response)
-                .sendRedirect("/");
+        verify(response).sendRedirect("/home");
     }
 }
+/*ทำไมต้องให้ Test fail ก่อน? เพื่อยืนยันว่า Test สามารถตรวจจับ Feature ที่ยังไม่มีหรือทำงานผิดได้จริง 
+จากนั้นจึงเขียนโค้ดให้ Test ผ่าน ตามหลัก TDD แบบ Red-Green-Refactor */

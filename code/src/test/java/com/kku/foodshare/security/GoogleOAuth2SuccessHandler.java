@@ -12,7 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
+//ข้อดีคือเวลาทำงานต่อในอนาคต ถ้าเราแก้โค้ดแล้วเผลอทำ Google Login พัง Test ตัวนี้จะเตือนเราทันที
 @Component
 public class GoogleOAuth2SuccessHandler
         implements AuthenticationSuccessHandler {
@@ -46,6 +46,6 @@ public class GoogleOAuth2SuccessHandler
                 name
         );
 
-        response.sendRedirect("/");
+        response.sendRedirect("/home");
     }
 }

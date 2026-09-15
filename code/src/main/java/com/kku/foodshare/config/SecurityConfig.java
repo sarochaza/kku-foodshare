@@ -42,6 +42,7 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
+                    "/videos/**",
 
                     // Google OAuth2
                     "/oauth2/**",

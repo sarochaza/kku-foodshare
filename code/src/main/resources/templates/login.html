@@ -13,6 +13,18 @@
 <body>
 
 <main class="login-page">
+    <!-- Animated decoration -->
+    <div class="login-atmosphere" aria-hidden="true">
+
+        <span class="login-bubble bubble-one"></span>
+        <span class="login-bubble bubble-two"></span>
+        <span class="login-bubble bubble-three"></span>
+
+        <span class="login-floating-leaf login-leaf-one">◆</span>
+        <span class="login-floating-leaf login-leaf-two">◆</span>
+        <span class="login-floating-leaf login-leaf-three">◆</span>
+
+    </div>
 
     <section class="login-card">
 
@@ -131,6 +143,24 @@
         </div>
 
     </section>
+        <!-- Student Scooter -->
+    <div class="login-scooter-scene" aria-hidden="true">
+
+        <div class="scooter-speed-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <img
+            class="login-scooter"
+            th:src="@{/images/login-student-scooter.png}"
+            alt=""
+        >
+
+        <div class="scooter-shadow"></div>
+
+    </div>
 
     <!-- Footer -->
     <footer class="login-footer">
@@ -144,6 +174,69 @@
     </footer>
 
 </main>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
 
+        const loginPage =
+            document.querySelector(".login-page");
+
+        const loginCard =
+            document.querySelector(".login-card");
+
+        const reduceMotion =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches;
+
+        if (
+            !loginPage ||
+            !loginCard ||
+            reduceMotion
+        ) {
+            return;
+        }
+
+        loginPage.addEventListener(
+            "pointermove",
+            function (event) {
+
+                const mouseX =
+                    event.clientX /
+                    window.innerWidth - 0.5;
+
+                const mouseY =
+                    event.clientY /
+                    window.innerHeight - 0.5;
+
+                loginPage.style.setProperty(
+                    "--mouse-x",
+                    mouseX * 2
+                );
+
+                loginPage.style.setProperty(
+                    "--mouse-y",
+                    mouseY * 2
+                );
+            }
+        );
+
+        loginPage.addEventListener(
+            "pointerleave",
+            function () {
+
+                loginPage.style.setProperty(
+                    "--mouse-x",
+                    0
+                );
+
+                loginPage.style.setProperty(
+                    "--mouse-y",
+                    0
+                );
+            }
+        );
+
+    });
+</script>
 </body>
 </html>
