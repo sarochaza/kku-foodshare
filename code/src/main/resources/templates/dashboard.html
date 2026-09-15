@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>หน้าหลัก | KKU FoodShare</title>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+
+<body>
+
+<!-- Navbar -->
+<header class="navbar">
+
+    <a th:href="@{/home}" class="logo">
+        <span class="logo-icon">🌱</span>
+        <span>KKU FoodShare</span>
+    </a>
+
+    <nav class="nav-links">
+        <a th:href="@{/home}" class="active">หน้าแรก</a>
+        <a href="#map">แผนที่</a>
+        <a href="#how">วิธีใช้งาน</a>
+    </nav>
+
+    <div class="nav-actions">
+        <button class="notification-button" type="button">🔔</button>
+
+        <div class="profile">
+            <div class="profile-avatar">👤</div>
+            <span>บัญชีของฉัน</span>
+        </div>
+    </div>
+
+</header>
+
+
+<main class="dashboard">
+
+    <!-- Hero -->
+<!-- Hero -->
+<section class="dashboard-hero">
+
+    <img
+        class="dashboard-hero-bg"
+        th:src="@{/images/hero-background.png}"
+        alt=""
+    >
+
+    <div class="dashboard-hero-overlay"></div>
+
+    <div class="dashboard-hero-content">
+
+        <span class="welcome-badge">
+            🌱 KKU FoodShare
+        </span>
+
+        <h1>
+            สวัสดี 👋<br>
+            <span>อาหารใกล้คุณ</span>
+            มีรอแบ่งปันอยู่
+        </h1>
+
+        <p>
+            ค้นหาอาหารที่ยังรับได้รอบมหาวิทยาลัย
+            หรือแบ่งปันอาหารดี ๆ ให้เพื่อนใน KKU
+        </p>
+
+        <div class="dashboard-hero-buttons">
+
+            <a href="#nearby-food" class="hero-button">
+                ดูอาหารใกล้ฉัน
+            </a>
+
+            <a href="#" class="hero-share-button">
+                ＋ แบ่งปันอาหาร
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="dashboard-hero-mascot">
+        <img
+            th:src="@{/images/register-mascot.png}"
+            alt="KKU FoodShare Mascot"
+        >
+    </div>
+
+</section>
+
+
+    <!-- ค้นหา -->
+    <section class="search-section">
+
+        <div class="search-box">
+            <span>🔎</span>
+
+            <input
+                type="text"
+                placeholder="ค้นหาอาหาร สถานที่ หรือประเภทอาหาร..."
+            >
+        </div>
+
+        <a href="#" class="share-button">
+            ＋ แบ่งปันอาหาร
+        </a>
+
+    </section>
+
+
+    <!-- ตัวกรอง -->
+    <section class="filters">
+
+        <button class="filter active" type="button">
+            🍱 ทั้งหมด
+        </button>
+
+        <button class="filter" type="button">
+            📍 ใกล้ฉัน
+        </button>
+
+        <button class="filter" type="button">
+            ⏰ รับได้ตอนนี้
+        </button>
+
+        <button class="filter" type="button">
+            🍚 อาหาร
+        </button>
+
+        <button class="filter" type="button">
+            🥤 เครื่องดื่ม
+        </button>
+
+        <button class="filter" type="button">
+            🍰 ของว่าง
+        </button>
+
+    </section>
+
+
+    <!-- แผนที่ -->
+    <section class="map-section" id="map">
+
+        <div class="section-heading">
+            <div>
+                <span class="section-label">FOOD MAP</span>
+                <h2>อาหารรอบมหาวิทยาลัย 📍</h2>
+            </div>
+
+            <a href="#">ดูแผนที่ทั้งหมด →</a>
+        </div>
+
+        <div class="map-placeholder">
+
+            <div class="map-message">
+                <span>📍</span>
+                <strong>แผนที่ KKU FoodShare</strong>
+                <p>ตำแหน่งอาหารที่กำลังเปิดรับจะแสดงบริเวณนี้</p>
+            </div>
+
+            <span class="map-pin pin-one">🍱</span>
+            <span class="map-pin pin-two">🥤</span>
+            <span class="map-pin pin-three">🍰</span>
+
+        </div>
+
+    </section>
+
+
+    <!-- รายการอาหารใกล้คุณ -->
+    <section class="nearby-food-section" id="nearby-food">
+
+        <div class="section-heading">
+
+            <div>
+                <span class="section-label">NEAR YOU</span>
+                <h2>รายการอาหารใกล้คุณ</h2>
+                <p>อาหารที่ยังสามารถไปรับได้ในขณะนี้</p>
+            </div>
+
+            <a href="#">ดูทั้งหมด →</a>
+
+        </div>
+
+
+        <div class="food-grid">
+
+            <!-- อาหารรายการที่ 1 -->
+            <article class="food-card">
+
+                <div class="food-image food-image-one">
+                    <span class="food-status available">
+                        ยังมี
+                    </span>
+
+                    <span class="food-emoji">🍱</span>
+                </div>
+
+                <div class="food-content">
+
+                    <h3>ข้าวกล่องจากงานสัมมนา</h3>
+
+                    <p class="location">
+                        📍 อาคารวิทยวิภาส
+                    </p>
+
+                    <div class="food-info">
+                        <span>⏰ เหลือเวลา 1 ชม.</span>
+                        <span>🍱 ประมาณ 12 กล่อง</span>
+                    </div>
+
+                    <a href="#" class="food-detail-button">
+                        ดูรายละเอียด
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <!-- อาหารรายการที่ 2 -->
+            <article class="food-card">
+
+                <div class="food-image food-image-two">
+                    <span class="food-status low">
+                        ใกล้หมด
+                    </span>
+
+                    <span class="food-emoji">🥪</span>
+                </div>
+
+                <div class="food-content">
+
+                    <h3>แซนด์วิชและขนม</h3>
+
+                    <p class="location">
+                        📍 คณะวิศวกรรมศาสตร์
+                    </p>
+
+                    <div class="food-info">
+                        <span>⏰ เหลือเวลา 35 นาที</span>
+                        <span>🥪 ประมาณ 5 ชิ้น</span>
+                    </div>
+
+                    <a href="#" class="food-detail-button">
+                        ดูรายละเอียด
+                    </a>
+
+                </div>
+
+            </article>
+
+
+            <!-- อาหารรายการที่ 3 -->
+            <article class="food-card">
+
+                <div class="food-image food-image-three">
+                    <span class="food-status available">
+                        ยังมี
+                    </span>
+
+                    <span class="food-emoji">🥤</span>
+                </div>
+
+                <div class="food-content">
+
+                    <h3>น้ำดื่มและเครื่องดื่ม</h3>
+
+                    <p class="location">
+                        📍 ศูนย์อาหารและบริการ 1
+                    </p>
+
+                    <div class="food-info">
+                        <span>⏰ เหลือเวลา 2 ชม.</span>
+                        <span>🥤 ประมาณ 20 ขวด</span>
+                    </div>
+
+                    <a href="#" class="food-detail-button">
+                        ดูรายละเอียด
+                    </a>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- สถิติ -->
+    <section class="impact-section">
+
+        <div class="impact-heading">
+            <span>🌱</span>
+
+            <div>
+                <h2>ทุกการแบ่งปันมีความหมาย</h2>
+                <p>ร่วมสร้างชุมชน KKU ที่แบ่งปันและลดอาหารเหลือไปด้วยกัน</p>
+            </div>
+        </div>
+
+        <div class="impact-stats">
+
+            <div>
+                <strong>1,284</strong>
+                <span>มื้อที่ถูกแบ่งปัน</span>
+            </div>
+
+            <div>
+                <strong>426</strong>
+                <span>ผู้ร่วมแบ่งปัน</span>
+            </div>
+
+            <div>
+                <strong>312 kg</strong>
+                <span>อาหารที่ช่วยลดการทิ้ง</span>
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

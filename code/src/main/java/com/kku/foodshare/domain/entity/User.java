@@ -10,13 +10,16 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //คือ Primary Key และ PostgreSQL จะสร้างเลข id เพิ่มให้อัตโนมัติ
 
     @Column(nullable = false, unique = true)
     private String email;
+    //email ห้ามว่าง และห้ามซ้ำ เพราะใช้ Login
 
     @Column(nullable = false)
     private String password;
-
+    //ตอนนี้เก็บ field ไว้ก่อน แต่ตอนทำ Register จริง เราจะเข้ารหัสด้วย BCrypt ไม่เก็บ password ตรง ๆ
+    
     @Column(name = "display_name", nullable = false)
     private String displayName;
 

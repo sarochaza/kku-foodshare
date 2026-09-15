@@ -3,122 +3,1468 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>KKU FoodShare</title>
 
-    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link
+        rel="stylesheet"
+        th:href="@{/css/home.css}"
+    >
 </head>
 
 <body>
 
-<header class="navbar">
-    <a href="/" class="logo">
-        <span class="logo-icon">🌱</span>
-        <span>KKU FoodShare</span>
-    </a>
+    <!-- Navbar -->
+    <header class="navbar">
 
-    <nav class="nav-links">
-        <a href="#home">หน้าแรก</a>
-        <a href="#about">เกี่ยวกับเรา</a>
-        <a href="#map">แผนที่อาหาร</a>
-        <a href="#how">วิธีการใช้งาน</a>
-        <a href="#contact">ติดต่อเรา</a>
-    </nav>
-</header>
+        <a
+            th:href="@{/}"
+            class="logo"
+        >
+            <span class="logo-icon">
+                🌱
+            </span>
+
+            <span>
+                KKU FoodShare
+            </span>
+        </a>
+
+        <nav class="nav-links">
+
+            <a href="#home">
+                หน้าแรก
+            </a>
+
+            <a href="#about">
+                เกี่ยวกับเรา
+            </a>
+
+            <a href="#map">
+                แผนที่อาหาร
+            </a>
+
+            <a href="#how">
+                วิธีการใช้งาน
+            </a>
+
+            <a href="#contact">
+                ติดต่อเรา
+            </a>
+
+        </nav>
+
+    </header>
 
 
-<main>
+    <main>
 
-    <section class="hero" id="home">
-
-        <!-- Background -->
-        <img
-            class="hero-background"
-            th:src="@{/images/hero-background.png}"
-            alt=""
+        <!-- Hero -->
+        <section
+            class="hero interactive-hero"
+            id="home"
         >
 
-        <div class="hero-overlay"></div>
-
-        <!-- Text -->
-        <div class="hero-content">
-
-            <div class="hero-badge">
-                🌱 อาหารไม่ควรถูกทิ้ง แต่ควรได้ไปต่อ
-            </div>
-
-            <h1>
-                แบ่งปันอาหาร<br>
-                <span>ส่งต่อความสุข</span>
-            </h1>
-
-            <p>
-                พื้นที่แบ่งปันอาหารภายในมหาวิทยาลัย
-                ช่วยลดอาหารเหลือ และส่งต่ออาหารดี ๆ
-                ให้กับคนในชุมชนของเรา
-            </p>
-
-            <div class="hero-buttons">
-
-                <a th:href="@{/register}"
-                   class="btn btn-primary">
-                    สมัครสมาชิก
-                </a>
-
-                <a th:href="@{/login}"
-                   class="btn btn-secondary">
-                    เข้าสู่ระบบ
-                </a>
-
-            </div>
-
-        </div>
-
-
-        <!-- Character -->
-        <div class="hero-art">
-
             <img
-                th:src="@{/images/hero-characters.png}"
-                alt="KKU FoodShare"
-                class="hero-characters"
+                class="hero-background"
+                th:src="@{/images/hero-background.png}"
+                alt=""
             >
 
+            <div class="hero-overlay"></div>
+
+
+            <!-- Decoration -->
+            <div class="hero-decoration hero-leaf leaf-one">
+                🌿
+            </div>
+
+            <div class="hero-decoration hero-leaf leaf-two">
+                🌱
+            </div>
+
+            <div class="hero-decoration hero-food food-one">
+                🍙
+            </div>
+
+            <div class="hero-decoration hero-food food-two">
+                🍱
+            </div>
+
+
+            <!-- Hero Content -->
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    🌱 KKU FoodShare
+                </div>
+
+                <h1>
+                    แบ่งปันอาหาร
+                    <br>
+                    <span>
+                        ส่งต่อความสุข
+                    </span>
+                </h1>
+
+                <p>
+                    พื้นที่แบ่งปันอาหารภายในมหาวิทยาลัย
+                    ช่วยให้อาหารที่ยังดีได้ส่งต่อถึงคนที่ต้องการ
+                    พร้อมร่วมกันลด Food Waste ภายใน KKU
+                </p>
+
+                <div class="hero-buttons">
+
+                    <a
+                        th:href="@{/register}"
+                        class="btn btn-primary"
+                    >
+                        เริ่มแบ่งปัน
+                    </a>
+
+                    <a
+                        th:href="@{/login}"
+                        class="btn btn-secondary"
+                    >
+                        เข้าสู่ระบบ
+                    </a>
+
+                </div>
+
+
+                <div class="hero-mini-info">
+
+                    <span>
+                        🍱 อาหารที่ยังดี
+                    </span>
+
+                    <span>
+                        🤝 คนใน KKU
+                    </span>
+
+                    <span>
+                        🌎 ลด Food Waste
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Hero Character -->
+            <div class="hero-art">
+
+                <img
+                    th:src="@{/images/hero-characters.png}"
+                    alt="KKU FoodShare"
+                    class="hero-characters"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- Problem -->
+        <!-- Problem Section -->
+<section class="problem-section problem-v2" id="about">
+
+    <div class="problem-v2__glow" aria-hidden="true"></div>
+    <div class="problem-v2__dots" aria-hidden="true"></div>
+
+    <div class="problem-v2__container">
+
+        <!-- รูปด้านซ้าย -->
+        <div class="problem-v2__visual reveal-on-scroll">
+
+            <div class="problem-v2__shape"></div>
+
+            <span class="problem-v2__food food-one-v2">🍱</span>
+            <span class="problem-v2__food food-two-v2">🥪</span>
+            <span class="problem-v2__food food-three-v2">🍎</span>
+
+            <img
+                class="problem-v2__mascot"
+                th:src="@{/images/mascot_landing.png}"
+                alt="มาสคอต KKU FoodShare กำลังช่วยแบ่งปันอาหาร"
+            >
+
+            <div class="problem-v2__message">
+                ของดี ๆ<br>
+                อย่าทิ้งเลย!
+                <span>♥</span>
+            </div>
+
         </div>
 
-    </section>
+        <!-- ข้อความด้านขวา -->
+        <div class="problem-v2__content">
 
+            <div class="problem-v2__label reveal-on-scroll">
+                <span>THE PROBLEM</span>
+                <i></i>
+            </div>
 
-    <section class="benefits" id="about">
+            <h2 class="problem-v2__title">
+                <span class="text-reveal">
+                    <span>อาหารดี ๆ</span>
+                </span>
 
-        <div>
-            <span>🍱</span>
-            <h3>ลดอาหารเหลือ</h3>
-            <p>อาหารที่ยังดีไม่จำเป็นต้องถูกทิ้ง</p>
+                <span class="text-reveal">
+                    <span class="blue-text">ยังไปต่อได้</span>
+                </span>
+            </h2>
+
+            <p class="problem-v2__description reveal-on-scroll">
+                ในกิจกรรมและชีวิตประจำวัน มักมีอาหารเหลือที่ยังรับประทานได้
+                แต่อาหารเหล่านั้นอาจถูกทิ้ง ทั้งที่ยังสามารถส่งต่อให้คนอื่นได้
+            </p>
+
+            <div class="problem-v2__highlight reveal-on-scroll">
+
+                <div class="problem-v2__highlight-icon">
+                    🌎
+                </div>
+
+                <div>
+                    <strong>ลด Food Waste</strong>
+
+                    <span>
+                        เปลี่ยนอาหารที่เหลือ ให้กลายเป็นโอกาสในการแบ่งปัน
+                    </span>
+                </div>
+
+            </div>
+
+            <a href="#map" class="problem-v2__button reveal-on-scroll">
+                <span>ดูอาหารใกล้คุณ</span>
+                <span class="problem-v2__arrow">→</span>
+            </a>
+
         </div>
 
-        <div>
-            <span>🤝</span>
-            <h3>สร้างชุมชนที่ดี</h3>
-            <p>แบ่งปันและช่วยเหลือกันภายในมหาวิทยาลัย</p>
+    </div>
+
+</section>
+<!-- How It Works -->
+<section class="journey-section" id="how">
+
+    <div class="journey-decoration journey-decoration-one"></div>
+    <div class="journey-decoration journey-decoration-two"></div>
+
+    <div class="journey-container">
+
+        <div class="journey-heading journey-reveal">
+
+            <span class="journey-label">
+                HOW IT WORKS
+            </span>
+
+            <h2>
+                ส่งต่อได้ใน
+                <span>4 ขั้นตอนง่าย ๆ</span>
+            </h2>
+
+            <p>
+                เพียงไม่กี่ขั้นตอน อาหารที่เหลือก็สามารถ
+                เดินทางไปถึงคนที่ต้องการได้
+            </p>
+
         </div>
 
-        <div>
-            <span>🌱</span>
-            <h3>มหาวิทยาลัยยั่งยืน</h3>
-            <p>ช่วยลดขยะอาหารและใช้ทรัพยากรอย่างคุ้มค่า</p>
+
+        <div class="journey-track">
+
+            <!-- เส้นเชื่อม -->
+            <div class="journey-line" aria-hidden="true">
+                <div class="journey-line-progress"></div>
+            </div>
+
+
+            <!-- Step 1 -->
+            <article class="journey-card journey-reveal">
+
+                <span class="journey-number">
+                    01
+                </span>
+
+                <div class="journey-image">
+                    <img
+                        th:src="@{/images/step-food.png}"
+                        alt="กล่องอาหารที่พร้อมแบ่งปัน"
+                    >
+                </div>
+
+                <h3>มีอาหารเหลือ</h3>
+
+                <p>
+                    อาหารยังดีและรับประทานได้
+                    เตรียมไว้สำหรับการแบ่งปัน
+                </p>
+
+            </article>
+
+
+            <!-- Step 2 -->
+            <article class="journey-card journey-reveal">
+
+                <span class="journey-number">
+                    02
+                </span>
+
+                <div class="journey-image">
+                    <img
+                        th:src="@{/images/step-map.png}"
+                        alt="ปักหมุดตำแหน่งอาหารบนแผนที่"
+                    >
+                </div>
+
+                <h3>ปักหมุดบนแผนที่</h3>
+
+                <p>
+                    ระบุสถานที่ จำนวน และช่วงเวลา
+                    ที่สะดวกให้นัดรับ
+                </p>
+
+            </article>
+
+
+            <!-- Step 3 -->
+            <article class="journey-card journey-reveal">
+
+                <span class="journey-number">
+                    03
+                </span>
+
+                <div class="journey-image">
+                    <img
+                        th:src="@{/images/step-share.png}"
+                        alt="ส่งมอบอาหารให้เพื่อน"
+                    >
+                </div>
+
+                <h3>เพื่อนมารับ</h3>
+
+                <p>
+                    ผู้ที่สนใจติดต่อและเดินทาง
+                    มารับอาหารตามจุดนัดหมาย
+                </p>
+
+            </article>
+
+
+            <!-- Step 4 -->
+            <article class="journey-card journey-reveal">
+
+                <span class="journey-number">
+                    04
+                </span>
+
+                <div class="journey-image">
+                    <img
+                        th:src="@{/images/step-impact.png}"
+                        alt="ลดขยะอาหารและช่วยสิ่งแวดล้อม"
+                    >
+                </div>
+
+                <h3>ลด Food Waste</h3>
+
+                <p>
+                    ลดอาหารที่ถูกทิ้ง และช่วยกันสร้าง
+                    มหาวิทยาลัยที่ยั่งยืน
+                </p>
+
+            </article>
+
         </div>
 
-        <div>
-            <span>🌎</span>
-            <h3>โลกที่น่าอยู่กว่าเดิม</h3>
-            <p>การแบ่งปันเล็ก ๆ สามารถสร้างการเปลี่ยนแปลงได้</p>
+    </div>
+
+</section>
+
+<!-- Food Map -->
+<section class="food-map-section" id="map">
+
+    <div class="food-map-container">
+
+        <!-- Heading -->
+        <div class="food-map-heading map-reveal">
+
+            <div>
+                <span class="food-map-label">
+                    FOOD MAP
+                </span>
+
+                <h2>
+                    ของอร่อยใกล้คุณ
+                    <span>ในมหาวิทยาลัย</span>
+                </h2>
+            </div>
+
+            <p>
+                กดเลือกหมุดบนแผนที่ เพื่อดูอาหาร
+                จำนวน และสถานที่นัดรับ
+            </p>
+
         </div>
 
-    </section>
 
-</main>
+        <!-- Map -->
+        <div class="food-map-layout map-reveal">
+
+            <div class="campus-map">
+
+                <!-- พื้นหลังแผนที่ -->
+                <div class="map-grid"></div>
+
+                <div class="map-road road-one"></div>
+                <div class="map-road road-two"></div>
+                <div class="map-road road-three"></div>
+                <div class="map-road road-four"></div>
+
+                <div class="map-lake"></div>
+
+                <div class="map-building building-one">
+                    <span>คณะวิศวกรรมศาสตร์</span>
+                </div>
+
+                <div class="map-building building-two">
+                    <span>ศูนย์อาหาร</span>
+                </div>
+
+                <div class="map-building building-three">
+                    <span>หอพักนักศึกษา</span>
+                </div>
+
+
+                <!-- ตำแหน่งปัจจุบัน -->
+                <div class="current-location">
+                    <span></span>
+                    คุณอยู่ที่นี่
+                </div>
+
+
+                <!-- Pin 1 -->
+                <button
+                    class="food-map-pin active"
+                    type="button"
+                    data-title="ข้าวกะเพราไก่ไข่ดาว"
+                    data-place="คณะวิศวกรรมศาสตร์"
+                    data-quantity="เหลือ 3 กล่อง"
+                    data-time="รับได้ถึง 14:00 น."
+                    data-distance="ห่างประมาณ 150 เมตร"
+                    data-image="/images/food-basil-rice.png"
+                    aria-label="ข้าวกะเพราไก่ไข่ดาว"
+                >
+                    <span class="pin-pulse"></span>
+                    <span class="pin-icon">🍚</span>
+                </button>
+
+
+                <!-- Pin 2 -->
+                <button
+                    class="food-map-pin pin-two"
+                    type="button"
+                    data-title="แซนด์วิชไก่และไข่"
+                    data-place="ศูนย์อาหารกลาง"
+                    data-quantity="เหลือ 5 ชิ้น"
+                    data-time="รับได้ถึง 16:30 น."
+                    data-distance="ห่างประมาณ 320 เมตร"
+                    data-image="/images/food-sandwich.png"
+                    aria-label="แซนด์วิชไก่และไข่"
+                >
+                    <span class="pin-pulse"></span>
+                    <span class="pin-icon">🥪</span>
+                </button>
+
+
+                <!-- Pin 3 -->
+                <button
+                    class="food-map-pin pin-three"
+                    type="button"
+                    data-title="ผลไม้รวม"
+                    data-place="หอพักนักศึกษา"
+                    data-quantity="เหลือ 2 กล่อง"
+                    data-time="รับได้ถึง 18:00 น."
+                    data-distance="ห่างประมาณ 500 เมตร"
+                    data-image="/images/food-fruit.png"
+                    aria-label="ผลไม้รวม"
+                >
+                    <span class="pin-pulse"></span>
+                    <span class="pin-icon">🍉</span>
+                </button>
+
+
+                <!-- เส้นทาง -->
+                <svg
+                    class="map-route"
+                    viewBox="0 0 800 500"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M365 310 C440 270, 470 180, 570 160"
+                    ></path>
+                </svg>
+
+            </div>
+
+
+            <!-- Food Detail Card -->
+            <aside class="map-food-card">
+
+                <div class="map-food-image-wrap">
+                    <img
+                        id="mapFoodImage"
+                        src="/images/food-basil-rice.png"
+                        alt="ข้าวกะเพราไก่ไข่ดาว"
+                        class="map-food-image"
+                    >
+
+                    <span class="map-food-status">
+                        พร้อมรับ
+                    </span>
+                </div>
+
+                <div class="map-food-content">
+
+                    <span class="map-food-small-label">
+                        อาหารใกล้คุณ
+                    </span>
+
+                    <h3 id="mapFoodTitle">
+                        ข้าวกะเพราไก่ไข่ดาว
+                    </h3>
+
+                    <div class="map-food-information">
+
+                        <p>
+                            <span>📍</span>
+
+                            <span id="mapFoodPlace">
+                                คณะวิศวกรรมศาสตร์
+                            </span>
+                        </p>
+
+                        <p>
+                            <span>🍱</span>
+
+                            <span id="mapFoodQuantity">
+                                เหลือ 3 กล่อง
+                            </span>
+                        </p>
+
+                        <p>
+                            <span>🕒</span>
+
+                            <span id="mapFoodTime">
+                                รับได้ถึง 14:00 น.
+                            </span>
+                        </p>
+
+                        <p>
+                            <span>🚶</span>
+
+                            <span id="mapFoodDistance">
+                                ห่างประมาณ 150 เมตร
+                            </span>
+                        </p>
+
+                    </div>
+
+                    <a
+                        th:href="@{/login}"
+                        class="map-food-button"
+                    >
+                        ดูรายละเอียด
+                        <span>→</span>
+                    </a>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- Available Food -->
+<section class="available-section" id="available">
+
+    <div class="available-container">
+
+        <div class="available-heading available-reveal">
+
+            <div>
+                <span class="available-label">
+                    AVAILABLE NOW
+                </span>
+
+                <h2>
+                    พร้อมรับ
+                    <span>ตอนนี้</span>
+                </h2>
+            </div>
+
+            <div class="available-controls">
+
+                <button
+                    class="carousel-button carousel-previous"
+                    type="button"
+                    aria-label="รายการก่อนหน้า"
+                >
+                    ←
+                </button>
+
+                <button
+                    class="carousel-button carousel-next"
+                    type="button"
+                    aria-label="รายการถัดไป"
+                >
+                    →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="available-carousel available-reveal">
+
+            <div class="available-track">
+
+                <!-- Card 1 -->
+                <article class="available-card">
+
+                    <div class="available-image">
+                        <img
+                            th:src="@{/images/food-basil-rice.png}"
+                            alt="ข้าวกะเพราไก่ไข่ดาว"
+                            draggable="false"
+                        >
+
+                        <span class="available-status">
+                            พร้อมรับ
+                        </span>
+
+                        <button
+                            class="available-favorite"
+                            type="button"
+                            aria-label="บันทึกรายการ"
+                        >
+                            ♡
+                        </button>
+                    </div>
+
+                    <div class="available-content">
+
+                        <h3>ข้าวกะเพราไก่ไข่ดาว</h3>
+
+                        <p class="available-place">
+                            📍 คณะวิศวกรรมศาสตร์
+                        </p>
+
+                        <div class="available-meta">
+                            <span>🍱 เหลือ 3 กล่อง</span>
+                            <span>🚶 150 ม.</span>
+                        </div>
+
+                        <div class="available-time">
+                            รับได้ถึง 14:00 น.
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Card 2 -->
+                <article class="available-card">
+
+                    <div class="available-image">
+                        <img
+                            th:src="@{/images/food-sandwich.png}"
+                            alt="แซนด์วิชไก่และไข่"
+                            draggable="false"
+                        >
+
+                        <span class="available-status">
+                            พร้อมรับ
+                        </span>
+
+                        <button
+                            class="available-favorite"
+                            type="button"
+                            aria-label="บันทึกรายการ"
+                        >
+                            ♡
+                        </button>
+                    </div>
+
+                    <div class="available-content">
+
+                        <h3>แซนด์วิชไก่และไข่</h3>
+
+                        <p class="available-place">
+                            📍 ศูนย์อาหารกลาง
+                        </p>
+
+                        <div class="available-meta">
+                            <span>🥪 เหลือ 5 ชิ้น</span>
+                            <span>🚶 320 ม.</span>
+                        </div>
+
+                        <div class="available-time">
+                            รับได้ถึง 16:30 น.
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Card 3 -->
+                <article class="available-card">
+
+                    <div class="available-image">
+                        <img
+                            th:src="@{/images/food-fruit.png}"
+                            alt="ผลไม้รวม"
+                            draggable="false"
+                        >
+
+                        <span class="available-status">
+                            พร้อมรับ
+                        </span>
+
+                        <button
+                            class="available-favorite"
+                            type="button"
+                            aria-label="บันทึกรายการ"
+                        >
+                            ♡
+                        </button>
+                    </div>
+
+                    <div class="available-content">
+
+                        <h3>ผลไม้รวม</h3>
+
+                        <p class="available-place">
+                            📍 หอพักนักศึกษา
+                        </p>
+
+                        <div class="available-meta">
+                            <span>🍉 เหลือ 2 กล่อง</span>
+                            <span>🚶 500 ม.</span>
+                        </div>
+
+                        <div class="available-time">
+                            รับได้ถึง 18:00 น.
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Card 4 -->
+                <article class="available-card">
+
+                    <div class="available-image">
+                        <img
+                            th:src="@{/images/food-basil-rice.png}"
+                            alt="ชุดข้าวกลางวัน"
+                            draggable="false"
+                        >
+
+                        <span class="available-status limited">
+                            ใกล้หมด
+                        </span>
+
+                        <button
+                            class="available-favorite"
+                            type="button"
+                            aria-label="บันทึกรายการ"
+                        >
+                            ♡
+                        </button>
+                    </div>
+
+                    <div class="available-content">
+
+                        <h3>ชุดข้าวกลางวัน</h3>
+
+                        <p class="available-place">
+                            📍 คณะบริหารธุรกิจ
+                        </p>
+
+                        <div class="available-meta">
+                            <span>🍱 เหลือ 1 กล่อง</span>
+                            <span>🚶 650 ม.</span>
+                        </div>
+
+                        <div class="available-time">
+                            รับได้ถึง 15:00 น.
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Card 5 -->
+                <article class="available-card">
+
+                    <div class="available-image">
+                        <img
+                            th:src="@{/images/food-sandwich.png}"
+                            alt="อาหารว่างจากกิจกรรม"
+                            draggable="false"
+                        >
+
+                        <span class="available-status">
+                            พร้อมรับ
+                        </span>
+
+                        <button
+                            class="available-favorite"
+                            type="button"
+                            aria-label="บันทึกรายการ"
+                        >
+                            ♡
+                        </button>
+                    </div>
+
+                    <div class="available-content">
+
+                        <h3>อาหารว่างจากกิจกรรม</h3>
+
+                        <p class="available-place">
+                            📍 อาคารกิจกรรมนักศึกษา
+                        </p>
+
+                        <div class="available-meta">
+                            <span>🥪 เหลือ 8 ชิ้น</span>
+                            <span>🚶 720 ม.</span>
+                        </div>
+
+                        <div class="available-time">
+                            รับได้ถึง 17:00 น.
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </div>
+
+
+        <div class="available-footer available-reveal">
+
+            <p>
+                ลากการ์ดเพื่อดูรายการเพิ่มเติม
+            </p>
+
+            <a th:href="@{/login}">
+                ดูอาหารทั้งหมด
+                <span>→</span>
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+    </main>
+
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const problemSection =
+                document.querySelector(".problem-v2");
+
+            if (!problemSection) {
+                return;
+            }
+
+            const revealItems =
+                problemSection.querySelectorAll(".reveal-on-scroll");
+
+            const prefersReducedMotion =
+                window.matchMedia(
+                    "(prefers-reduced-motion: reduce)"
+                ).matches;
+
+
+            // แสดงอนิเมชันเมื่อเลื่อนมาถึงส่วน Problem
+            if (
+                prefersReducedMotion ||
+                !("IntersectionObserver" in window)
+            ) {
+                problemSection.classList.add("is-active");
+
+                revealItems.forEach(function (item) {
+                    item.classList.add("is-visible");
+                });
+
+            } else {
+
+                const observer =
+                    new IntersectionObserver(
+                        function (entries) {
+
+                            entries.forEach(function (entry) {
+
+                                if (!entry.isIntersecting) {
+                                    return;
+                                }
+
+                                problemSection.classList.add(
+                                    "is-active"
+                                );
+
+                                revealItems.forEach(
+                                    function (item, index) {
+
+                                        item.style.setProperty(
+                                            "--reveal-delay",
+                                            (index * 110) + "ms"
+                                        );
+
+                                        item.classList.add(
+                                            "is-visible"
+                                        );
+                                    }
+                                );
+
+                                observer.unobserve(problemSection);
+                            });
+                        },
+                        {
+                            threshold: 0.22
+                        }
+                    );
+
+                observer.observe(problemSection);
+            }
+
+
+            // ทำให้รูปขยับตามเมาส์
+            if (!prefersReducedMotion) {
+
+                problemSection.addEventListener(
+                    "pointermove",
+                    function (event) {
+
+                        const bounds =
+                            problemSection.getBoundingClientRect();
+
+                        const pointerX =
+                            (
+                                event.clientX -
+                                bounds.left
+                            ) / bounds.width - 0.5;
+
+                        const pointerY =
+                            (
+                                event.clientY -
+                                bounds.top
+                            ) / bounds.height - 0.5;
+
+                        problemSection.style.setProperty(
+                            "--pointer-x",
+                            pointerX
+                        );
+
+                        problemSection.style.setProperty(
+                            "--pointer-y",
+                            pointerY
+                        );
+                    }
+                );
+
+                problemSection.addEventListener(
+                    "pointerleave",
+                    function () {
+
+                        problemSection.style.setProperty(
+                            "--pointer-x",
+                            0
+                        );
+
+                        problemSection.style.setProperty(
+                            "--pointer-y",
+                            0
+                        );
+                    }
+                );
+            }
+            const journeySection =
+    document.querySelector(".journey-section");
+
+if (journeySection) {
+
+    const journeyItems =
+        journeySection.querySelectorAll(
+            ".journey-reveal"
+        );
+
+    if (
+        prefersReducedMotion ||
+        !("IntersectionObserver" in window)
+    ) {
+        journeySection.classList.add(
+            "is-active"
+        );
+
+        journeyItems.forEach(function (item) {
+            item.classList.add("is-visible");
+        });
+
+    } else {
+
+        const journeyObserver =
+            new IntersectionObserver(
+                function (entries) {
+
+                    entries.forEach(function (entry) {
+
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        journeySection.classList.add(
+                            "is-active"
+                        );
+
+                        journeyItems.forEach(
+                            function (item, index) {
+
+                                item.style.setProperty(
+                                    "--journey-delay",
+                                    (index * 150) + "ms"
+                                );
+
+                                item.classList.add(
+                                    "is-visible"
+                                );
+                            }
+                        );
+
+                        journeyObserver.unobserve(
+                            journeySection
+                        );
+                    });
+                },
+                {
+                    threshold: 0.18
+                }
+            );
+
+        journeyObserver.observe(
+            journeySection
+        );
+    }
+}
+const foodMapSection =
+    document.querySelector(".food-map-section");
+
+if (foodMapSection) {
+
+    const mapRevealItems =
+        foodMapSection.querySelectorAll(".map-reveal");
+
+    const mapElement =
+        foodMapSection.querySelector(".campus-map");
+
+    const mapPins =
+        foodMapSection.querySelectorAll(".food-map-pin");
+
+    const foodImage =
+        document.getElementById("mapFoodImage");
+
+    const foodTitle =
+        document.getElementById("mapFoodTitle");
+
+    const foodPlace =
+        document.getElementById("mapFoodPlace");
+
+    const foodQuantity =
+        document.getElementById("mapFoodQuantity");
+
+    const foodTime =
+        document.getElementById("mapFoodTime");
+
+    const foodDistance =
+        document.getElementById("mapFoodDistance");
+
+
+    // Scroll reveal
+    if (
+        prefersReducedMotion ||
+        !("IntersectionObserver" in window)
+    ) {
+        mapRevealItems.forEach(function (item) {
+            item.classList.add("is-visible");
+        });
+
+    } else {
+
+        const mapObserver =
+            new IntersectionObserver(
+                function (entries) {
+
+                    entries.forEach(function (entry) {
+
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        mapRevealItems.forEach(
+                            function (item, index) {
+
+                                item.style.transitionDelay =
+                                    (index * 160) + "ms";
+
+                                item.classList.add(
+                                    "is-visible"
+                                );
+                            }
+                        );
+
+                        mapObserver.unobserve(
+                            foodMapSection
+                        );
+                    });
+                },
+                {
+                    threshold: 0.15
+                }
+            );
+
+        mapObserver.observe(foodMapSection);
+    }
+
+
+    // กดหมุดเพื่อเปลี่ยนข้อมูลอาหาร
+    mapPins.forEach(function (pin) {
+
+        pin.addEventListener("click", function () {
+
+            mapPins.forEach(function (otherPin) {
+                otherPin.classList.remove("active");
+            });
+
+            pin.classList.add("active");
+
+            foodImage.classList.add("is-changing");
+
+            window.setTimeout(function () {
+
+                foodImage.src =
+                    pin.dataset.image;
+
+                foodImage.alt =
+                    pin.dataset.title;
+
+                foodTitle.textContent =
+                    pin.dataset.title;
+
+                foodPlace.textContent =
+                    pin.dataset.place;
+
+                foodQuantity.textContent =
+                    pin.dataset.quantity;
+
+                foodTime.textContent =
+                    pin.dataset.time;
+
+                foodDistance.textContent =
+                    pin.dataset.distance;
+
+                foodImage.classList.remove(
+                    "is-changing"
+                );
+
+            }, 220);
+        });
+    });
+
+
+    // แผนที่เอียงเล็กน้อยตามเมาส์
+    if (!prefersReducedMotion) {
+
+        mapElement.addEventListener(
+            "pointermove",
+            function (event) {
+
+                const bounds =
+                    mapElement.getBoundingClientRect();
+
+                const x =
+                    (
+                        event.clientX -
+                        bounds.left
+                    ) / bounds.width - 0.5;
+
+                const y =
+                    (
+                        event.clientY -
+                        bounds.top
+                    ) / bounds.height - 0.5;
+
+                mapElement.style.setProperty(
+                    "--map-x",
+                    x * 2
+                );
+
+                mapElement.style.setProperty(
+                    "--map-y",
+                    y * 2
+                );
+            }
+        );
+
+        mapElement.addEventListener(
+            "pointerleave",
+            function () {
+
+                mapElement.style.setProperty(
+                    "--map-x",
+                    0
+                );
+
+                mapElement.style.setProperty(
+                    "--map-y",
+                    0
+                );
+            }
+        );
+    }
+}
+const availableSection =
+    document.querySelector(".available-section");
+
+if (availableSection) {
+
+    const carousel =
+        availableSection.querySelector(
+            ".available-carousel"
+        );
+
+    const previousButton =
+        availableSection.querySelector(
+            ".carousel-previous"
+        );
+
+    const nextButton =
+        availableSection.querySelector(
+            ".carousel-next"
+        );
+
+    const availableRevealItems =
+        availableSection.querySelectorAll(
+            ".available-reveal"
+        );
+
+    let isDragging = false;
+    let dragStartX = 0;
+    let startingScrollLeft = 0;
+    let hasDragged = false;
+
+
+    // Scroll reveal
+    if (
+        prefersReducedMotion ||
+        !("IntersectionObserver" in window)
+    ) {
+        availableRevealItems.forEach(
+            function (item) {
+                item.classList.add("is-visible");
+            }
+        );
+
+    } else {
+
+        const availableObserver =
+            new IntersectionObserver(
+                function (entries) {
+
+                    entries.forEach(function (entry) {
+
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        availableRevealItems.forEach(
+                            function (item, index) {
+
+                                item.style.transitionDelay =
+                                    (index * 150) + "ms";
+
+                                item.classList.add(
+                                    "is-visible"
+                                );
+                            }
+                        );
+
+                        availableObserver.unobserve(
+                            availableSection
+                        );
+                    });
+                },
+                {
+                    threshold: 0.15
+                }
+            );
+
+        availableObserver.observe(
+            availableSection
+        );
+    }
+
+
+    // ปุ่มเลื่อน
+    nextButton.addEventListener(
+        "click",
+        function () {
+
+            carousel.scrollBy({
+                left: 374,
+                behavior: "smooth"
+            });
+        }
+    );
+
+    previousButton.addEventListener(
+        "click",
+        function () {
+
+            carousel.scrollBy({
+                left: -374,
+                behavior: "smooth"
+            });
+        }
+    );
+
+
+    // ลากด้วยเมาส์
+    carousel.addEventListener(
+        "pointerdown",
+        function (event) {
+
+            if (
+                event.target.closest(
+                    ".available-favorite"
+                )
+            ) {
+                return;
+            }
+
+            isDragging = true;
+            hasDragged = false;
+
+            dragStartX = event.clientX;
+
+            startingScrollLeft =
+                carousel.scrollLeft;
+
+            carousel.classList.add(
+                "is-dragging"
+            );
+
+            carousel.setPointerCapture(
+                event.pointerId
+            );
+        }
+    );
+
+    carousel.addEventListener(
+        "pointermove",
+        function (event) {
+
+            if (!isDragging) {
+                return;
+            }
+
+            const movement =
+                event.clientX - dragStartX;
+
+            if (Math.abs(movement) > 5) {
+                hasDragged = true;
+            }
+
+            carousel.scrollLeft =
+                startingScrollLeft - movement;
+        }
+    );
+
+    function stopDragging() {
+        isDragging = false;
+
+        carousel.classList.remove(
+            "is-dragging"
+        );
+    }
+
+    carousel.addEventListener(
+        "pointerup",
+        stopDragging
+    );
+
+    carousel.addEventListener(
+        "pointercancel",
+        stopDragging
+    );
+
+
+    // ปุ่มหัวใจ
+    const favoriteButtons =
+        availableSection.querySelectorAll(
+            ".available-favorite"
+        );
+
+    favoriteButtons.forEach(function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                if (hasDragged) {
+                    return;
+                }
+
+                button.classList.toggle(
+                    "is-favorite"
+                );
+
+                button.textContent =
+                    button.classList.contains(
+                        "is-favorite"
+                    )
+                        ? "♥"
+                        : "♡";
+            }
+        );
+    });
+}
+        });
+    </script>
 
 </body>
+
+</html>
+</body>
+
 </html>
