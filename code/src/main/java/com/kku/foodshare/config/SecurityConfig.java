@@ -38,6 +38,8 @@ public class SecurityConfig {
                     "/",
                     "/login",
                     "/register",
+                     "/forgot-password",
+                    "/reset-password",
 
                     "/css/**",
                     "/js/**",
@@ -47,6 +49,7 @@ public class SecurityConfig {
                     // Google OAuth2
                     "/oauth2/**",
                     "/login/oauth2/**"
+                    
                 ).permitAll()
 
                 .anyRequest().authenticated()

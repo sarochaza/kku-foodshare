@@ -55,6 +55,14 @@
         <div class="alert alert-success" th:if="${param.logout}">
             ออกจากระบบเรียบร้อยแล้ว
         </div>
+        <div
+    class="alert alert-success"
+    th:if="${param.resetSuccess}">
+
+    ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว
+    กรุณาเข้าสู่ระบบ
+
+</div>
 
         <!-- Login Form -->
         <form
@@ -109,9 +117,11 @@
                 </div>
 
                 <div class="forgot-password">
-                    <a href="#">
-                        ลืมรหัสผ่านเหรอ?
+
+                    <a th:href="@{/forgot-password}">
+        ลืมรหัสผ่านเหรอ?
                     </a>
+
                 </div>
 
             </div>

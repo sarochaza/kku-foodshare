@@ -1490,3 +1490,177 @@ body {
         animation: none;
     }
 }
+/* =========================================
+   COMPACT REGISTER - DESKTOP 100%
+========================================= */
+
+@media (min-width: 901px) {
+
+    .register-page {
+        padding:
+            25px
+            20px;
+    }
+
+    .register-container {
+        width:
+            min(
+                930px,
+                90vw
+            );
+
+        min-height: 610px;
+
+        grid-template-columns:
+            44%
+            56%;
+
+        border-radius: 28px;
+    }
+
+    .register-container::before {
+        border-radius: 29px;
+
+        inset:
+            -14px
+            15px
+            14px
+            -15px;
+    }
+
+    .register-container::after {
+        inset: -32px;
+
+        border-radius: 45px;
+    }
+
+    .register-intro {
+        padding:
+            28px
+            38px
+            0;
+    }
+
+    .brand img {
+        width: 170px;
+    }
+
+    .intro-text {
+        margin-top: 20px;
+    }
+
+    .intro-text h1 {
+        font-size: 35px;
+
+        line-height: 1.14;
+    }
+
+    .intro-text p {
+        margin-top: 13px;
+
+        font-size: 15px;
+
+        line-height: 1.45;
+    }
+
+    .register-mascot {
+        width: 225px;
+    }
+
+    .register-form-panel {
+        padding:
+            30px
+            46px;
+    }
+
+    .form-header {
+        margin-bottom: 18px;
+    }
+
+    .small-title {
+        margin-bottom: 5px;
+
+        font-size: 11px;
+
+        letter-spacing: 4px;
+    }
+
+    .form-header h2 {
+        font-size: 34px;
+    }
+
+    .register-form {
+        gap: 13px;
+    }
+
+    .input-wrapper input {
+        height: 54px;
+
+        padding:
+            0
+            52px;
+
+        font-size: 15px;
+    }
+
+    .input-icon {
+        left: 18px;
+
+        font-size: 19px;
+    }
+
+    .password-toggle {
+        right: 16px;
+    }
+
+    .field-error {
+        margin-top: 4px;
+
+        font-size: 12px;
+    }
+
+    .alert-error {
+        margin-bottom: 12px;
+
+        padding:
+            10px
+            13px;
+
+        font-size: 13px;
+    }
+
+    .register-button {
+        height: 54px;
+
+        font-size: 16px;
+    }
+
+    .divider {
+        gap: 14px;
+
+        margin:
+            14px
+            0;
+    }
+
+    .divider p {
+        font-size: 13px;
+    }
+
+    .google-button {
+        height: 52px;
+
+        font-size: 14px;
+    }
+
+    .google-logo {
+        width: 22px;
+        height: 22px;
+    }
+
+    .login-link {
+        margin-top: 15px;
+
+        font-size: 13px;
+    }
+}

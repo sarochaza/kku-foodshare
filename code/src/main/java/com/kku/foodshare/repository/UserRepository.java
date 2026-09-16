@@ -10,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     //เอาไว้ตอน Register เพื่อเช็กว่า email ซ้ำไหม
     boolean existsByEmail(String email);
+    
+    Optional<User> findByEmailIgnoreCase(String email);
 }
