@@ -9,7 +9,7 @@
 | 673380026-6  | นางสาวกัญญาวี ศรีเหรา | [kanyawi.s@kkumail.com](mailto:kanyawi.s@kkumail.com)     |    1    |
 | 673380289-4  | นางสาวรสริน เมืองหงษ์ | [rossarin.m@kkumail.com](mailto:rossarin.m@kkumail.com)   |    1    |
 | 673380296-7  | นางสาวสโรชา เสาทอง    | [sarocha.sao@kkumail.com](mailto:sarocha.sao@kkumail.com) |    1    |
-
+| 673380047-8  | นางสาวปวริศร์ แพงมา | [pawarit.pan@kkumail.com](mailto:[pawarit.pan@kkumail.com)     |    1    |
 ## หัวข้อโปรเจค
 
 **KKU FoodShare – ระบบแบ่งปันอาหารภายในมหาวิทยาลัย**
