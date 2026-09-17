@@ -48,9 +48,7 @@ public class SecurityConfig {
 
                     // Google OAuth2
                     "/oauth2/**",
-                    "/login/oauth2/**"
-                    
-                ).permitAll()
+                    "/login/oauth2/**").permitAll()
 
                 .anyRequest().authenticated()
             )

@@ -3,7 +3,7 @@ package com.kku.foodshare.domain.entity;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-
+//ร้าง Entity เก็บลิงก์รีเซ็ตรหัสผ่าน
 @Entity
 @Table(name = "password_reset_tokens")
 public class PasswordResetToken {
