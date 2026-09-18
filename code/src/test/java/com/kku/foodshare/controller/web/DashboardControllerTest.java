@@ -242,7 +242,7 @@ void dashboardShouldAddGoogleAccountProfileToModel() {
                     "บัญชี Google"
             );
 }
-// ทดสอบว่า Dashboard มีแผนที่ Leaflet และโหลดไฟล์ JavaScript ที่จำเป็น
+// ทดสอบว่า Dashboard ใช้ Leaflet ภายในโปรเจกต์และมีพื้นที่แสดงแผนที่
 @Test
 void dashboardShouldContainLeafletFoodMap()
         throws Exception {
@@ -257,6 +257,14 @@ void dashboardShouldContainLeafletFoodMap()
             "src/main/resources/static/js/dashboard-map.js"
     );
 
+    Path leafletCssPath = Path.of(
+            "src/main/resources/static/vendor/leaflet/leaflet.css"
+    );
+
+    Path leafletScriptPath = Path.of(
+            "src/main/resources/static/vendor/leaflet/leaflet.js"
+    );
+
     assertTrue(
             html.contains("id=\"foodMap\"")
     );
@@ -267,13 +275,13 @@ void dashboardShouldContainLeafletFoodMap()
 
     assertTrue(
             html.contains(
-                    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+                    "th:href=\"@{/vendor/leaflet/leaflet.css}\""
             )
     );
 
     assertTrue(
             html.contains(
-                    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                    "th:src=\"@{/vendor/leaflet/leaflet.js}\""
             )
     );
 
@@ -284,7 +292,16 @@ void dashboardShouldContainLeafletFoodMap()
     );
 
     assertTrue(
+            Files.exists(leafletCssPath)
+    );
+
+    assertTrue(
+            Files.exists(leafletScriptPath)
+    );
+
+    assertTrue(
             Files.exists(mapScriptPath)
     );
 }
+
 }
