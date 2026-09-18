@@ -7,7 +7,17 @@
 
     <title>หน้าหลัก | KKU FoodShare</title>
 
-    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3ynhHdKUIZ1V+NMp27xQ9q2G3h0uI="
+    crossorigin=""
+>
+
+<link
+    rel="stylesheet"
+    th:href="@{/css/dashboard.css}"
+>
 </head>
 
 <body>
@@ -383,19 +393,31 @@
             <a href="#">ดูแผนที่ทั้งหมด →</a>
         </div>
 
-        <div class="map-placeholder">
+        <div class="food-map-shell">
 
-            <div class="map-message">
-                <span>📍</span>
-                <strong>แผนที่ KKU FoodShare</strong>
-                <p>ตำแหน่งอาหารที่กำลังเปิดรับจะแสดงบริเวณนี้</p>
-            </div>
+    <div
+        id="foodMap"
+        class="food-map"
+        aria-label="แผนที่ตำแหน่งอาหารในมหาวิทยาลัยขอนแก่น"
+    ></div>
 
-            <span class="map-pin pin-one">🍱</span>
-            <span class="map-pin pin-two">🥤</span>
-            <span class="map-pin pin-three">🍰</span>
+    <button
+        type="button"
+        class="locate-user-button"
+        data-locate-user
+    >
+        ◎ ตำแหน่งของฉัน
+    </button>
 
-        </div>
+    <p
+        class="map-status"
+        data-map-status
+        aria-live="polite"
+    >
+        กำลังเตรียมแผนที่...
+    </p>
+
+</div>
 
     </section>
 
@@ -556,8 +578,21 @@
 
 </main>
     <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+></script>
+
+<script
     th:src="@{/js/dashboard.js}"
     defer
 ></script>
+
+<script
+    th:src="@{/js/dashboard-map.js}"
+    defer
+></script>
+
 </body>
 </html>

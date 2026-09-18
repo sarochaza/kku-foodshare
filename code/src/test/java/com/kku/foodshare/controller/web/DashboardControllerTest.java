@@ -1,31 +1,28 @@
 package com.kku.foodshare.controller.web;
 
-import org.junit.jupiter.api.Test;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import com.kku.foodshare.dto.response.UserProfileResponse;
-import com.kku.foodshare.service.UserProfileService;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
-
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 
-import java.util.List;
-import java.util.Map;
+import com.kku.foodshare.dto.response.UserProfileResponse;
+import com.kku.foodshare.service.UserProfileService;
 
 class DashboardControllerTest {
 
@@ -244,5 +241,50 @@ void dashboardShouldAddGoogleAccountProfileToModel() {
                     "sarocha@gmail.com",
                     "บัญชี Google"
             );
+}
+// ทดสอบว่า Dashboard มีแผนที่ Leaflet และโหลดไฟล์ JavaScript ที่จำเป็น
+@Test
+void dashboardShouldContainLeafletFoodMap()
+        throws Exception {
+
+    String html = Files.readString(
+            Path.of(
+                    "src/main/resources/templates/dashboard.html"
+            )
+    );
+
+    Path mapScriptPath = Path.of(
+            "src/main/resources/static/js/dashboard-map.js"
+    );
+
+    assertTrue(
+            html.contains("id=\"foodMap\"")
+    );
+
+    assertTrue(
+            html.contains("data-locate-user")
+    );
+
+    assertTrue(
+            html.contains(
+                    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            )
+    );
+
+    assertTrue(
+            html.contains(
+                    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            )
+    );
+
+    assertTrue(
+            html.contains(
+                    "th:src=\"@{/js/dashboard-map.js}\""
+            )
+    );
+
+    assertTrue(
+            Files.exists(mapScriptPath)
+    );
 }
 }
