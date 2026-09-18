@@ -26,14 +26,243 @@
         <a href="#how">วิธีใช้งาน</a>
     </nav>
 
-    <div class="nav-actions">
-        <button class="notification-button" type="button">🔔</button>
+   <div class="nav-actions">
 
-        <div class="profile">
-            <div class="profile-avatar">👤</div>
-            <span>บัญชีของฉัน</span>
+    <button
+        class="notification-button"
+        type="button"
+        aria-label="การแจ้งเตือน"
+    >
+        🔔
+    </button>
+
+
+    <!-- Account Menu -->
+    <div
+        class="account-menu"
+        data-account-menu
+    >
+
+        <button
+            class="account-menu-button"
+            id="accountMenuButton"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="accountDropdown"
+        >
+            <img
+    class="nav-account-avatar"
+    th:src="@{/images/default-profile.png}"
+    alt=""
+    aria-hidden="true"
+>
+
+            <span
+    class="nav-account-label"
+    th:text="${currentUser.displayName}"
+>
+    บัญชีของฉัน
+</span>
+
+            <span
+                class="account-menu-chevron"
+                aria-hidden="true"
+            >
+                ▾
+            </span>
+        </button>
+
+
+        <div
+            class="account-dropdown"
+            id="accountDropdown"
+            role="menu"
+            aria-labelledby="accountMenuButton"
+            hidden
+        >
+
+            <div class="account-dropdown-pointer"></div>
+
+
+            <!-- Profile Summary -->
+            <div class="account-summary">
+
+                <div
+    class="account-summary-avatar"
+    aria-hidden="true"
+>
+    <img
+        class="account-summary-avatar-image"
+        th:src="@{/images/default-profile.png}"
+        alt=""
+    >
+
+    <span class="account-online-dot"></span>
+</div>
+
+                <div class="account-summary-text">
+
+                    <strong
+                        class="account-summary-name"
+                        th:text="${
+                            currentUser != null
+                            ? currentUser.displayName
+                            : 'ผู้ใช้งาน FoodShare'
+                        }"
+                    >
+                        ผู้ใช้งาน FoodShare
+                    </strong>
+
+                    <span
+                        class="account-summary-email"
+                        th:text="${
+                            currentUser != null
+                            ? currentUser.email
+                            : 'user@kku.ac.th'
+                        }"
+                    >
+                        user@kku.ac.th
+                    </span>
+
+                    <span class="account-provider-badge">
+
+                        <span
+                            class="provider-icon"
+                            aria-hidden="true"
+                        >
+                            G
+                        </span>
+
+                        <span
+                            th:text="${
+                                currentUser != null
+                                ? currentUser.providerLabel
+                                : 'บัญชี FoodShare'
+                            }"
+                        >
+                            บัญชี FoodShare
+                        </span>
+
+                    </span>
+
+                </div>
+
+                <span
+                    class="account-mascot-peek"
+                    aria-hidden="true"
+                >
+                    🌱
+                </span>
+
+            </div>
+
+
+            <!-- Quick Links -->
+            <nav
+                class="account-dropdown-links"
+                aria-label="เมนูบัญชี"
+            >
+
+                <a
+                    href="/account"
+                    th:href="@{/account}"
+                    class="account-dropdown-link account-dropdown-link-main"
+                    role="menuitem"
+                >
+                    <span
+                        class="account-link-icon account-link-icon-blue"
+                        aria-hidden="true"
+                    >
+                        👤
+                    </span>
+
+                    <span class="account-link-content">
+                        <strong>ดูบัญชีของฉัน</strong>
+                        <small>
+                            โปรไฟล์และกิจกรรมของคุณ
+                        </small>
+                    </span>
+
+                    <span
+                        class="account-link-arrow"
+                        aria-hidden="true"
+                    >
+                        →
+                    </span>
+                </a>
+
+
+                <a
+                    href="/account/posts"
+                    th:href="@{/account/posts}"
+                    class="account-dropdown-link"
+                    role="menuitem"
+                >
+                    <span
+                        class="account-link-icon account-link-icon-green"
+                        aria-hidden="true"
+                    >
+                        ▤
+                    </span>
+
+                    <span class="account-link-content">
+                        <strong>โพสต์อาหารของฉัน</strong>
+                    </span>
+                </a>
+
+
+                <a
+                    href="/posts/new"
+                    th:href="@{/posts/new}"
+                    class="account-dropdown-link"
+                    role="menuitem"
+                >
+                    <span
+                        class="account-link-icon account-link-icon-orange"
+                        aria-hidden="true"
+                    >
+                        ↗
+                    </span>
+
+                    <span class="account-link-content">
+                        <strong>แบ่งปันอาหาร</strong>
+                    </span>
+                </a>
+
+            </nav>
+
+
+            <div class="account-dropdown-divider"></div>
+
+
+            <!-- Spring Security Logout -->
+            <form
+                th:action="@{/logout}"
+                method="post"
+                class="account-logout-form"
+            >
+                <button
+                    type="submit"
+                    class="account-logout-button"
+                    role="menuitem"
+                >
+                    <span
+                        class="account-link-icon account-link-icon-red"
+                        aria-hidden="true"
+                    >
+                        ↪
+                    </span>
+
+                    <span>ออกจากระบบ</span>
+                </button>
+            </form>
+
         </div>
+
     </div>
+
+</div>
 
 </header>
 
@@ -326,6 +555,9 @@
     </section>
 
 </main>
-
+    <script
+    th:src="@{/js/dashboard.js}"
+    defer
+></script>
 </body>
 </html>
