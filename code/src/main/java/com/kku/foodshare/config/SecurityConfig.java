@@ -1,16 +1,13 @@
 package com.kku.foodshare.config;
 
-import com.kku.foodshare.security.GoogleOAuth2SuccessHandler;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.kku.foodshare.security.GoogleOAuth2SuccessHandler;
 
 @Configuration
 public class SecurityConfig {
@@ -34,24 +31,31 @@ public class SecurityConfig {
             // =========================
             .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers(
-                    "/",
-                    "/login",
-                    "/register",
-                     "/forgot-password",
-                    "/reset-password",
+        .requestMatchers(
+                "/",
+                "/login",
+                "/register",
+                "/forgot-password",
+                "/reset-password",
 
-                    "/css/**",
-                    "/js/**",
-                    "/images/**",
-                    "/videos/**",
+                "/css/**",
+                "/js/**",
+                "/images/**",
+                "/videos/**",
+                "/vendor/**",
 
-                    // Google OAuth2
-                    "/oauth2/**",
-                    "/login/oauth2/**").permitAll()
+                "/oauth2/**",
+                "/login/oauth2/**"
+        ).permitAll()
 
-                .anyRequest().authenticated()
-            )
+        .requestMatchers(
+                "/admin/**"
+        ).hasRole(
+                "ADMIN"
+        )
+
+        .anyRequest().authenticated()
+)
 
 
             // =========================
