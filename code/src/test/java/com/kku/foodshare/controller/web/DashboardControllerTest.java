@@ -303,5 +303,359 @@ void dashboardShouldContainLeafletFoodMap()
             Files.exists(mapScriptPath)
     );
 }
+// ทดสอบว่าสคริปต์แผนที่โหลดโพสต์อาหารจาก Map API
+@Test
+void dashboardMapShouldLoadFoodPostsFromApi()
+        throws Exception {
 
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "fetch(\"/api/food-posts/map\")"
+            )
+    );
+}
+// ทดสอบว่าสคริปต์สร้างหมุดอาหารจากพิกัดของแต่ละโพสต์
+@Test
+void dashboardMapShouldCreateMarkerForEachFoodPost()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains("foodPosts.forEach")
+    );
+
+    assertTrue(
+            script.contains("foodPost.latitude")
+    );
+
+    assertTrue(
+            script.contains("foodPost.longitude")
+    );
+
+    assertTrue(
+            script.contains("L.marker")
+    );
+}
+// ทดสอบว่าหมุดอาหารแสดงรายละเอียดโพสต์ใน Popup อย่างปลอดภัย
+@Test
+void dashboardMapMarkerShouldShowFoodPostPopup()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains("document.createElement")
+    );
+
+    assertTrue(
+            script.contains("textContent")
+    );
+
+    assertTrue(
+            script.contains("foodPost.title")
+    );
+
+    assertTrue(
+            script.contains("foodPost.pickupLocationName")
+    );
+
+    assertTrue(
+            script.contains("bindPopup")
+    );
+}
+// ทดสอบว่า Popup แสดงจำนวนและเวลาสิ้นสุดของโพสต์อาหาร
+@Test
+void dashboardMapPopupShouldShowQuantityAndAvailableUntil()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains("foodPost.quantity")
+    );
+
+    assertTrue(
+            script.contains("foodPost.unit")
+    );
+
+    assertTrue(
+            script.contains("foodPost.availableUntil")
+    );
+
+    assertTrue(
+            script.contains("toLocaleString")
+    );
+}
+// ทดสอบว่า Popup มีปุ่มเปิดเส้นทางไปยังจุดรับอาหาร
+@Test
+void dashboardMapPopupShouldProvidePickupDirections()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "https://www.google.com/maps/dir/?api=1&destination="
+            )
+    );
+
+    assertTrue(
+            script.contains("นำทางไปจุดรับ")
+    );
+
+    assertTrue(
+            script.contains("target")
+    );
+
+    assertTrue(
+            script.contains("_blank")
+    );
+}
+// ทดสอบว่าแผนที่แจ้งเตือนเมื่อโหลดโพสต์อาหารไม่สำเร็จ
+@Test
+void dashboardMapShouldShowErrorWhenFoodPostsCannotLoad()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains("response.ok")
+    );
+
+    assertTrue(
+            script.contains(".catch")
+    );
+
+    assertTrue(
+            script.contains(
+                    "ไม่สามารถโหลดตำแหน่งอาหารได้"
+            )
+    );
+}
+// ทดสอบว่าปุ่มตำแหน่งของฉันเรียกใช้ Geolocation ของเบราว์เซอร์
+@Test
+void dashboardMapShouldRequestCurrentUserLocation()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "[data-locate-user]"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "navigator.geolocation"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "getCurrentPosition"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "addEventListener"
+            )
+    );
+}
+// ทดสอบว่าแผนที่แสดงหมุดและเลื่อนไปยังตำแหน่งของผู้ใช้
+@Test
+void dashboardMapShouldShowCurrentUserLocation()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "position.coords.latitude"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "position.coords.longitude"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "userLocationMarker"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "L.circleMarker"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "คุณอยู่ที่นี่"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "map.setView"
+            )
+    );
+}
+// ทดสอบว่าแผนที่แจ้งข้อความเมื่อไม่สามารถเข้าถึงตำแหน่งผู้ใช้
+@Test
+void dashboardMapShouldHandleUserLocationError()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "PERMISSION_DENIED"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "กรุณาอนุญาตการเข้าถึงตำแหน่ง"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "ไม่สามารถระบุตำแหน่งของคุณได้"
+            )
+    );
+}
+// ทดสอบว่าแผนที่แสดงขอบเขตความคลาดเคลื่อนของตำแหน่งผู้ใช้
+@Test
+void dashboardMapShouldShowUserLocationAccuracy()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "position.coords.accuracy"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "userAccuracyCircle"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "L.circle("
+            )
+    );
+}
+// ทดสอบว่า Dashboard ขอตำแหน่งผู้ใช้เมื่อเปิดแผนที่
+@Test
+void dashboardMapShouldRequestLocationOnLoad()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "requestUserLocation"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "requestUserLocation();"
+            )
+    );
+}
+
+// ทดสอบว่า Popup แสดงระยะห่างระหว่างผู้ใช้กับจุดแบ่งปัน
+@Test
+void dashboardMapPopupShouldShowDistanceFromUser()
+        throws Exception {
+
+    String script = Files.readString(
+            Path.of(
+                    "src/main/resources/static/js/dashboard-map.js"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "currentUserCoordinates"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "map.distance"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "formatDistance"
+            )
+    );
+
+    assertTrue(
+            script.contains(
+                    "ห่างจากคุณ"
+            )
+    );
+}
 }
