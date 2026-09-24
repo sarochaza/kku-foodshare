@@ -5,6 +5,7 @@ import com.kku.foodshare.domain.entity.PickupStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PickupRepository extends JpaRepository<Pickup, Long> {
 
@@ -15,5 +16,11 @@ public interface PickupRepository extends JpaRepository<Pickup, Long> {
             PickupStatus status
     );
 
-    List<Pickup> findByUserId(Long userId);
+    List<Pickup> findByUserId(Long userId); 
+
+    Optional<Pickup> findByUserIdAndFoodPostIdAndStatus(
+        Long userId,
+        Long foodPostId,
+        PickupStatus status
+);
 }
