@@ -17,7 +17,7 @@ import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "food_post")
-public abstract class FoodPost {
+public class FoodPost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
