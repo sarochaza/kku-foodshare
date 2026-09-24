@@ -13,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 
 @Entity
@@ -63,19 +64,121 @@ public class FoodPost {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public FoodPost() {
-    }
+    public FoodPost() {}
 
+    //before insert
     @PrePersist
-    protected void onCreate() {
-
+    protected void onCreate(){
         LocalDateTime now = LocalDateTime.now();
-
         createdAt = now;
         updatedAt = now;
-
         if (status == null) {
             status = FoodPostStatus.AVAILABLE;
         }
+    }
+
+    //before update
+    @PreUpdate
+    protected void onUpdate(){
+        updatedAt = LocalDateTime.now();
+    }
+
+    //get & set
+    public Long getPostId(){
+        return postId;
+    }
+    public void setPostId(Long postId){
+        this.postId = postId;
+    }
+
+    public Long getUserId(){
+        return userId;
+    }
+    public void setUserId(Long userId){
+        this.userId = userId;
+    }
+
+    public String getTitle(){
+        return title;
+    }
+    public void setTitle(String title){
+        this.title = title;
+    }
+
+    public String getDescription(){
+        return description;
+    }
+    public void setDescription(String description){
+        this.description = description;
+    }
+
+    public Integer getInitialQuantity(){
+        return initialQuantity;
+    }
+    public void setInitialQuantity(Integer initialQuantity){
+        this.initialQuantity = initialQuantity;
+    }
+
+    public Integer getEstimatedRemaining(){
+        return estimatedRemaining;
+    }
+    public void setEstimatedRemaining(Integer estimatedRemaining){
+        this.estimatedRemaining = estimatedRemaining;
+    }
+
+    public String getLocationName(){
+        return locationName;
+    }
+    public void setLocationName(String locationName){
+        this.locationName = locationName;
+    }
+
+    public BigDecimal getLatitude(){
+        return latitude;
+    }
+    public void setLatitude(BigDecimal latitude){
+        this.latitude = latitude;
+    }
+
+    public BigDecimal getLongitude(){
+        return longitude;
+    }
+    public void setLongitude(BigDecimal longitude){
+        this.longitude = longitude;
+    }
+
+    public LocalDateTime getStartTime(){
+        return startTime;
+    }
+    public void setStartTime(LocalDateTime startTime){
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime(){
+        return endTime;
+    }
+    public void setEndTime(LocalDateTime endTime){
+        this.endTime = endTime;
+    }
+
+    public FoodPostStatus getStatus(){
+        return status;
+    }
+    public void setStatus(FoodPostStatus status){
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt){
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt(){
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt){
+        this.updatedAt = updatedAt;
     }
 }
