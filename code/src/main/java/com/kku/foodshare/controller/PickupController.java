@@ -1,7 +1,9 @@
 package com.kku.foodshare.controller;
 
 import com.kku.foodshare.domain.entity.Pickup;
+import com.kku.foodshare.dto.PickupRequest;
 import com.kku.foodshare.service.PickupService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +19,12 @@ public class PickupController {
 
     @PostMapping("/interest")
     public ResponseEntity<Pickup> createInterest(
-            @RequestParam Long userId,
-            @RequestParam Long foodPostId) {
+            @Valid @RequestBody PickupRequest request) {
 
-        Pickup pickup = pickupService.createInterest(userId, foodPostId);
+        Pickup pickup = pickupService.createInterest(
+                request.getUserId(),
+                request.getFoodPostId()
+        );
 
         return ResponseEntity.ok(pickup);
     }
@@ -28,9 +32,12 @@ public class PickupController {
     @PutMapping("/{pickupId}/confirm")
     public ResponseEntity<Pickup> confirmPickup(
             @PathVariable Long pickupId,
-            @RequestParam Integer quantity) {
+            @Valid @RequestBody PickupRequest request) {
 
-        Pickup pickup = pickupService.confirmPickup(pickupId, quantity);
+        Pickup pickup = pickupService.confirmPickup(
+                pickupId,
+                request.getQuantity()
+        );
 
         return ResponseEntity.ok(pickup);
     }
