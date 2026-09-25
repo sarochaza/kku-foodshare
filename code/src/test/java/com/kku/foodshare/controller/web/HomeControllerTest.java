@@ -87,4 +87,47 @@ void problemSectionShouldContainMascotImage()
             html.contains("mascot_landing.png")
     );
 }
+// ทดสอบว่า Home มี Footer และลิงก์ไปหน้าติดต่อ ผล RED ถูกต้องค่ะ ตอนนี้เพิ่มโครงสร้าง Footer เพื่อให้ Test ผ่านก่อน
+@Test
+void homeTemplateShouldContainFooterAndContactLink()
+        throws Exception {
+
+    String html = Files.readString(
+            Path.of(
+                    "src/main/resources/templates/home.html"
+            )
+    );
+
+    assertTrue(
+            html.contains("foodshare-footer")
+    );
+
+    assertTrue(
+            html.contains("href=\"/contact\"")
+            || html.contains("th:href=\"@{/contact}\"")
+    );
+}
+// ทดสอบว่า Footer CTA เชื่อมไปยังการแบ่งปันและแผนที่อาหาร
+@Test
+void homeFooterShouldContainSharingCallToAction()
+        throws Exception {
+
+    String html = Files.readString(
+            Path.of(
+                    "src/main/resources/templates/home.html"
+            )
+    );
+
+    assertTrue(
+            html.contains("footer-cta")
+    );
+
+    assertTrue(
+            html.contains("th:href=\"@{/login}\"")
+    );
+
+    assertTrue(
+            html.contains("href=\"#map\"")
+    );
+}
 }

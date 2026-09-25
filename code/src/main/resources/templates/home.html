@@ -1461,10 +1461,180 @@ if (availableSection) {
 }
         });
     </script>
+<footer class="foodshare-footer">
+
+    <div class="footer-decoration footer-decoration-one"></div>
+    <div class="footer-decoration footer-decoration-two"></div>
+            <section
+        class="footer-cta"
+        aria-labelledby="footerCtaTitle"
+    >
+
+        <div class="footer-cta-content">
+
+            <span class="footer-cta-label">
+                แบ่งปันง่าย ๆ ในไม่กี่ขั้นตอน
+            </span>
+
+            <h2 id="footerCtaTitle">
+                มีอาหารเหลือจากกิจกรรม?
+            </h2>
+
+            <p>
+                ส่งต่ออาหารที่ยังดีให้กับคนในมหาวิทยาลัย
+                เปลี่ยนอาหารส่วนเกินให้กลายเป็นรอยยิ้ม
+            </p>
+
+            <div class="footer-cta-actions">
+
+                <a
+                    href="/login"
+                    th:href="@{/login}"
+                    class="footer-cta-primary"
+                >
+                    <span>แบ่งปันอาหาร</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+
+                <a
+                    href="#map"
+                    class="footer-cta-secondary"
+                >
+                    ดูแผนที่อาหาร
+                </a>
+
+            </div>
+
+        </div>
+
+        <div
+            class="footer-cta-visual"
+            aria-hidden="true"
+        >
+            <div class="footer-cta-glow"></div>
+
+            <img
+                src="/images/register-mascot.png"
+                th:src="@{/images/register-mascot.png}"
+                alt=""
+                class="footer-cta-mascot"
+            >
+
+            <span class="footer-cta-leaf footer-cta-leaf-one">
+                🌱
+            </span>
+
+            <span class="footer-cta-leaf footer-cta-leaf-two">
+                ✦
+            </span>
+        </div>
+
+    </section>
+
+        <div class="footer-content">
+            <div class="footer-brand">
+
+            <img
+                src="/images/foodshare-logo.png"
+                th:src="@{/images/foodshare-logo.png}"
+                alt="KKU FoodShare"
+                class="footer-logo"
+            >
+
+            <p class="footer-description">
+                พื้นที่แบ่งปันอาหารในมหาวิทยาลัยขอนแก่น
+                เพื่อส่งต่ออาหารที่ยังดีและลดขยะอาหารไปด้วยกัน
+            </p>
+
+            <span class="footer-slogan">
+                Share Food · Brighter Tomorrow
+            </span>
+
+        </div>
+
+        <nav
+            class="footer-navigation"
+            aria-label="เมนูส่วนท้าย"
+        >
+            <h2 class="footer-heading">
+                เมนู
+            </h2>
+
+            <a href="/" th:href="@{/}">
+                หน้าหลัก
+            </a>
+
+            <a href="/#how-it-works">
+                วิธีการใช้งาน
+            </a>
+
+            <a
+                href="/contact"
+                th:href="@{/contact}"
+            >
+                ติดต่อเรา
+            </a>
+        </nav>
+
+        <div class="footer-contact">
+
+            <h2 class="footer-heading">
+                ติดต่อเรา
+            </h2>
+
+            <p>
+                <span
+                    class="footer-contact-icon"
+                    aria-hidden="true"
+                >
+                    ✉
+                </span>
+
+                <span>
+                    ติดต่อทีมงาน KKU FoodShare
+                </span>
+            </p>
+
+            <p>
+                <span
+                    class="footer-contact-icon"
+                    aria-hidden="true"
+                >
+                    ●
+                </span>
+
+                <span>
+                    มหาวิทยาลัยขอนแก่น
+                </span>
+            </p>
+
+            <a
+                href="/contact"
+                th:href="@{/contact}"
+                class="footer-contact-link"
+            >
+                ดูข้อมูลติดต่อทั้งหมด
+                <span aria-hidden="true">→</span>
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 KKU FoodShare
+        </p>
+
+        <p>
+            แบ่งปันอาหาร เติมเต็มชุมชน
+            <span aria-hidden="true">🌱</span>
+        </p>
+
+    </div>
+
+</footer>
 
 </body>
-
-</html>
-</body>
-
 </html>

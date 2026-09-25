@@ -1,12 +1,12 @@
 package com.kku.foodshare.service;
 
-import com.kku.foodshare.domain.entity.User;
-import com.kku.foodshare.repository.UserRepository;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import com.kku.foodshare.domain.entity.User;
+import com.kku.foodshare.repository.UserRepository;
 /*CustomUserDetailsService มีหน้าที่ดึงข้อมูลผู้ใช้จากฐานข้อมูลด้วย 
 Email เพื่อให้ Spring Security ใช้ตรวจสอบตัวตนตอน Login 
 ส่วน Test ที่ทำคือ Unit Test เพื่อตรวจว่าการค้นหาและคืนข้อมูล User ทำงานถูกต้อง โดยใช้ Mock Repository แทนฐานข้อมูลจริงครับ */
@@ -33,7 +33,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .authorities("USER")
+                .roles(
+                        user.getRole().name()
+                )
                 .build();
     }
 }

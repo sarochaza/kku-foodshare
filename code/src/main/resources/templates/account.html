@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บัญชีของฉัน | KKU FoodShare</title>
+    <link rel="stylesheet" th:href="@{/css/account.css}">
+</head>
+<body>
+
+<header class="navbar">
+    <a class="logo" th:href="@{/home}">
+        <span class="logo-icon">🌱</span>
+        <span>KKU FoodShare</span>
+    </a>
+
+    <nav>
+        <a th:href="@{/home}">หน้าแรก</a>
+        <a th:href="@{/home#map}">แผนที่</a>
+        <a class="active" th:href="@{/account}">บัญชีของฉัน</a>
+    </nav>
+
+    <form th:action="@{/logout}" method="post">
+        <button class="logout-button" type="submit">ออกจากระบบ</button>
+    </form>
+</header>
+
+<main class="page">
+    <a class="back-link" th:href="@{/home}">← กลับหน้าหลัก</a>
+
+    <section class="hero">
+        <div>
+            <span class="hero-badge">🌱 KKU FoodShare</span>
+            <h1>บัญชีของฉัน</h1>
+            <p>ข้อมูลและเรื่องราวการแบ่งปันอาหารของคุณ</p>
+        </div>
+    </section>
+
+    <div class="top-grid">
+        <section class="card" aria-labelledby="profile-title">
+            <span class="section-label">โปรไฟล์</span>
+            <h2 id="profile-title">ข้อมูลส่วนตัว</h2>
+
+           <div class="profile-heading">
+    <img th:src="@{/account/photo}"
+         onerror="this.onerror=null;this.src='/images/default-profile.png';"
+         alt="รูปโปรไฟล์ของฉัน">
+
+    <div>
+        <h3 th:text="${account.displayName()}">ชื่อผู้ใช้</h3>
+        <span class="provider"
+              th:text="${account.providerLabel()}">
+            บัญชีอีเมล
+        </span>
+    </div>
+</div>
+
+<form class="photo-form"
+      th:action="@{/account/photo}"
+      method="post"
+      enctype="multipart/form-data">
+
+    <label for="photo">เปลี่ยนรูปโปรไฟล์</label>
+
+    <input id="photo"
+           name="photo"
+           type="file"
+           accept="image/jpeg,image/png"
+           required>
+
+    <button type="submit">บันทึกรูปใหม่</button>
+    <small>รองรับ JPG หรือ PNG ขนาดไม่เกิน 2 MB</small>
+</form>
+
+<p class="photo-success"
+   th:if="${photoSuccess}"
+   th:text="${photoSuccess}"></p>
+
+<p class="photo-error"
+   th:if="${photoError}"
+   th:text="${photoError}"></p>
+
+            <dl class="details">
+                <div>
+                    <dt>ชื่อที่แสดง</dt>
+                    <dd th:text="${account.displayName()}">
+                        ชื่อผู้ใช้
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>อีเมล</dt>
+                    <dd th:text="${account.email()}">
+                        user@example.com
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>เข้าร่วมเมื่อ</dt>
+                    <dd th:text="${#temporals.format(
+                        account.joinedAt(), 'dd/MM/yyyy'
+                    )}">
+                        01/01/2026
+                    </dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="card" aria-labelledby="summary-title">
+            <span class="section-label">การแบ่งปันของคุณ</span>
+            <h2 id="summary-title">ทุกมื้อมีความหมาย 💙</h2>
+            <p class="subtext">
+                ขอบคุณที่ช่วยส่งต่ออาหารให้เพื่อนใน KKU
+            </p>
+
+            <div class="stats">
+                <div class="stat">
+                    <span>▤</span>
+                    <strong th:text="${account.totalPosts()}">0</strong>
+                    <small>โพสต์ทั้งหมด</small>
+                </div>
+
+                <div class="stat">
+                    <span>✦</span>
+                    <strong th:text="${account.availablePosts()}">0</strong>
+                    <small>กำลังแบ่งปัน</small>
+                </div>
+
+                <div class="stat">
+                    <span>♥</span>
+                    <strong th:text="${account.sharedPosts()}">0</strong>
+                    <small>ส่งต่อแล้ว</small>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="card posts" id="posts"
+             aria-labelledby="posts-title">
+        <div class="posts-heading">
+            <div>
+                <span class="section-label">กิจกรรมล่าสุด</span>
+                <h2 id="posts-title">โพสต์อาหารของฉัน</h2>
+            </div>
+
+            <span class="post-count"
+                  th:text="|${account.totalPosts()} โพสต์|">
+                0 โพสต์
+            </span>
+        </div>
+
+        <div class="empty-state"
+             th:if="${#lists.isEmpty(account.posts())}">
+            <span class="empty-icon">🍱</span>
+            <h3>ยังไม่มีโพสต์อาหาร</h3>
+            <p>เมื่อคุณแบ่งปันอาหาร โพสต์จะปรากฏตรงนี้</p>
+            <a th:href="@{/home}">กลับหน้าหลัก →</a>
+        </div>
+
+        <ul class="post-list"
+            th:unless="${#lists.isEmpty(account.posts())}">
+            <li class="post-item"
+                th:each="post : ${account.posts()}">
+                <span class="food-icon">🍱</span>
+
+                <div class="post-text">
+                    <strong th:text="${post.title()}">
+                        ชื่ออาหาร
+                    </strong>
+
+                    <small>
+                        <span th:text="${post.pickupLocation()}">
+                            สถานที่รับ
+                        </span>
+                        ·
+                        <time th:text="${#temporals.format(
+                            post.createdAt(), 'dd/MM/yyyy HH:mm'
+                        )}">
+                            วันเวลา
+                        </time>
+                    </small>
+                </div>
+
+                <span class="status"
+                      th:classappend="${post.available()}
+                          ? 'status-open' : 'status-closed'"
+                      th:text="${post.statusLabel()}">
+                    สถานะ
+                </span>
+            </li>
+        </ul>
+    </section>
+</main>
+
+</body>
+</html>
