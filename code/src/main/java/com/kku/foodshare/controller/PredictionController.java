@@ -2,7 +2,6 @@ package com.kku.foodshare.controller;
 
 import com.kku.foodshare.dto.PredictionResponse;
 import com.kku.foodshare.service.PredictionService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
