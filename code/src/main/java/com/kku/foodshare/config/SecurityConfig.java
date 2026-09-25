@@ -94,6 +94,7 @@ public class SecurityConfig {
             // LOGOUT
             // =========================
             .logout(logout -> logout
+                .logoutSuccessUrl("/")
                 .permitAll()
             );
 

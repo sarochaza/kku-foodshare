@@ -14,6 +14,9 @@ import com.kku.foodshare.domain.entity.FoodPostStatus;
 public interface FoodPostRepository
         extends JpaRepository<FoodPost, Long> {
 
+    // เพิ่มบรรทัดนี้: ดึงโพสต์ของผู้ใช้ตาม ownerId เรียงจากใหม่ไปเก่า
+    List<FoodPost> findByOwnerIdOrderByCreatedAtDesc(Long ownerId);
+
     @Query("""
             SELECT post
             FROM FoodPost post
