@@ -30,6 +30,13 @@ public class SecurityConfig {
         http
 
             // =========================
+            // CSRF
+            // =========================
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**")
+            )
+
+            // =========================
             // AUTHORIZE
             // =========================
             .authorizeHttpRequests(auth -> auth
@@ -44,6 +51,9 @@ public class SecurityConfig {
                     "/images/**",
                     "/videos/**",
 
+                    // API
+                    "/api/**",
+
                     // Google OAuth2
                     "/oauth2/**",
                     "/login/oauth2/**"
@@ -52,38 +62,25 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
-
             // =========================
             // EMAIL / PASSWORD LOGIN
             // =========================
             .formLogin(form -> form
-
                 .loginPage("/login")
-
-                // ใช้ email แทน username
                 .usernameParameter("email")
-
-                // Login สำเร็จกลับหน้า Home
                 .defaultSuccessUrl("/home", true)
-
                 .permitAll()
             )
-
 
             // =========================
             // GOOGLE LOGIN
             // =========================
             .oauth2Login(oauth -> oauth
-
-                // ใช้หน้า Login ของเราเอง
                 .loginPage("/login")
-
-                // Google Login สำเร็จ
                 .successHandler(
                     googleOAuth2SuccessHandler
                 )
             )
-
 
             // =========================
             // LOGOUT
