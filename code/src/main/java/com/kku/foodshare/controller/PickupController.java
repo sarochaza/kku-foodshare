@@ -2,10 +2,13 @@ package com.kku.foodshare.controller;
 
 import com.kku.foodshare.domain.entity.Pickup;
 import com.kku.foodshare.dto.PickupRequest;
+import com.kku.foodshare.dto.PickupResponse;
 import com.kku.foodshare.service.PickupService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/pickups")
@@ -18,7 +21,7 @@ public class PickupController {
     }
 
     @PostMapping("/interest")
-    public ResponseEntity<Pickup> createInterest(
+    public ResponseEntity<PickupResponse> createInterest(
             @Valid @RequestBody PickupRequest request) {
 
         Pickup pickup = pickupService.createInterest(
@@ -26,11 +29,11 @@ public class PickupController {
                 request.getFoodPostId()
         );
 
-        return ResponseEntity.ok(pickup);
+        return ResponseEntity.ok(toResponse(pickup));
     }
 
     @PutMapping("/{pickupId}/confirm")
-    public ResponseEntity<Pickup> confirmPickup(
+    public ResponseEntity<PickupResponse> confirmPickup(
             @PathVariable Long pickupId,
             @Valid @RequestBody PickupRequest request) {
 
@@ -39,7 +42,7 @@ public class PickupController {
                 request.getQuantity()
         );
 
-        return ResponseEntity.ok(pickup);
+        return ResponseEntity.ok(toResponse(pickup));
     }
 
     @PutMapping("/{pickupId}/cancel")
@@ -49,5 +52,42 @@ public class PickupController {
         pickupService.cancelInterest(pickupId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PickupResponse>> getByUser(
+            @PathVariable Long userId) {
+
+        List<PickupResponse> responses = pickupService
+                .getPickupsByUser(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/food-post/{foodPostId}")
+    public ResponseEntity<List<PickupResponse>> getByFoodPost(
+            @PathVariable Long foodPostId) {
+
+        List<PickupResponse> responses = pickupService
+                .getPickupsByFoodPost(foodPostId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    private PickupResponse toResponse(Pickup pickup) {
+        return new PickupResponse(
+                pickup.getId(),
+                pickup.getUser().getId(),
+                pickup.getFoodPost().getId(),
+                pickup.getQuantity(),
+                pickup.getStatus(),
+                pickup.getCreatedAt()
+        );
     }
 }

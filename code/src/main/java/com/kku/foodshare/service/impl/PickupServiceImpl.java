@@ -1,5 +1,7 @@
 package com.kku.foodshare.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,5 +125,15 @@ public class PickupServiceImpl implements PickupService {
         pickup.setStatus(PickupStatus.PICKED_UP);
 
         return pickupRepository.save(pickup);
+    }
+
+    @Override
+    public List<Pickup> getPickupsByUser(Long userId) {
+        return pickupRepository.findByUserId(userId);
+    }
+
+    @Override
+    public List<Pickup> getPickupsByFoodPost(Long foodPostId) {
+        return pickupRepository.findByFoodPostId(foodPostId);
     }
 }
