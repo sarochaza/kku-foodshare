@@ -154,4 +154,23 @@ class PredictionServiceImplTest {
         assertEquals(5, response.getPickedUpQuantity());
         assertEquals(5, response.getRemainingQuantity());
     }
+
+    @Test
+    void shouldThrowExceptionWhenFoodQuantityIsNegative() {
+
+        foodPost.setQuantity(-1);
+
+        when(foodPostRepository.findById(1L))
+                .thenReturn(Optional.of(foodPost));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> predictionService.predict(1L)
+        );
+
+        assertEquals(
+                "Food quantity cannot be negative",
+                exception.getMessage()
+        );
+    }
 }
