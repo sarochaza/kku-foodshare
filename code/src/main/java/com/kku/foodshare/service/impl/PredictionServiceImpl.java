@@ -32,6 +32,24 @@ public class PredictionServiceImpl implements PredictionService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("Food post not found"));
 
+        if (foodPost.getQuantity() == null) {
+            throw new IllegalArgumentException(
+                    "Food quantity is required"
+            );
+        }
+
+        if (foodPost.getQuantity() < 0) {
+            throw new IllegalArgumentException(
+                    "Food quantity cannot be negative"
+            );
+        }
+
+        if (foodPost.getCreatedAt() == null) {
+            throw new IllegalArgumentException(
+                    "Food post creation time is required"
+            );
+        }
+
         int pickedUpQuantity = pickupRepository
                 .findByFoodPostIdAndStatus(
                         foodPostId,
