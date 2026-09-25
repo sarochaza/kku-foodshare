@@ -127,4 +127,31 @@ class PredictionServiceImplTest {
                 response.getEstimatedSoldOutTime()
         );
     }
+
+    @Test
+    void shouldSumMultiplePickups() {
+
+        Pickup pickup1 = new Pickup();
+        pickup1.setQuantity(3);
+        pickup1.setStatus(PickupStatus.PICKED_UP);
+
+        Pickup pickup2 = new Pickup();
+        pickup2.setQuantity(2);
+        pickup2.setStatus(PickupStatus.PICKED_UP);
+
+        when(foodPostRepository.findById(1L))
+                .thenReturn(Optional.of(foodPost));
+
+        when(pickupRepository.findByFoodPostIdAndStatus(
+                1L,
+                PickupStatus.PICKED_UP
+        )).thenReturn(List.of(pickup1, pickup2));
+
+        PredictionResponse response =
+                predictionService.predict(1L);
+
+        assertEquals(10, response.getInitialQuantity());
+        assertEquals(5, response.getPickedUpQuantity());
+        assertEquals(5, response.getRemainingQuantity());
+    }
 }
