@@ -10,11 +10,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.csrf(csrf -> csrf.disable())
+        http
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/food-posts/**").permitAll()
-            .anyRequest().authenticated()
-        );
+                .requestMatchers(
+                    "/api/food-posts",
+                    "/api/food-posts/**", "/error").permitAll()
+                .anyRequest().authenticated()
+            );
         return http.build();
     }
 }

@@ -1,11 +1,14 @@
 package com.kku.foodshare.domain;
 
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +18,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "food_post")
@@ -63,6 +68,13 @@ public class FoodPost {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    //เชื่อม FoodPost กับ PostImage
+    @OneToMany(mappedBy = "foodPost",
+                cascade = CascadeType.ALL,
+                orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    private List<PostImage> images = new ArrayList<>();
 
     public FoodPost() {}
 
@@ -180,5 +192,13 @@ public class FoodPost {
     }
     public void setUpdatedAt(LocalDateTime updatedAt){
         this.updatedAt = updatedAt;
+    }
+
+    //get-set PostImage
+    public List<PostImage> getImages(){
+        return images;
+    }
+    public void setImages(List<PostImage> images){
+        this.images = images;
     }
 }
