@@ -16,6 +16,8 @@ import {
   empty,
   errorBox,
   card,
+  feedCard,
+  gallery,
   paginate,
   ask,
 } from "./ui.js";
@@ -122,13 +124,15 @@ async function home() {
         : "มีอาหารดี ๆ รอแบ่งปัน";
       $("#home-results-copy").textContent = `พบ ${data.totalElements} รายการ${state.now ? "ที่รับได้ตอนนี้" : "ในชุมชน KKU"}`;
       el.innerHTML = data.items.length
-        ? data.items.map(card).join("")
+        ? data.items.map(feedCard).join("")
         : empty(
             "ยังไม่พบมื้อที่ตรงกับตัวกรอง",
             "ลองเลือกหมวดอื่นหรือปิดตัวกรอง “รับได้ตอนนี้” แล้วค้นหาอีกครั้ง",
             "/explore",
             "สำรวจอาหารทั้งหมด",
           );
+      hydrateFeedComments(el);
+      wireFeedMenus(el);
     } else errorBox(el, listResult.reason, load);
 
     if (mapResult.status === "fulfilled") {
@@ -191,7 +195,7 @@ async function home() {
   });
   $("#home-available-now").onchange = (event) => {
     state.now = event.target.checked;
-    event.target.closest(".home-category").classList.toggle("active", state.now);
+    event.target.closest(".home-category, .home-now-compact")?.classList.toggle("active", state.now);
     load();
   };
   $("#home-sort").onchange = async (event) => {
@@ -207,6 +211,18 @@ async function home() {
   $("#home-locate").onclick = () => busy($("#home-locate"), useLocation);
   await load();
   homeGuide();
+}
+function reportPost(postId, commentId = null) {
+  return ask("แจ้งปัญหาให้ผู้ดูแล", "เลือกเหตุผล เช่น โพสต์เล่น, ข้อมูลไม่ถูกต้อง, ไม่เหมาะสม, สแปม หรืออื่น ๆ", {label:"เหตุผล", maxLength:1000, confirm:"ส่งรายงาน"}).then(async (reason) => {
+    if (!reason) return; await api("/api/v1/reports", {method:"POST", body:{postId:Number(postId), commentId, reason}}); toast("ส่งรายงานให้ผู้ดูแลแล้ว");
+  });
+}
+async function hydrateFeedComments(root) {
+  await Promise.all($$("[data-comment-preview]", root).map(async (slot) => { try { const d=await api(`/api/v1/food-posts/${slot.dataset.commentPreview}/comments?size=1`); const c=d.items?.[0]; slot.innerHTML=c ? `<img src="/api/v1/members/${c.authorId}/photo" alt=""><span><strong>${escape(c.authorName)}</strong> ${escape(c.body)}</span>` : "ถามรายละเอียดหรือดูความคิดเห็น"; } catch { /* the post is still usable without the preview */ } }));
+}
+function wireFeedMenus(root) {
+  $$('[data-feed-menu]', root).forEach((button) => button.onclick = () => { const menu=$("#feed-menu-"+button.dataset.feedMenu); $$('[id^="feed-menu-"]',root).forEach(x=>{if(x!==menu)x.hidden=true;}); menu.hidden=!menu.hidden; });
+  $$('[data-report-post]', root).forEach((button) => button.onclick = () => busy(button, () => reportPost(button.dataset.reportPost)));
 }
 async function explore() {
   const params = new URLSearchParams(location.search);
@@ -344,8 +360,15 @@ async function detail() {
     const p = await api("/api/v1/food-posts/" + id);
     const closed = ["CANCELLED", "EXPIRED", "CLAIMED"].includes(p.status);
     el.innerHTML = `<div class="detail-layout"><section><div class="detail-photo">${photo(p)}</div><div class="detail-panel panel"><span class="section-kicker">${escape(categories[p.category])} · FROM OUR COMMUNITY</span><h1 class="detail-title">${escape(p.title)}</h1><div class="detail-meta"><span data-detail-state>${badge(p.status)}</span><span>${icon("pin")} ${escape(p.pickupLocationName)}</span></div><h2>รายละเอียดอาหาร</h2><p>${escape(p.description)}</p>${p.allergens ? `<div class="allergen-note"><strong>ส่วนผสมที่อาจทำให้แพ้</strong><br>${escape(p.allergens)}</div>` : ""}</div><section class="detail-panel panel"><h2>${icon("pin")} จุดนัดรับอาหาร</h2><p>${escape(p.pickupLocationName)}</p><div id="detail-trip"></div></section></section><aside class="booking-panel panel"><span class="section-kicker">A MEAL MADE FOR SHARING</span><div class="booking-price">แบ่งปันฟรี ♡</div><p>มื้อดี ๆ จากเพื่อนในชุมชน</p><div class="booking-stock"><span>จำนวนที่ยังจองได้</span><span><strong data-detail-stock>${p.availableQuantity}</strong> ${escape(p.unit)}</span></div><div class="pickup-time">${icon("clock")}<div><strong>เวลานัดรับ</strong><span>${escape(pickupWindow(p))}</span></div></div><p id="detail-trip-quick" class="trip-quick" role="status">กำลังตรวจตำแหน่งเพื่อแสดงระยะทางขับรถ…</p>${p.mine ? `<a class="btn btn-primary full" href="/account/posts">จัดการโพสต์และผู้จอง ${icon("arrow")}</a>${!closed ? `<a class="btn btn-soft full" style="margin-top:10px" href="/posts/${p.id}/edit">${icon("edit")} แก้ไขโพสต์</a>` : ""}` : signedIn() ? '<div id="detail-booking" class="quick-booking"></div>' : `<a class="btn btn-primary full" href="/login">เข้าสู่ระบบเพื่อจองอาหาร ${icon("arrow")}</a>`}<div class="owner-label"><span>${icon("user")}</span><div><small>แบ่งปันโดย</small><strong>${escape(p.ownerName)}</strong></div></div>${signedIn() && !p.mine ? '<button class="report-button" id="report-post">รายงานปัญหาของโพสต์นี้</button>' : ""}</aside></div>`;
+    const legacyPhoto = $(".detail-photo", el);
+    if (legacyPhoto) legacyPhoto.outerHTML = gallery(p, "detail-gallery");
     const trip = mountTrip($("#detail-trip"), p, {summaryTarget: $("#detail-trip-quick")});
     trip.refresh();
+    const commentsPanel = document.createElement("section");
+    commentsPanel.className = "detail-panel panel comments-panel";
+    commentsPanel.innerHTML = `<h2>ความคิดเห็น <span id="comments-count">${p.commentCount || 0}</span></h2><div id="post-comments"></div>`;
+    $(".detail-gallery", el).after(commentsPanel);
+    mountComments(Number(id));
     if (signedIn() && !p.mine) mountReservation($("#detail-booking"), p, trip, (fresh) => {
       $('[data-detail-stock]').textContent = fresh.availableQuantity;
       $('[data-detail-state]').innerHTML = badge(fresh.status);
@@ -369,6 +392,18 @@ async function detail() {
   } catch (e) {
     errorBox(el, e, detail);
   }
+}
+async function mountComments(postId) {
+  const el = $("#post-comments"); if (!el) return;
+  const load = async () => {
+    const d = await api(`/api/v1/food-posts/${postId}/comments`);
+    el.innerHTML = `<div class="comment-list">${d.items.map(c => `<article class="comment"><img src="/api/v1/members/${c.authorId}/photo" alt=""><div><strong>${escape(c.authorName)}</strong><time>${escape(dateTime(c.createdAt))}</time><p>${escape(c.body)}</p></div>${c.canDelete ? `<button type="button" data-delete-comment="${c.id}">ลบ</button>` : ""}${signedIn() ? `<button type="button" data-report-comment="${c.id}">รายงาน</button>` : ""}</article>`).join("") || "<p class=field-note>ยังไม่มีความคิดเห็น</p>"}</div>${signedIn() ? `<form id="comment-form" class="comment-form"><img src="/account/photo" alt=""><textarea name="body" maxlength="800" required placeholder="เขียนความคิดเห็นอย่างสุภาพ"></textarea><button class="btn btn-primary" type="submit">ส่ง</button></form>` : `<a class="btn btn-soft" href="/login">เข้าสู่ระบบเพื่อแสดงความคิดเห็น</a>`}`;
+    $("#comments-count").textContent = d.totalElements;
+    $("#comment-form", el)?.addEventListener("submit", e => { e.preventDefault(); busy($("button", e.currentTarget), async () => { await api(`/api/v1/food-posts/${postId}/comments`, {method:"POST", body:{body:e.currentTarget.elements.body.value}}); await load(); }); });
+    $$('[data-delete-comment]', el).forEach(b => b.onclick = () => busy(b, async () => { await api(`/api/v1/comments/${b.dataset.deleteComment}`, {method:"DELETE"}); await load(); }));
+    $$('[data-report-comment]', el).forEach(b => b.onclick = () => busy(b, async () => { const reason = await ask("รายงานความคิดเห็น", "เลือกเหตุผล เช่น ไม่เหมาะสมหรือสแปม", {label:"เหตุผล", maxLength:1000, confirm:"ส่งรายงาน"}); if (reason) { await api("/api/v1/reports", {method:"POST", body:{postId, commentId:Number(b.dataset.reportComment), reason}}); toast("ส่งรายงานแล้ว"); } }));
+  };
+  try { await load(); } catch (e) { errorBox(el, e, load); }
 }
 async function editor() {
   const form = $("#post-form");
@@ -399,20 +434,18 @@ async function editor() {
   form.elements.quantity.oninput = syncPerPersonLimit;
   syncPerPersonLimit();
   $("#food-photo").onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (
-      file.size > 5 * 1024 * 1024 ||
-      !["image/jpeg", "image/png"].includes(file.type)
-    ) {
+    const files = [...e.target.files];
+    if (!files.length) return;
+    if (files.length > 5 || files.some(file => file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png"].includes(file.type))) {
       e.target.value = "";
       toast("กรุณาเลือกรูป JPG/PNG ไม่เกิน 5 MB", true);
       return;
     }
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-    previewUrl = URL.createObjectURL(file);
+    previewUrl = URL.createObjectURL(files[0]);
     $("#photo-preview").src = previewUrl;
     $("#photo-preview").hidden = false;
+    $("#photo-previews").innerHTML = files.map((file, index) => `<span>${index + 1}. ${escape(file.name)}</span>`).join("");
   };
   if (id) {
     try {
@@ -466,15 +499,13 @@ async function editor() {
         body: data,
       });
       id = saved.id;
-      const file = $("#food-photo").files[0];
-      if (file) {
+      const files = [...$("#food-photo").files];
+      if (files.length) {
         try {
-          const upload = new FormData();
-          upload.append("file", file);
-          await api(`/api/v1/food-posts/${id}/images`, {
-            method: "POST",
-            body: upload,
-          });
+          for (const file of files) {
+            const upload = new FormData(); upload.append("file", file);
+            await api(`/api/v1/food-posts/${id}/images`, { method: "POST", body: upload });
+          }
         } catch (e) {
           error.textContent =
             "โพสต์บันทึกแล้ว แต่รูปยังอัปโหลดไม่สำเร็จ: " +
@@ -981,12 +1012,19 @@ async function myPosts(page = 0) {
 async function notifications(page = 0) {
   const el = $("#notification-list");
   try {
+    const preferences = await api("/api/v1/me/notification-preferences");
+    const preferenceForm = $("#notification-preference-form");
+    if (preferenceForm) {
+      preferenceForm.elements.keywords.value = preferences.keywords || "";
+      $$("input[name=categories]", preferenceForm).forEach(input => input.checked = preferences.categories?.includes(input.value));
+      preferenceForm.onsubmit = e => { e.preventDefault(); busy($("button", preferenceForm), async () => { await api("/api/v1/me/notification-preferences", {method:"PUT", body:{categories: $$('input[name=categories]:checked', preferenceForm).map(i=>i.value), keywords: preferenceForm.elements.keywords.value}}); toast("บันทึกความสนใจแล้ว"); }); };
+    }
     const d = await api("/api/v1/me/notifications?page=" + page);
     el.innerHTML = d.items.length
       ? d.items
           .map(
             (n) =>
-              `<article class="notification-card ${n.read ? "" : "unread"}"><span class="notification-icon">${icon("bell")}</span><div><h3>${escape(n.title)}</h3><p>${escape(n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}">ดูรายการ →</a></article>`,
+              `<article class="notification-card ${n.read ? "" : "unread"}"><img class="notification-avatar" src="${n.actorId ? `/api/v1/members/${n.actorId}/photo` : "/images/default-profile.png"}" alt=""><div><h3>${escape(n.actorName || n.title)}</h3><p>${escape(n.actorName ? n.message : n.title + " · " + n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}" aria-label="เปิดการแจ้งเตือน">เปิด</a></article>`,
           )
           .join("")
       : empty(

@@ -9,6 +9,15 @@
         <h1>การแจ้งเตือน</h1>
         <p>ติดตามการจองและเรื่องราวการแบ่งปันของคุณ</p>
       </div>
+      <details class="panel notification-preferences" id="notification-preferences">
+        <summary>ปรับความสนใจการแจ้งเตือน</summary>
+        <p class="field-note">เลือกหมวดหรือคำ/พื้นที่ที่อยากติดตาม</p>
+        <form id="notification-preference-form">
+          <div class="preference-options"><label><input type="checkbox" name="categories" value="FOOD"> อาหาร</label><label><input type="checkbox" name="categories" value="DRINK"> เครื่องดื่ม</label><label><input type="checkbox" name="categories" value="SNACK"> ของว่าง</label></div>
+          <label>คำค้นหาหรือพื้นที่ <input name="keywords" maxlength="300" placeholder="เช่น มข. หอสมุด Complex"></label>
+          <button class="btn btn-soft" type="submit">บันทึกความสนใจ</button>
+        </form>
+      </details>
       <div
         id="notification-list"
         class="notification-list"

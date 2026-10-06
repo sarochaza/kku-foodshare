@@ -142,6 +142,15 @@ export function errorBox(el, e, retry) {
 export function card(p) {
   return `<article class="food-card"><a class="card-image" href="/posts/${p.id}" aria-label="ดู ${escape(p.title)}">${photo(p)}${badge(p.status)}<span class="free-badge">แบ่งปันฟรี</span></a><div class="card-content"><div class="card-topline"><span>${escape(categories[p.category])}</span><span>${p.distanceKm != null ? `${p.distanceKm.toFixed(1)} กม. จากคุณ` : "KKU COMMUNITY"}</span></div><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p class="card-location">${icon("pin")}${escape(p.pickupLocationName)}</p><p class="card-time">${icon("clock")}รับภายใน ${escape(dateTime(p.availableUntil))}</p><div class="card-bottom"><span class="card-stock">เหลือ <strong>${p.availableQuantity}</strong> ${escape(p.unit)}</span><a class="card-link" href="/posts/${p.id}">ดูรายละเอียด ${icon("arrow")}</a></div></div></article>`;
 }
+export function gallery(p, className = "post-gallery") {
+  const images = p.images?.length ? p.images : p.imageUrl ? [{ url: p.imageUrl }] : [];
+  if (!images.length) return `<div class="${className} gallery-empty">${icon("food")}</div>`;
+  const shown = images.slice(0, 4);
+  return `<div class="${className} gallery-${shown.length}">${shown.map((image, index) => `<a href="${escape(image.url)}" target="_blank" rel="noopener" aria-label="เปิดรูปที่ ${index + 1}"><img src="${escape(image.url)}" alt="${escape(p.title)} รูปที่ ${index + 1}" loading="lazy">${index === 3 && images.length > 4 ? `<span class="gallery-more">+${images.length - 4}</span>` : ""}</a>`).join("")}</div>`;
+}
+export function feedCard(p) {
+  return `<article class="feed-card food-feed-card" data-feed-post="${p.id}"><div class="food-feed-head"><div><span class="section-kicker">${escape(categories[p.category])}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p></div><button type="button" class="feed-menu-button" data-feed-menu="${p.id}" aria-label="ตัวเลือกโพสต์">…</button></div><div class="feed-menu" id="feed-menu-${p.id}" hidden><a href="/posts/${p.id}">ดูรายละเอียด</a>${p.mine ? `<a href="/posts/${p.id}/edit">แก้ไขโพสต์</a>` : `<button type="button" data-report-post="${p.id}">รายงานโพสต์</button>`}</div>${gallery(p)}<a class="feed-comments-entry" href="/posts/${p.id}#post-comments"><span data-comment-preview="${p.id}">ดูความคิดเห็น</span><strong>${p.commentCount || 0} ความคิดเห็น</strong></a><div class="feed-body"><p>${escape(p.description)}</p><div class="feed-facts"><span>${icon("clock")} รับถึง ${escape(dateTime(p.availableUntil))}</span><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong></div><div class="feed-actions"><a class="btn btn-primary" href="/posts/${p.id}">${p.mine ? "จัดการโพสต์" : "ดูรายละเอียดและจอง"}</a></div></div></article>`;
+}
 export function paginate(data, onPage) {
   const el = $("#pagination");
   if (!el) return;

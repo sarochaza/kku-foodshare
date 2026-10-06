@@ -130,12 +130,12 @@
         </nav>
         <div class="header-actions">
           <a
-            class="icon-button"
+            class="icon-button notification-bell"
             th:if="${viewer != null}"
             href="/notifications"
             aria-label="การแจ้งเตือน"
             ><svg class="icon" aria-hidden="true">
-              <use href="#i-bell"></use></svg></a
+              <use href="#i-bell"></use></svg><span class="notification-badge" th:if="${unreadCount != null and unreadCount > 0}" th:text="${unreadCount > 99 ? '99+' : unreadCount}"></span></a
           ><div class="profile-menu-wrap" th:if="${viewer != null}">
             <button id="profile-menu-button" class="account-link" type="button" aria-expanded="false" aria-controls="profile-menu" aria-label="เปิดเมนูโปรไฟล์">
               <img src="/account/photo" alt="" /><span th:text="${viewer.name}"></span>

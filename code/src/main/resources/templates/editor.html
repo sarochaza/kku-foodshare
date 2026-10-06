@@ -19,12 +19,13 @@
                 type="file"
                 id="food-photo"
                 accept="image/png,image/jpeg"
-              /><img id="photo-preview" alt="รูปอาหารที่เลือก" hidden /><span
+                multiple
+              /><div id="photo-previews" class="photo-preview-grid" aria-live="polite"></div><img id="photo-preview" alt="รูปอาหารที่เลือก" hidden><span
                 class="upload-placeholder"
                 ><svg class="icon" aria-hidden="true">
                   <use href="#i-camera"></use></svg
                 ><strong>เพิ่มรูปอาหารให้น่ารับ</strong
-                ><small>แตะเพื่อเลือกรูป JPG / PNG ไม่เกิน 5 MB</small></span
+                ><small>เพิ่มได้ 1–5 รูป JPG / PNG รูปละไม่เกิน 5 MB</small></span
               ></label
             ><label
               >ชื่ออาหาร <span class="required">*</span
