@@ -18,4 +18,5 @@ public interface NotificationService {
   Preferences preferences(String email);
   Preferences updatePreferences(String email, List<String> categories, String keywords);
   void notifyInterested(com.kku.foodshare.domain.entity.FoodPost post);
+  void notifySavedPostDeadline(com.kku.foodshare.domain.entity.User user, com.kku.foodshare.domain.entity.FoodPost post);
 }

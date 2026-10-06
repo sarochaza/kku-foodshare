@@ -6,8 +6,13 @@
     <main class="container page-main narrow">
       <div class="page-heading">
         <span class="section-kicker">YOUR NEXT GOOD MEAL</span>
-        <h1>การจองของฉัน</h1>
-        <p>มื้อที่คุณจองไว้ พร้อมรหัสสำหรับรับอาหาร</p>
+        <h1>การรับอาหารของฉัน</h1>
+        <p>ดูมื้อที่กำลังจะไปรับ และประวัติการรับอาหารทั้งหมด</p>
+      </div>
+      <div class="reservation-tabs" role="group" aria-label="กรองประวัติการรับอาหาร">
+        <button type="button" class="active" data-reservation-filter="all">ทั้งหมด</button>
+        <button type="button" data-reservation-filter="active">กำลังจะไปรับ</button>
+        <button type="button" data-reservation-filter="history">รับแล้ว / ปิดแล้ว</button>
       </div>
       <div class="info-note">
         <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg

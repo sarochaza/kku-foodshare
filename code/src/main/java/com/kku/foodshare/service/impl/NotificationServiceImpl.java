@@ -95,4 +95,7 @@ public class NotificationServiceImpl implements NotificationService {
       if (category || keyword) save(p.user, post.getOwner(), "มีอาหารใหม่ที่อาจถูกใจ", post.getTitle()+" · "+post.getPickupLocationName(), "/posts/"+post.getId(), "interest-post:"+post.getId());
     }
   }
+  public void notifySavedPostDeadline(com.kku.foodshare.domain.entity.User user, FoodPost post) {
+    save(user, post.getOwner(), "โพสต์ที่บันทึกใกล้หมดเวลา", post.getTitle()+" · เหลือเวลาไม่เกิน 30 นาที", "/posts/"+post.getId(), "saved-deadline:"+user.getId()+":"+post.getId());
+  }
 }
