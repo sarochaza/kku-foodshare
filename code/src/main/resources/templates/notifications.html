@@ -18,6 +18,13 @@
           <button class="btn btn-soft" type="submit">บันทึกความสนใจ</button>
         </form>
       </details>
+      <div id="notification-types" class="notification-types" role="tablist" aria-label="ประเภทการแจ้งเตือน">
+        <button type="button" class="active" data-notification-type="ALL" aria-pressed="true">ทั้งหมด</button>
+        <button type="button" data-notification-type="RESERVATION" aria-pressed="false">การจอง</button>
+        <button type="button" data-notification-type="COMMENT" aria-pressed="false">คอมเมนต์</button>
+        <button type="button" data-notification-type="INTEREST" aria-pressed="false">อาหารที่สนใจ</button>
+        <button type="button" data-notification-type="UPDATE" aria-pressed="false">อื่น ๆ</button>
+      </div>
       <div
         id="notification-list"
         class="notification-list"

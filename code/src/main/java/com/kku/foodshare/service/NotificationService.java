@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface NotificationService {
   record View(
-      Long id, String title, String message, String href, Long actorId, String actorName, LocalDateTime createdAt, boolean read) {}
+      Long id, String title, String message, String href, String type, Long actorId, String actorName, LocalDateTime createdAt, boolean read) {}
 
   PageView<View> list(String email, int page);
 

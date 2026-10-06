@@ -49,7 +49,15 @@ public class NotificationServiceImpl implements NotificationService {
     Long uid = members.require(email).getId();
     return PageView.of(
         repo.findByUserIdOrderByCreatedAtDesc(uid, PageRequest.of(Math.max(0, page), 20))
-            .map(n -> new View(n.id, n.title, n.message, n.href, n.actorUserId, n.actorName, n.createdAt, n.readAt != null)));
+            .map(n -> new View(n.id, n.title, n.message, n.href, type(n), n.actorUserId, n.actorName, n.createdAt, n.readAt != null)));
+  }
+
+  private String type(Notification n) {
+    String text = (n.title + " " + n.message).toLowerCase(Locale.ROOT);
+    if (text.contains("ความคิดเห็น")) return "COMMENT";
+    if (text.contains("อาหารใหม่") || n.dedupeKey != null && n.dedupeKey.startsWith("interest-post:")) return "INTEREST";
+    if (text.contains("จอง") || text.contains("รับอาหาร") || text.contains("reservation")) return "RESERVATION";
+    return "UPDATE";
   }
 
   public void read(String email, long id) {
