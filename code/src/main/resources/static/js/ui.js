@@ -1,3 +1,4 @@
+import { mapsUrl } from './routes.mjs';
 export const $ = (selector, root = document) => root.querySelector(selector);
 export const $$ = (selector, root = document) => [
   ...root.querySelectorAll(selector),
@@ -90,6 +91,18 @@ export function dateTime(value) {
 export function pickupWindow(p) {
   return `${date(p.availableFrom)} · ${time(p.availableFrom)} – ${date(p.availableFrom) !== date(p.availableUntil) ? date(p.availableUntil) + " " : ""}${time(p.availableUntil)} น.`;
 }
+export function availabilityLabel(p) {
+  const now = Date.now(), start = asDate(p.availableFrom).getTime(), end = asDate(p.availableUntil).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return "ตรวจสอบเวลารับ";
+  if (start > now) return `เริ่มรับ ${time(p.availableFrom)} น.`;
+  const minutes = Math.max(0, Math.ceil((end - now) / 60000));
+  if (minutes <= 60) return `เหลือ ${minutes} นาที`;
+  if (minutes <= 180) return `เหลือ ${Math.ceil(minutes / 60)} ชม.`;
+  return "รับได้ตอนนี้";
+}
+export function googleMapsUrl(p, origin = null, mode = 'driving') {
+  return mapsUrl(p, origin, mode);
+}
 export function inputTime(date) {
   return new Date(date.getTime() + 7 * 3600000).toISOString().slice(0, 16);
 }
@@ -149,7 +162,7 @@ export function gallery(p, className = "post-gallery") {
   return `<div class="${className} gallery-${shown.length}">${shown.map((image, index) => `<a href="${escape(image.url)}" target="_blank" rel="noopener" aria-label="เปิดรูปที่ ${index + 1}"><img src="${escape(image.url)}" alt="${escape(p.title)} รูปที่ ${index + 1}" loading="lazy">${index === 3 && images.length > 4 ? `<span class="gallery-more">+${images.length - 4}</span>` : ""}</a>`).join("")}</div>`;
 }
 export function feedCard(p) {
-  return `<article class="feed-card food-feed-card" data-feed-post="${p.id}"><div class="food-feed-head"><div><span class="section-kicker">${escape(categories[p.category])}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p></div><button type="button" class="feed-menu-button" data-feed-menu="${p.id}" aria-label="ตัวเลือกโพสต์">…</button></div><div class="feed-menu" id="feed-menu-${p.id}" hidden><a href="/posts/${p.id}">ดูรายละเอียด</a>${p.mine ? `<a href="/posts/${p.id}/edit">แก้ไขโพสต์</a>` : `<button type="button" data-report-post="${p.id}">รายงานโพสต์</button>`}</div>${gallery(p)}<a class="post-owner" href="/members/${p.ownerId}"><img src="/api/v1/members/${p.ownerId}/photo" alt=""><span>แบ่งปันโดย <strong>${escape(p.ownerName)}</strong></span></a><a class="feed-comments-entry" href="/posts/${p.id}#post-comments"><span data-comment-preview="${p.id}">ดูความคิดเห็น</span><strong>${p.commentCount || 0} ความคิดเห็น</strong></a><div class="feed-body"><p>${escape(p.description)}</p><div class="feed-facts"><span>${icon("clock")} รับถึง ${escape(dateTime(p.availableUntil))}</span><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong></div><div class="feed-actions"><a class="btn btn-primary" href="/posts/${p.id}">${p.mine ? "จัดการโพสต์" : "ดูรายละเอียดและจอง"}</a></div></div></article>`;
+  return `<article class="feed-card food-feed-card" data-feed-post="${p.id}"><div class="food-feed-head"><div><span class="section-kicker">${escape(categories[p.category])}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p></div><div class="feed-head-actions"><button type="button" class="save-post-button ${p.saved ? "is-saved" : ""}" data-save-post="${p.id}" data-saved="${p.saved}" aria-pressed="${p.saved}" aria-label="${p.saved ? "เลิกบันทึกโพสต์" : "บันทึกโพสต์"}">${icon("heart")}</button><button type="button" class="feed-menu-button" data-feed-menu="${p.id}" aria-label="ตัวเลือกโพสต์">…</button></div></div><div class="feed-menu" id="feed-menu-${p.id}" hidden><a href="/posts/${p.id}">ดูรายละเอียด</a><a href="${googleMapsUrl(p)}" target="_blank" rel="noopener noreferrer">เปิดใน Google Maps</a>${p.mine ? `<a href="/posts/${p.id}/edit">แก้ไขโพสต์</a>` : `<button type="button" data-report-post="${p.id}">รายงานโพสต์</button>`}</div>${gallery(p)}<a class="post-owner" href="/members/${p.ownerId}"><img src="/api/v1/members/${p.ownerId}/photo" alt=""><span>แบ่งปันโดย <strong>${escape(p.ownerName)}</strong></span></a><a class="feed-comments-entry" href="/posts/${p.id}#post-comments"><span data-comment-preview="${p.id}">ดูความคิดเห็น</span><strong>${p.commentCount || 0} ความคิดเห็น</strong></a><div class="feed-body"><p>${escape(p.description)}</p><div class="feed-facts"><span class="availability-state">${icon("clock")} ${escape(availabilityLabel(p))}</span><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong></div><div class="feed-actions"><a class="btn btn-primary" href="/posts/${p.id}">${p.mine ? "จัดการโพสต์" : "ดูรายละเอียดและจอง"}</a><a class="feed-map-link" href="${googleMapsUrl(p)}" target="_blank" rel="noopener noreferrer">${icon("map")} Google Maps</a></div></div></article>`;
 }
 export function paginate(data, onPage) {
   const el = $("#pagination");

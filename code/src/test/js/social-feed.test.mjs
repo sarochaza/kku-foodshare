@@ -15,3 +15,11 @@ test("notifications have real preferences and unread API routes", () => {
   assert.match(app, /notification-preferences/);
   assert.match(app, /data-report-comment/);
 });
+
+test("food feed exposes save, owner and Google Maps actions", () => {
+  assert.match(ui, /data-save-post/);
+  assert.match(ui, /googleMapsUrl/);
+  assert.match(ui, /availabilityLabel/);
+  assert.match(app, /data-owner/);
+  assert.match(app, /saved-posts/);
+});

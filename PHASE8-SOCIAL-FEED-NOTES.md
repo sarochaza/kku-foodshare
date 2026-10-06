@@ -18,10 +18,13 @@
 - Home uses an image-led equal-card gallery layout: three columns on desktop, responsive columns on smaller screens, and a fixed square image area with `object-fit: cover` for every post regardless of source image dimensions.
 - Search now uses the equal-card gallery layout and includes a compact owner filter: all posts, my posts, or other members’ posts. The map view has a full map plus a compact nearby-food side list. Each card displays the owner avatar and links to a public member page listing that member’s non-cancelled sharing history.
 - Search and map initialization now tolerate a page that does not include optional map-only controls, so a missing map expansion button cannot stop the food feed from loading.
+- Members can save a food post from its heart button and review it at `/saved`. A saved post that will expire within 30 minutes creates one in-app reminder for that member and post.
+- The pickup history page now has compact filters for all items, active reservations and completed/cancelled history. It also exposes a direct Google Maps link for active pickups.
+- The owner filter is explicit: all posts, my posts or other members’ posts. It applies to both search cards and the food-map data, and direct Google Maps links are available on food cards, post details and active reservations.
 
 ## Database migration
 
-`V5__social_feed.sql` preserves existing data. It removes the old one-image unique constraint, adds image order, comment and preference tables, and optional notification/report fields.
+`V5__social_feed.sql` preserves existing data. It removes the old one-image unique constraint, adds image order, comment and preference tables, and optional notification/report fields. `V7__saved_posts.sql` adds saved-post records without altering old posts or reservations. `V8__correct_central_library_location.sql` corrects only the exact old Central Library quick-place coordinate, so existing posts using that suggestion open on the building rather than south of it.
 
 ## Run locally
 
@@ -43,4 +46,4 @@ Do not commit or include `.env` in a hand-off ZIP.
 - `node --check src/main/resources/static/js/ui.js`
 - `node --test src/test/js/*.test.mjs` — 9 test files passing
 
-The current packaging environment does not contain Maven, so `mvn -o -B test` and the package command must be run in the normal project/Docker environment before release.
+`mvn -o -B test` could not be completed in the packaging environment because the Spring Boot parent dependency is not present in its offline Maven cache. Run the Maven commands in the normal project/Docker environment before release.
