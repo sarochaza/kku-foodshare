@@ -8,4 +8,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
   Page<Report> findAllByOrderByCreatedAtDesc(Pageable page);
 
   boolean existsByPostIdAndReporterIdAndStatus(Long post, Long user, String status);
+
+  boolean existsByCommentIdAndReporterIdAndStatus(Long comment, Long user, String status);
 }

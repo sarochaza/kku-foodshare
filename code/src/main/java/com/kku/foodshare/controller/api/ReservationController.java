@@ -16,6 +16,7 @@ public class ReservationController {
   public record Quantity(@Min(1) @Max(10000) int quantity) {}
 
   public record Code(@NotBlank String code) {}
+  public record PreferenceInput(java.util.List<String> categories, @Size(max = 300) String keywords) {}
 
   private final ReservationService service;
   private final NotificationService notifications;
@@ -86,4 +87,13 @@ public class ReservationController {
     notifications.read(CurrentIdentity.email(a), id);
     return ResponseEntity.noContent().build();
   }
+
+  @GetMapping("/me/notifications/unread")
+  public java.util.Map<String, Long> unread(Authentication a) { return java.util.Map.of("count", notifications.unread(CurrentIdentity.email(a))); }
+
+  @GetMapping("/me/notification-preferences")
+  public NotificationService.Preferences preferences(Authentication a) { return notifications.preferences(CurrentIdentity.email(a)); }
+
+  @PutMapping("/me/notification-preferences")
+  public NotificationService.Preferences preferences(@Valid @RequestBody PreferenceInput input, Authentication a) { return notifications.updatePreferences(CurrentIdentity.email(a), input.categories(), input.keywords()); }
 }

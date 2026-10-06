@@ -8,4 +8,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   Page<Notification> findByUserIdOrderByCreatedAtDesc(Long id, Pageable page);
 
   long countByUserIdAndReadAtIsNull(Long id);
+
+  boolean existsByUserIdAndDedupeKey(Long userId, String dedupeKey);
 }

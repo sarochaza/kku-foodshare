@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1")
 public class ModerationController {
-  public record ReportInput(@Min(1) long postId, @NotBlank @Size(max = 1000) String reason) {}
+  public record ReportInput(@Min(1) long postId, Long commentId, @NotBlank @Size(max = 1000) String reason) {}
 
   public record Resolve(@NotBlank @Size(max = 1000) String reason, boolean closePost) {}
 
@@ -28,7 +28,7 @@ public class ModerationController {
   public ResponseEntity<ModerationService.ReportView> report(
       @Valid @RequestBody ReportInput r, Authentication a) {
     return ResponseEntity.status(201)
-        .body(service.report(CurrentIdentity.email(a), r.postId(), r.reason()));
+        .body(service.report(CurrentIdentity.email(a), r.postId(), r.commentId(), r.reason()));
   }
 
   @GetMapping("/admin/reports")

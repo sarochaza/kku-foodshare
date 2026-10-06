@@ -7,6 +7,7 @@ public interface ModerationService {
   record ReportView(
       Long id,
       Long postId,
+      Long commentId,
       String title,
       String reporter,
       String reason,
@@ -16,7 +17,7 @@ public interface ModerationService {
 
   record UserView(Long id, String name, String email, boolean active, String role) {}
 
-  ReportView report(String email, long postId, String reason);
+  ReportView report(String email, long postId, Long commentId, String reason);
 
   PageView<ReportView> reports(String email, int page);
 

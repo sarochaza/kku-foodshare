@@ -19,6 +19,7 @@ public class ModerationServiceImpl implements ModerationService {
   private final AuditEventRepository audits;
   private final FoodPostRepository posts;
   private final UserRepository users;
+  private final PostCommentRepository comments;
   private final MemberService members;
   private final ApplicationEventPublisher events;
   private final Clock clock;
@@ -27,7 +28,7 @@ public class ModerationServiceImpl implements ModerationService {
       ReportRepository reports,
       AuditEventRepository audits,
       FoodPostRepository posts,
-      UserRepository users,
+      UserRepository users, PostCommentRepository comments,
       MemberService members,
       ApplicationEventPublisher events,
       Clock clock) {
@@ -35,6 +36,7 @@ public class ModerationServiceImpl implements ModerationService {
     this.audits = audits;
     this.posts = posts;
     this.users = users;
+    this.comments = comments;
     this.members = members;
     this.events = events;
     this.clock = clock;
@@ -44,6 +46,7 @@ public class ModerationServiceImpl implements ModerationService {
     return new ReportView(
         r.id,
         r.post.getId(),
+        r.commentId,
         r.post.getTitle(),
         r.reporter.getDisplayName(),
         r.reason,
@@ -57,15 +60,21 @@ public class ModerationServiceImpl implements ModerationService {
       throw new Problem(400, "กรุณาระบุเหตุผลไม่เกิน 1,000 ตัวอักษร");
   }
 
-  public ReportView report(String email, long id, String reason) {
+  public ReportView report(String email, long id, Long commentId, String reason) {
     User u = members.require(email);
     reason(reason);
     FoodPost p = posts.lockById(id).orElseThrow(Problem::missing);
     if (p.getStatus() == FoodPostStatus.CANCELLED) throw Problem.missing();
-    if (reports.existsByPostIdAndReporterIdAndStatus(id, u.getId(), "OPEN"))
+    if (commentId == null && reports.existsByPostIdAndReporterIdAndStatus(id, u.getId(), "OPEN"))
       throw Problem.conflict("คุณรายงานรายการนี้แล้ว ผู้ดูแลกำลังตรวจสอบ");
+    if (commentId != null) {
+      var comment = comments.findByIdAndDeletedAtIsNull(commentId).orElseThrow(Problem::missing);
+      if (!comment.post.getId().equals(id)) throw Problem.missing();
+      if (reports.existsByCommentIdAndReporterIdAndStatus(commentId, u.getId(), "OPEN")) throw Problem.conflict("คุณรายงานความคิดเห็นนี้แล้ว ผู้ดูแลกำลังตรวจสอบ");
+    }
     Report r = new Report();
     r.post = p;
+    r.commentId = commentId;
     r.reporter = u;
     r.reason = reason.trim();
     r.status = "OPEN";
