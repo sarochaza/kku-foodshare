@@ -33,6 +33,7 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   private final ImageStorage storage;
   private final ReservationRepository reservations;
   private final ReservationService reservationService;
+  private final NotificationService notifications;
 
   public FoodCatalogServiceImpl(
       FoodPostRepository posts,
@@ -44,7 +45,7 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
       FoodPostImageRepository images,
       ImageStorage storage,
       ReservationRepository reservations,
-      ReservationService reservationService) {
+      ReservationService reservationService, NotificationService notifications) {
     this.posts = posts;
     this.members = members;
     this.mapper = mapper;
@@ -55,6 +56,7 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
     this.storage = storage;
     this.reservations = reservations;
     this.reservationService = reservationService;
+    this.notifications = notifications;
   }
 
   private LocalDateTime now() {
@@ -95,6 +97,7 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
     p.setStatus(FoodPostStatus.AVAILABLE);
     p.setCreatedAt(now());
     posts.saveAndFlush(p);
+    notifications.notifyInterested(p);
     return mapper.map(p, email, null, null);
   }
 
@@ -165,20 +168,30 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   public PostView image(String email, long id, MultipartFile file) {
     FoodPost p = owned(email, id);
     if (p.getStatus() == FoodPostStatus.CANCELLED) throw Problem.conflict("โพสต์นี้ปิดแล้ว");
+    if (images.countByPostId(id) >= 5) throw Problem.conflict("เพิ่มรูปได้สูงสุด 5 รูปต่อโพสต์");
     String name = storage.store(file);
-    FoodPostImage i = images.findByPostId(id).orElseGet(FoodPostImage::new);
-    String old = i.filename;
+    FoodPostImage i = new FoodPostImage();
     i.post = p;
     i.filename = name;
+    i.sortOrder = (int) images.countByPostId(id);
     images.save(i);
     TransactionSynchronizationManager.registerSynchronization(
         new TransactionSynchronization() {
           public void afterCompletion(int status) {
-            if (status == STATUS_COMMITTED) storage.remove(old);
-            else storage.remove(name);
+            if (status != STATUS_COMMITTED) storage.remove(name);
           }
         });
     return mapper.map(p, email, null, null);
+  }
+
+  public void removeImage(String email, long id, long imageId) {
+    owned(email, id);
+    FoodPostImage image = images.findByIdAndPostId(imageId, id).orElseThrow(Problem::missing);
+    String filename = image.filename;
+    images.delete(image);
+    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+      public void afterCompletion(int status) { if (status == STATUS_COMMITTED) storage.remove(filename); }
+    });
   }
 
   @Transactional(readOnly = true)

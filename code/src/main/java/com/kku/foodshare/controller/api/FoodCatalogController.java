@@ -77,6 +77,12 @@ public class FoodCatalogController {
     return service.image(CurrentIdentity.email(a), id, file);
   }
 
+  @DeleteMapping("/food-posts/{id}/images/{imageId}")
+  public ResponseEntity<Void> removeImage(@PathVariable long id, @PathVariable long imageId, Authentication a) {
+    service.removeImage(CurrentIdentity.email(a), id, imageId);
+    return ResponseEntity.noContent().build();
+  }
+
   @GetMapping("/me/posts")
   public PageView<PostView> mine(@RequestParam(defaultValue = "0") int page, Authentication a) {
     return service.mine(CurrentIdentity.email(a), page);

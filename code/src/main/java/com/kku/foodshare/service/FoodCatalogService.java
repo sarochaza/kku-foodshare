@@ -18,6 +18,8 @@ public interface FoodCatalogService {
 
   PostView image(String email, long id, MultipartFile file);
 
+  void removeImage(String email, long id, long imageId);
+
   PageView<PostView> search(
       String text,
       String category,

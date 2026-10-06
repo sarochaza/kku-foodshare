@@ -2,6 +2,7 @@ package com.kku.foodshare.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record PostView(
     Long id,
@@ -23,6 +24,9 @@ public record PostView(
     Long ownerId,
     String allergens,
     String imageUrl,
+    List<PostImageView> images,
+    int commentCount,
+    LocalDateTime createdAt,
     boolean mine,
     Double distanceKm,
     int offlineQuantity,

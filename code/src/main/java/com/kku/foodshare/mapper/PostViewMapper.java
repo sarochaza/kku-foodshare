@@ -3,16 +3,20 @@ package com.kku.foodshare.mapper;
 import com.kku.foodshare.domain.entity.*;
 import com.kku.foodshare.dto.response.PostView;
 import com.kku.foodshare.repository.FoodPostImageRepository;
+import com.kku.foodshare.repository.PostCommentRepository;
 import java.time.*;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostViewMapper {
   private final FoodPostImageRepository images;
+  private final PostCommentRepository comments;
   private final Clock clock;
 
-  public PostViewMapper(FoodPostImageRepository images, Clock clock) {
+  public PostViewMapper(FoodPostImageRepository images, PostCommentRepository comments, Clock clock) {
     this.images = images;
+    this.comments = comments;
     this.clock = clock;
   }
 
@@ -26,7 +30,9 @@ public class PostViewMapper {
         state = p.getCollectedQuantity() + p.getOfflineQuantity() == p.getQuantity() ? "CLAIMED" : "FULL";
       else if (p.getAvailableFrom().isAfter(LocalDateTime.now(clock))) state = "SCHEDULED";
     }
-    String image = images.findByPostId(p.getId()).map(i -> "/media/" + i.filename).orElse(null);
+    List<com.kku.foodshare.dto.response.PostImageView> gallery = images.findAllByPostIdOrderBySortOrderAscIdAsc(p.getId()).stream()
+        .map(i -> new com.kku.foodshare.dto.response.PostImageView(i.id, "/media/" + i.filename, i.sortOrder)).toList();
+    String image = gallery.isEmpty() ? null : gallery.get(0).url();
     Double distance = null;
     if (lat != null && lng != null) {
       double a =
@@ -56,6 +62,9 @@ public class PostViewMapper {
         p.getOwner().getId(),
         p.getAllergens(),
         image,
+        gallery,
+        (int) comments.countByPostIdAndDeletedAtIsNull(p.getId()),
+        p.getCreatedAt(),
         email != null && p.getOwner().getEmail().equalsIgnoreCase(email),
         distance,
         p.getOfflineQuantity(),
