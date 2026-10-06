@@ -4,6 +4,8 @@ import com.kku.foodshare.domain.entity.*;
 import com.kku.foodshare.dto.response.PostView;
 import com.kku.foodshare.repository.FoodPostImageRepository;
 import com.kku.foodshare.repository.PostCommentRepository;
+import com.kku.foodshare.repository.SavedPostRepository;
+import com.kku.foodshare.repository.UserRepository;
 import java.time.*;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -12,11 +14,15 @@ import org.springframework.stereotype.Component;
 public class PostViewMapper {
   private final FoodPostImageRepository images;
   private final PostCommentRepository comments;
+  private final SavedPostRepository savedPosts;
+  private final UserRepository users;
   private final Clock clock;
 
-  public PostViewMapper(FoodPostImageRepository images, PostCommentRepository comments, Clock clock) {
+  public PostViewMapper(FoodPostImageRepository images, PostCommentRepository comments, SavedPostRepository savedPosts, UserRepository users, Clock clock) {
     this.images = images;
     this.comments = comments;
+    this.savedPosts = savedPosts;
+    this.users = users;
     this.clock = clock;
   }
 
@@ -34,6 +40,8 @@ public class PostViewMapper {
         .map(i -> new com.kku.foodshare.dto.response.PostImageView(i.id, "/media/" + i.filename, i.sortOrder)).toList();
     String image = gallery.isEmpty() ? null : gallery.get(0).url();
     Double distance = null;
+    boolean saved = email != null && users.findByEmailIgnoreCase(email)
+        .map(user -> savedPosts.existsByUserIdAndPostId(user.getId(), p.getId())).orElse(false);
     if (lat != null && lng != null) {
       double a =
           Math.pow(Math.sin(Math.toRadians(lat - p.getLatitude().doubleValue()) / 2), 2)
@@ -68,6 +76,7 @@ public class PostViewMapper {
         email != null && p.getOwner().getEmail().equalsIgnoreCase(email),
         distance,
         p.getOfflineQuantity(),
-        p.getMaxPerPerson());
+        p.getMaxPerPerson(),
+        saved);
   }
 }

@@ -40,8 +40,9 @@ public class FoodCatalogController {
       @RequestParam(defaultValue = "") String q,
       @RequestParam(defaultValue = "") String category,
       @RequestParam(defaultValue = "false") boolean now,
+      @RequestParam(defaultValue = "") String ownership,
       Authentication a) {
-    return service.search(q, category, "expiry", null, null, now, 0, 200, CurrentIdentity.email(a), "");
+    return service.search(q, category, "expiry", null, null, now, 0, 200, CurrentIdentity.email(a), ownership);
   }
 
   @GetMapping("/food-posts/{id}")

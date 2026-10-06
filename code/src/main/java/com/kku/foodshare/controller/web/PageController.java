@@ -56,6 +56,11 @@ public class PageController {
     return "reservations";
   }
 
+  @GetMapping("/saved")
+  public String saved() {
+    return "saved";
+  }
+
   @GetMapping("/notifications")
   public String notifications() {
     return "notifications";

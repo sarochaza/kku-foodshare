@@ -30,4 +30,5 @@ public record PostView(
     boolean mine,
     Double distanceKm,
     int offlineQuantity,
-    Integer maxPerPerson) {}
+    Integer maxPerPerson,
+    boolean saved) {}
