@@ -35,6 +35,9 @@ public interface FoodPostRepository
   org.springframework.data.domain.Page<FoodPost> findByOwnerIdOrderByCreatedAtDesc(
       Long id, org.springframework.data.domain.Pageable pageable);
 
+  org.springframework.data.domain.Page<FoodPost> findByOwnerIdAndStatusNotOrderByCreatedAtDesc(
+      Long id, FoodPostStatus status, org.springframework.data.domain.Pageable pageable);
+
   java.util.List<FoodPost> findByAvailableUntilBeforeAndStatusIn(
       java.time.LocalDateTime now, java.util.Collection<FoodPostStatus> statuses);
 

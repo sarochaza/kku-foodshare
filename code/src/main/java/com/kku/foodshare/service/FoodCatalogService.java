@@ -29,9 +29,12 @@ public interface FoodCatalogService {
       boolean now,
       int page,
       int size,
-      String email);
+      String email,
+      String ownership);
 
   PageView<PostView> mine(String email, int page);
+
+  PageView<PostView> ownerPosts(long ownerId, String email, int page);
 
   java.util.Map<String, Long> managementSummary(String email);
 

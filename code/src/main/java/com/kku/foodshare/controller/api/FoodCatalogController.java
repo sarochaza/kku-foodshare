@@ -30,8 +30,9 @@ public class FoodCatalogController {
       @RequestParam(defaultValue = "false") boolean now,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "12") int size,
+      @RequestParam(defaultValue = "") String ownership,
       Authentication a) {
-    return service.search(q, category, sort, lat, lng, now, page, size, CurrentIdentity.email(a));
+    return service.search(q, category, sort, lat, lng, now, page, size, CurrentIdentity.email(a), ownership);
   }
 
   @GetMapping("/food-posts/map")
@@ -40,7 +41,7 @@ public class FoodCatalogController {
       @RequestParam(defaultValue = "") String category,
       @RequestParam(defaultValue = "false") boolean now,
       Authentication a) {
-    return service.search(q, category, "expiry", null, null, now, 0, 200, CurrentIdentity.email(a));
+    return service.search(q, category, "expiry", null, null, now, 0, 200, CurrentIdentity.email(a), "");
   }
 
   @GetMapping("/food-posts/{id}")
@@ -86,6 +87,11 @@ public class FoodCatalogController {
   @GetMapping("/me/posts")
   public PageView<PostView> mine(@RequestParam(defaultValue = "0") int page, Authentication a) {
     return service.mine(CurrentIdentity.email(a), page);
+  }
+
+  @GetMapping("/members/{ownerId}/posts")
+  public PageView<PostView> ownerPosts(@PathVariable long ownerId, @RequestParam(defaultValue = "0") int page, Authentication a) {
+    return service.ownerPosts(ownerId, CurrentIdentity.email(a), page);
   }
 
   @GetMapping("/me/posts/management-summary")

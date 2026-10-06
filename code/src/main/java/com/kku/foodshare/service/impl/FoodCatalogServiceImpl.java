@@ -204,6 +204,12 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   }
 
   @Transactional(readOnly = true)
+  public PageView<PostView> ownerPosts(long ownerId, String email, int page) {
+    return PageView.of(posts.findByOwnerIdAndStatusNotOrderByCreatedAtDesc(ownerId, FoodPostStatus.CANCELLED, PageRequest.of(Math.max(0, page), 12))
+        .map(p -> mapper.map(p, email, null, null)));
+  }
+
+  @Transactional(readOnly = true)
   public Map<String, Long> managementSummary(String email) {
     User user = members.require(email);
     var owned = posts.findByOwnerIdOrderByCreatedAtDesc(user.getId());
@@ -232,7 +238,8 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
       boolean availableNow,
       int page,
       int size,
-      String email) {
+      String email,
+      String ownership) {
     if (page < 0 || page > 10000 || size < 1 || size > 200)
       throw new Problem(400, "ขนาดหน้าข้อมูลไม่ถูกต้อง");
     if ((lat == null) != (lng == null)
@@ -249,6 +256,10 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
             .filter(s -> s.key().equals(sort))
             .findFirst()
             .orElseThrow(() -> new Problem(400, "รูปแบบการเรียงไม่ถูกต้อง"));
+    if (ownership == null) ownership = "";
+    if (!Set.of("", "mine", "others").contains(ownership)) throw new Problem(400, "ตัวกรองเจ้าของโพสต์ไม่ถูกต้อง");
+    User ownerFilter = ownership.equals("mine") ? members.require(email) : email == null ? null : members.require(email);
+    String ownerScope = ownership;
     Specification<FoodPost> spec =
         (r, q, b) -> {
           var list = new ArrayList<jakarta.persistence.criteria.Predicate>();
@@ -262,6 +273,8 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
           list.add(b.isTrue(r.get("owner").get("active")));
           if (availableNow) list.add(b.lessThanOrEqualTo(r.get("availableFrom"), now()));
           if (cat != null) list.add(b.equal(r.get("category"), cat));
+          if (ownerScope.equals("mine")) list.add(b.equal(r.get("owner").get("id"), ownerFilter.getId()));
+          if (ownerScope.equals("others") && ownerFilter != null) list.add(b.notEqual(r.get("owner").get("id"), ownerFilter.getId()));
           if (text != null && !text.isBlank()) {
             String pattern =
                 "%"
