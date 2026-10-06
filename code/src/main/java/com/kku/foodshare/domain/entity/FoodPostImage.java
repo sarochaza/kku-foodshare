@@ -10,9 +10,12 @@ public class FoodPostImage {
   public Long id;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "post_id", nullable = false, unique = true)
+  @JoinColumn(name = "post_id", nullable = false)
   public FoodPost post;
 
   @Column(nullable = false, length = 100)
   public String filename;
+
+  @Column(name = "sort_order", nullable = false)
+  public int sortOrder;
 }

@@ -14,6 +14,9 @@ public class Report {
   @JoinColumn(name = "post_id", nullable = false)
   public FoodPost post;
 
+  @Column(name = "comment_id")
+  public Long commentId;
+
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "reporter_id", nullable = false)
   public User reporter;

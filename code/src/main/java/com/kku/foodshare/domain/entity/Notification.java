@@ -27,4 +27,13 @@ public class Notification {
   public LocalDateTime createdAt;
 
   public LocalDateTime readAt;
+
+  @Column(name = "dedupe_key", length = 255)
+  public String dedupeKey;
+
+  @Column(name = "actor_user_id")
+  public Long actorUserId;
+
+  @Column(name = "actor_name", length = 120)
+  public String actorName;
 }
