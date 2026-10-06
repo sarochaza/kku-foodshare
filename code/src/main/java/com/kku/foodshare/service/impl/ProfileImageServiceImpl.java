@@ -72,6 +72,14 @@ public class ProfileImageServiceImpl implements ProfileImageService {
         .map(image -> new ProfileImageResponse(image.getContentType(), image.getImageData()));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<ProfileImageResponse> getImageByUserId(long userId) {
+    return imageRepository
+        .findById(userId)
+        .map(image -> new ProfileImageResponse(image.getContentType(), image.getImageData()));
+  }
+
   private String detectImageType(byte[] bytes) {
     try (ImageInputStream stream =
         ImageIO.createImageInputStream(new ByteArrayInputStream(bytes))) {

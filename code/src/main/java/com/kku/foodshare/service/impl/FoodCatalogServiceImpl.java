@@ -31,6 +31,8 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   private final ApplicationEventPublisher events;
   private final FoodPostImageRepository images;
   private final ImageStorage storage;
+  private final ReservationRepository reservations;
+  private final ReservationService reservationService;
 
   public FoodCatalogServiceImpl(
       FoodPostRepository posts,
@@ -40,7 +42,9 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
       List<FoodDiscoveryStrategy> strategies,
       ApplicationEventPublisher events,
       FoodPostImageRepository images,
-      ImageStorage storage) {
+      ImageStorage storage,
+      ReservationRepository reservations,
+      ReservationService reservationService) {
     this.posts = posts;
     this.members = members;
     this.mapper = mapper;
@@ -49,6 +53,8 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
     this.events = events;
     this.images = images;
     this.storage = storage;
+    this.reservations = reservations;
+    this.reservationService = reservationService;
   }
 
   private LocalDateTime now() {
@@ -62,6 +68,9 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
     p.setDescription(r.description().trim());
     p.setCategory(r.category());
     p.setQuantity(r.quantity());
+    if (r.maxPerPerson() != null && r.maxPerPerson() > r.quantity())
+      throw new Problem(400, "จำกัดต่อคนต้องไม่เกินจำนวนทั้งหมด");
+    p.setMaxPerPerson(r.maxPerPerson());
     p.setUnit(r.unit().trim());
     p.setPickupLocationName(r.pickupLocationName().trim());
     p.setLatitude(r.latitude());
@@ -93,8 +102,12 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
     FoodPost p = owned(email, id);
     if (p.getStatus() == FoodPostStatus.CANCELLED || !p.getAvailableUntil().isAfter(now()))
       throw Problem.conflict("โพสต์นี้ปิดรับแล้ว");
-    if (r.quantity() < p.getReservedQuantity() + p.getCollectedQuantity())
-      throw Problem.conflict("จำนวนต้องไม่น้อยกว่าจำนวนที่จองและรับไปแล้ว");
+    if (r.quantity() < p.getReservedQuantity() + p.getCollectedQuantity() + p.getOfflineQuantity())
+      throw Problem.conflict("จำนวนต้องไม่น้อยกว่ายอดจอง รับผ่านเว็บ และแจกนอกเว็บรวมกัน");
+    if (r.maxPerPerson() != null
+        && r.maxPerPerson()
+            < reservations.maxQuantityByPostIdAndStatus(id, ReservationStatus.RESERVED))
+      throw Problem.conflict("จำกัดต่อคนต่ำกว่าจำนวนที่ผู้จองไว้ไม่ได้");
     if (p.getReservedQuantity() > 0
         && (!p.getAvailableFrom().equals(r.availableFrom())
             || !p.getAvailableUntil().equals(r.availableUntil())
@@ -104,7 +117,30 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
       throw Problem.conflict(
           "มีผู้จองแล้ว หากต้องเปลี่ยนสถานที่หรือเวลา กรุณาปิดโพสต์และสร้างใหม่");
     fields(p, r);
-    if (p.getQuantity() > p.getCollectedQuantity()) p.setStatus(FoodPostStatus.AVAILABLE);
+    p.setStatus(p.getQuantity() > p.getCollectedQuantity() + p.getOfflineQuantity()
+        ? FoodPostStatus.AVAILABLE : FoodPostStatus.CLAIMED);
+    return mapper.map(p, email, null, null);
+  }
+
+  public PostView extend(String email, long id, ExtendPostRequest r) {
+    User owner = members.require(email);
+    FoodPost before = posts.findById(id).orElseThrow(Problem::missing);
+    if (!before.getOwner().getId().equals(owner.getId())) throw Problem.forbidden();
+    if (before.getStatus() == FoodPostStatus.CANCELLED)
+      throw Problem.conflict("โพสต์นี้ถูกปิดแล้ว");
+    if (before.getAvailableUntil().isAfter(now()))
+      throw Problem.conflict("โพสต์นี้ยังไม่หมดเวลารับ");
+    if (!r.availableUntil().isAfter(now()))
+      throw new Problem(400, "เวลาใหม่ต้องอยู่หลังเวลาปัจจุบัน");
+
+    // Expire any old reservations first, so they can never be revived with the new time.
+    reservationService.expire(id);
+    FoodPost p = posts.lockById(id).orElseThrow(Problem::missing);
+    if (p.getAvailableQuantity() < 1)
+      throw Problem.conflict("ไม่มีอาหารเหลือให้เปิดรับต่อ");
+    p.setAvailableUntil(r.availableUntil());
+    p.setStatus(FoodPostStatus.AVAILABLE);
+    p.setUpdatedAt(now());
     return mapper.map(p, email, null, null);
   }
 
@@ -155,6 +191,25 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   }
 
   @Transactional(readOnly = true)
+  public Map<String, Long> managementSummary(String email) {
+    User user = members.require(email);
+    var owned = posts.findByOwnerIdOrderByCreatedAtDesc(user.getId());
+    long open =
+        owned.stream()
+            .map(post -> mapper.map(post, email, null, null).status())
+            .filter(state -> Set.of("AVAILABLE", "LOW_STOCK", "SCHEDULED", "FULL").contains(state))
+            .count();
+    long waiting = owned.stream().mapToLong(FoodPost::getReservedQuantity).sum();
+    long collected = owned.stream().mapToLong(FoodPost::getCollectedQuantity).sum();
+    return Map.of(
+        "totalPosts", (long) owned.size(),
+        "openPosts", open,
+        "waitingCount", waiting,
+        "collectedCount", collected,
+        "offlineCount", owned.stream().mapToLong(FoodPost::getOfflineQuantity).sum());
+  }
+
+  @Transactional(readOnly = true)
   public PageView<PostView> search(
       String text,
       String category,
@@ -189,7 +244,8 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
           list.add(
               b.gt(
                   r.<Integer>get("quantity"),
-                  b.sum(r.<Integer>get("reservedQuantity"), r.<Integer>get("collectedQuantity"))));
+                  b.sum(b.sum(r.<Integer>get("reservedQuantity"), r.<Integer>get("collectedQuantity")),
+                      r.<Integer>get("offlineQuantity"))));
           list.add(b.isTrue(r.get("owner").get("active")));
           if (availableNow) list.add(b.lessThanOrEqualTo(r.get("availableFrom"), now()));
           if (cat != null) list.add(b.equal(r.get("category"), cat));

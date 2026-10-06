@@ -16,4 +16,5 @@ public record FoodPostRequest(
     @NotNull @DecimalMin("-180") @DecimalMax("180") BigDecimal longitude,
     @NotNull LocalDateTime availableFrom,
     @NotNull LocalDateTime availableUntil,
-    @Size(max = 500) String allergens) {}
+    @Size(max = 500) String allergens,
+    @Min(1) @Max(10000) Integer maxPerPerson) {}

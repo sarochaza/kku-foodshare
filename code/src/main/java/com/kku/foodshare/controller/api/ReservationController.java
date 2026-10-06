@@ -40,6 +40,12 @@ public class ReservationController {
     return service.forPost(CurrentIdentity.email(a), id);
   }
 
+  @GetMapping("/food-posts/{id}/my-reservation")
+  public ResponseEntity<ReservationView> mineForPost(@PathVariable long id, Authentication a) {
+    var result = service.mineForPost(CurrentIdentity.email(a), id);
+    return result == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
+  }
+
   @GetMapping("/reservations/{id}")
   public ReservationView get(@PathVariable long id, Authentication a) {
     return service.get(CurrentIdentity.email(a), id);

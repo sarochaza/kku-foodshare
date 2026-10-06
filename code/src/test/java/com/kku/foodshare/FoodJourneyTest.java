@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.kku.foodshare.domain.entity.User;
+import com.kku.foodshare.domain.entity.FoodPostStatus;
+import com.kku.foodshare.repository.FoodPostRepository;
 import com.kku.foodshare.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class FoodJourneyTest {
   @Autowired MockMvc mvc;
   @Autowired UserRepository users;
+  @Autowired FoodPostRepository posts;
 
   @BeforeEach
   void accounts() {
@@ -105,6 +108,80 @@ class FoodJourneyTest {
         .getContentAsString();
   }
 
+  String cappedPost(int maximum) {
+    return validPost().replace("\"allergens\":\"ไข่\"", "\"allergens\":\"ไข่\",\"maxPerPerson\":" + maximum);
+  }
+
+  void expirePost(long id) {
+    var post = posts.findById(id).orElseThrow();
+    post.setAvailableUntil(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")).minusMinutes(2));
+    post.setStatus(FoodPostStatus.EXPIRED);
+    posts.saveAndFlush(post);
+  }
+
+  @Test
+  void ownerCanSetPerPersonLimitAndReservationsCannotExceedIt() throws Exception {
+    String created =
+        mvc.perform(post("/api/v1/food-posts").with(user("owner@test.local")).with(csrf())
+                .contentType("application/json").content(cappedPost(2)))
+            .andExpect(status().isCreated()).andExpect(jsonPath("maxPerPerson").value(2))
+            .andReturn().getResponse().getContentAsString();
+    long id = ((Number) com.jayway.jsonpath.JsonPath.read(created, "$.id")).longValue();
+    String booking = reserve(id, "receiver@test.local", 2, java.util.UUID.randomUUID().toString());
+    long reservationId = ((Number) com.jayway.jsonpath.JsonPath.read(booking, "$.id")).longValue();
+    mvc.perform(put("/api/v1/reservations/" + reservationId).with(user("receiver@test.local")).with(csrf())
+            .contentType("application/json").content("{\"quantity\":3}"))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("message").value(org.hamcrest.Matchers.containsString("2")));
+  }
+
+  @Test
+  void invalidOrUnfairPerPersonLimitIsRejected() throws Exception {
+    mvc.perform(post("/api/v1/food-posts").with(user("owner@test.local")).with(csrf())
+            .contentType("application/json").content(cappedPost(6)))
+        .andExpect(status().isBadRequest());
+    long id =
+        ((Number) com.jayway.jsonpath.JsonPath.read(
+                mvc.perform(post("/api/v1/food-posts").with(user("owner@test.local")).with(csrf())
+                        .contentType("application/json").content(cappedPost(4)))
+                    .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.id"))
+            .longValue();
+    reserve(id, "receiver@test.local", 3, java.util.UUID.randomUUID().toString());
+    mvc.perform(put("/api/v1/food-posts/" + id).with(user("owner@test.local")).with(csrf())
+            .contentType("application/json").content(cappedPost(2)))
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void ownerCanExtendAnExpiredPostWithFoodRemaining() throws Exception {
+    long id = createPost();
+    expirePost(id);
+    String until = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")).plusHours(2).toString();
+    mvc.perform(post("/api/v1/food-posts/" + id + "/extend").with(user("owner@test.local")).with(csrf())
+            .contentType("application/json").content("{\"availableUntil\":\"" + until + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("status").value("AVAILABLE"))
+        .andExpect(jsonPath("availableUntil").value(until));
+  }
+
+  @Test
+  void onlyOwnerCanExtendAndLiveOrEmptyPostCannotBeExtended() throws Exception {
+    long id = createPost();
+    String until = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")).plusHours(2).toString();
+    mvc.perform(post("/api/v1/food-posts/" + id + "/extend").with(user("receiver@test.local")).with(csrf())
+            .contentType("application/json").content("{\"availableUntil\":\"" + until + "\"}"))
+        .andExpect(status().isForbidden());
+    mvc.perform(post("/api/v1/food-posts/" + id + "/extend").with(user("owner@test.local")).with(csrf())
+            .contentType("application/json").content("{\"availableUntil\":\"" + until + "\"}"))
+        .andExpect(status().isConflict());
+    expirePost(id);
+    var post = posts.findById(id).orElseThrow();
+    post.setOfflineQuantity(post.getQuantity());
+    posts.saveAndFlush(post);
+    mvc.perform(post("/api/v1/food-posts/" + id + "/extend").with(user("owner@test.local")).with(csrf())
+            .contentType("application/json").content("{\"availableUntil\":\"" + until + "\"}"))
+        .andExpect(status().isConflict());
+  }
+
   @Test
   void cancellingTwiceRestoresStockOnlyOnce() throws Exception {
     long id = createPost();
@@ -159,6 +236,66 @@ class FoodJourneyTest {
     mvc.perform(get("/api/v1/food-posts/" + id))
         .andExpect(jsonPath("collectedQuantity").value(2))
         .andExpect(jsonPath("availableQuantity").value(3));
+  }
+
+  @Test
+  void ownerCanSeeReservationMemberPhotoButStrangerCannot() throws Exception {
+    long postId = createPost();
+    String reservation =
+        reserve(postId, "receiver@test.local", 1, java.util.UUID.randomUUID().toString());
+    long reservationId =
+        ((Number) com.jayway.jsonpath.JsonPath.read(reservation, "$.id")).longValue();
+    var bytes = new java.io.ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(
+        new java.awt.image.BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_RGB),
+        "png",
+        bytes);
+    var photo =
+        new org.springframework.mock.web.MockMultipartFile(
+            "photo", "profile.png", "image/png", bytes.toByteArray());
+    mvc.perform(
+            multipart("/account/photo")
+                .file(photo)
+                .with(user("receiver@test.local"))
+                .with(csrf()))
+        .andExpect(status().is3xxRedirection());
+
+    mvc.perform(
+            get("/api/v1/reservations/" + reservationId + "/member-photo")
+                .with(user("owner@test.local")))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType("image/png"));
+
+    var stranger = new User();
+    stranger.setEmail(java.util.UUID.randomUUID() + "@test.local");
+    stranger.setPassword("unused");
+    stranger.setDisplayName("stranger");
+    users.save(stranger);
+    mvc.perform(
+            get("/api/v1/reservations/" + reservationId + "/member-photo")
+                .with(user(stranger.getEmail())))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void signedInOwnerCanDecodeQrCameraFrame() throws Exception {
+    var matrix =
+        new com.google.zxing.qrcode.QRCodeWriter()
+            .encode("FS1:42:001234", com.google.zxing.BarcodeFormat.QR_CODE, 320, 320);
+    var bytes = new java.io.ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(
+        com.google.zxing.client.j2se.MatrixToImageWriter.toBufferedImage(matrix), "png", bytes);
+    var frame =
+        new org.springframework.mock.web.MockMultipartFile(
+            "frame", "qr.png", "image/png", bytes.toByteArray());
+
+    mvc.perform(
+            multipart("/api/v1/pickup/scan")
+                .file(frame)
+                .with(user("owner@test.local"))
+                .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("value").value("FS1:42:001234"));
   }
 
   @Test
@@ -343,4 +480,115 @@ class FoodJourneyTest {
     mvc.perform(get("/api/v1/me/reservations").with(user(target.getEmail())))
         .andExpect(status().isForbidden());
   }
+  String stock(long id) throws Exception {
+    return mvc.perform(get("/api/v1/food-posts/" + id + "/stock").with(user("owner@test.local")))
+        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+  }
+
+  org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder stockChange(
+      long id, String snapshot, String action, int amount) {
+    long version = ((Number) com.jayway.jsonpath.JsonPath.read(snapshot, "$.version")).longValue();
+    return post("/api/v1/food-posts/" + id + "/stock")
+        .with(user("owner@test.local")).with(csrf()).contentType("application/json")
+        .content("{\"action\":\"" + action + "\",\"amount\":" + amount + ",\"expectedVersion\":" + version + "}");
+  }
+
+  @Test
+  void activeBookingIsFoundAndEditedDirectlyEvenWhenFull() throws Exception {
+    long id = createPost();
+    mvc.perform(get("/api/v1/food-posts/" + id + "/my-reservation").with(user("receiver@test.local")))
+        .andExpect(status().isNoContent());
+    String json = reserve(id, "receiver@test.local", 5, java.util.UUID.randomUUID().toString());
+    long rid = ((Number) com.jayway.jsonpath.JsonPath.read(json, "$.id")).longValue();
+    mvc.perform(get("/api/v1/food-posts/" + id + "/my-reservation").with(user("receiver@test.local")))
+        .andExpect(status().isOk()).andExpect(jsonPath("id").value(rid))
+        .andExpect(jsonPath("pickupCode").value((String) com.jayway.jsonpath.JsonPath.read(json, "$.pickupCode")));
+    mvc.perform(get("/api/v1/food-posts/" + id + "/my-reservation").with(user("owner@test.local")))
+        .andExpect(status().isNoContent());
+    mvc.perform(put("/api/v1/reservations/" + rid).with(user("receiver@test.local")).with(csrf())
+        .contentType("application/json").content("{\"quantity\":3}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("id").value(rid)).andExpect(jsonPath("quantity").value(3));
+    mvc.perform(get("/api/v1/food-posts/" + id)).andExpect(jsonPath("availableQuantity").value(2));
+    mvc.perform(delete("/api/v1/reservations/" + rid).with(user("receiver@test.local")).with(csrf()))
+        .andExpect(status().isNoContent());
+    mvc.perform(get("/api/v1/food-posts/" + id + "/my-reservation").with(user("receiver@test.local")))
+        .andExpect(status().isNoContent());
+    mvc.perform(get("/api/v1/food-posts/" + id + "/my-reservation")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void offlineDistributionProtectsBookingsAndStillAllowsQrCollection() throws Exception {
+    long id = createPost();
+    String json = reserve(id, "receiver@test.local", 3, java.util.UUID.randomUUID().toString());
+    long rid = ((Number) com.jayway.jsonpath.JsonPath.read(json, "$.id")).longValue();
+    String snapshot = stock(id);
+    mvc.perform(stockChange(id, snapshot, "OFFLINE", 3)).andExpect(status().isConflict());
+    mvc.perform(stockChange(id, snapshot, "OFFLINE", 2)).andExpect(status().isOk())
+        .andExpect(jsonPath("availableQuantity").value(0)).andExpect(jsonPath("reservedQuantity").value(3));
+    mvc.perform(get("/api/v1/food-posts/" + id)).andExpect(jsonPath("status").value("FULL"))
+        .andExpect(jsonPath("offlineQuantity").value(2));
+    mvc.perform(post("/api/v1/reservations/" + rid + "/collection").with(user("owner@test.local")).with(csrf())
+        .contentType("application/json").content("{\"code\":\"" + com.jayway.jsonpath.JsonPath.read(json, "$.pickupCode") + "\"}"))
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/v1/food-posts/" + id)).andExpect(jsonPath("status").value("CLAIMED"))
+        .andExpect(jsonPath("collectedQuantity").value(3)).andExpect(jsonPath("offlineQuantity").value(2));
+    mvc.perform(stockChange(id, stock(id), "ADD", 1)).andExpect(status().isOk()).andExpect(jsonPath("availableQuantity").value(1));
+    mvc.perform(get("/api/v1/food-posts/" + id)).andExpect(jsonPath("status").value("AVAILABLE"));
+  }
+
+  @Test
+  void stockChangesAreOwnerOnlyVersionedAndOfflineCountCanBeCorrected() throws Exception {
+    long id = createPost();
+    String original = stock(id);
+    mvc.perform(get("/api/v1/food-posts/" + id + "/stock").with(user("receiver@test.local")))
+        .andExpect(status().isForbidden());
+    mvc.perform(stockChange(id, original, "OFFLINE", 2).with(user("receiver@test.local")))
+        .andExpect(status().isForbidden());
+    mvc.perform(stockChange(id, original, "OFFLINE", 2)).andExpect(status().isOk());
+    mvc.perform(stockChange(id, original, "OFFLINE", 2)).andExpect(status().isConflict());
+    mvc.perform(stockChange(id, stock(id), "UNDO_OFFLINE", 1)).andExpect(status().isOk())
+        .andExpect(jsonPath("offlineQuantity").value(1)).andExpect(jsonPath("availableQuantity").value(4));
+    mvc.perform(stockChange(id, stock(id), "UNDO_OFFLINE", 2)).andExpect(status().isConflict());
+    mvc.perform(stockChange(id, stock(id), "REMOVE", 4)).andExpect(status().isOk()).andExpect(jsonPath("quantity").value(1));
+    mvc.perform(stockChange(id, stock(id), "REMOVE", 1)).andExpect(status().isConflict());
+    mvc.perform(stockChange(id, stock(id), "ADD", 0)).andExpect(status().isBadRequest());
+    mvc.perform(delete("/api/v1/food-posts/" + id).with(user("owner@test.local")).with(csrf())).andExpect(status().isNoContent());
+    mvc.perform(stockChange(id, stock(id), "ADD", 1)).andExpect(status().isConflict());
+  }
+
+  @Test
+  void normalEditCannotForgetOfflineStockAndExhaustedPostLeavesDiscovery() throws Exception {
+    long id = createPost();
+    mvc.perform(stockChange(id, stock(id), "OFFLINE", 5)).andExpect(status().isOk());
+    mvc.perform(put("/api/v1/food-posts/" + id).with(user("owner@test.local")).with(csrf())
+        .contentType("application/json").content(validPost().replace("\"quantity\":5", "\"quantity\":4")))
+        .andExpect(status().isConflict());
+    String json = mvc.perform(get("/api/v1/food-posts?size=200&sort=expiry")).andExpect(status().isOk())
+        .andReturn().getResponse().getContentAsString();
+    java.util.List<Number> ids = com.jayway.jsonpath.JsonPath.read(json, "$.items[*].id");
+    org.junit.jupiter.api.Assertions.assertFalse(ids.stream().anyMatch(v -> v.longValue() == id));
+    mvc.perform(get("/api/v1/me/posts").with(user("owner@test.local"))).andExpect(status().isOk());
+  }
+
+  @Test
+  void concurrentOfflineAndReservationCannotUseTheSameLastFood() throws Exception {
+    long id = createPost();
+    String snapshot = stock(id);
+    var pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+    var latch = new java.util.concurrent.CountDownLatch(1);
+    try {
+      var offline = pool.submit(() -> { latch.await(); return mvc.perform(stockChange(id, snapshot, "OFFLINE", 5))
+          .andReturn().getResponse().getStatus(); });
+      var booking = pool.submit(() -> { latch.await(); return mvc.perform(post("/api/v1/food-posts/" + id + "/reservations")
+          .with(user("receiver@test.local")).with(csrf()).header("Idempotency-Key", java.util.UUID.randomUUID().toString())
+          .contentType("application/json").content("{\"quantity\":5}"))
+          .andReturn().getResponse().getStatus(); });
+      latch.countDown();
+      var statuses = new java.util.ArrayList<>(java.util.List.of(offline.get(20, java.util.concurrent.TimeUnit.SECONDS), booking.get(20, java.util.concurrent.TimeUnit.SECONDS)));
+      java.util.Collections.sort(statuses);
+      org.junit.jupiter.api.Assertions.assertTrue(statuses.equals(java.util.List.of(200,409)) || statuses.equals(java.util.List.of(201,409)));
+      mvc.perform(get("/api/v1/food-posts/" + id)).andExpect(jsonPath("availableQuantity").value(0));
+    } finally { pool.shutdownNow(); }
+  }
+
 }

@@ -25,9 +25,14 @@
                 class="desktop-break"
               />ไปด้วยกันในชุมชนมหาวิทยาลัยขอนแก่น
             </p>
+            <form class="home-search" id="home-search" action="/explore" method="get" role="search">
+              <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+              <input name="q" aria-label="ค้นหาอาหาร" placeholder="วันนี้อยากกินอะไร? ค้นหาอาหารหรือจุดรับ" />
+              <button type="submit" aria-label="ค้นหาอาหาร">ค้นหา <span aria-hidden="true">→</span></button>
+            </form>
             <div class="hero-buttons">
               <a href="/explore" class="btn btn-primary btn-lg"
-                >ค้นหาอาหารใกล้ฉัน
+                >สำรวจอาหารทั้งหมด
                 <svg class="icon" aria-hidden="true">
                   <use href="#i-arrow"></use></svg></a
               ><a href="/posts/new" class="btn btn-white btn-lg"
@@ -89,12 +94,66 @@
           </div>
         </div>
       </section>
+      <section id="home-discover" class="container home-discover" aria-labelledby="discover-title">
+        <div class="home-discovery-heading">
+          <div>
+            <span class="section-kicker">LIVE FOOD MAP</span>
+            <h2 id="discover-title">มื้อดี ๆ รอบตัวคุณ ตอนนี้</h2>
+            <p>เลือกหมวด ดูหมุดจริง แล้ววางแผนไปรับได้จากหน้าเดียว</p>
+          </div>
+          <span class="live-pill"><i aria-hidden="true"></i> อัปเดตจากรายการที่เปิดรับ</span>
+        </div>
+
+        <div class="home-discovery-toolbar">
+          <div id="home-category-filters" class="home-categories" aria-label="เลือกหมวดหมู่อาหาร">
+            <button type="button" class="home-category active" data-home-category="" aria-pressed="true"><span>✨</span> ทั้งหมด</button>
+            <button type="button" class="home-category" data-home-category="FOOD" aria-pressed="false"><span>🍱</span> อาหาร</button>
+            <button type="button" class="home-category" data-home-category="DRINK" aria-pressed="false"><span>🥤</span> เครื่องดื่ม</button>
+            <button type="button" class="home-category" data-home-category="SNACK" aria-pressed="false"><span>🥐</span> ของว่าง</button>
+            <label class="home-category home-now"><input id="home-available-now" type="checkbox" /> <span>⚡</span> รับได้ตอนนี้</label>
+          </div>
+          <label class="home-sort">เรียงตาม
+            <select id="home-sort" aria-label="เรียงรายการอาหาร">
+              <option value="expiry">หมดเวลารับก่อน</option>
+              <option value="latest">โพสต์ล่าสุด</option>
+              <option value="nearby">ใกล้ฉัน</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="home-map-intro"><h2>ดูตำแหน่งอาหารก่อนเลือกจอง</h2><p class="field-note">🍱 หมุดอาหาร · 🔵 ตำแหน่งของคุณ · เลือกหมุดแล้วเปิดรายละเอียดเพื่อเลือกเดินเท้าหรือขับรถ และตรวจเวลาไปรับ</p></div>
+        <div id="home-map" class="home-map-layout">
+          <div id="home-map-shell" class="home-map-shell">
+            <div id="home-live-map" class="home-live-map" role="region" aria-label="แผนที่หมุดอาหารในชุมชนมหาวิทยาลัยขอนแก่น"></div>
+            <button id="home-locate" class="home-locate" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-locate"></use></svg>
+              <span>ตำแหน่งของฉัน</span>
+            </button>
+            <div id="home-map-preview" class="home-map-preview" hidden aria-live="polite"></div>
+          </div>
+          <aside class="home-map-aside" aria-label="รายการอาหารบนแผนที่">
+            <div class="home-map-aside-head">
+              <div><span class="section-kicker">NEAR THE CAMPUS</span><h3>เลือกหมุดที่อยากแวะ</h3></div>
+              <span id="home-map-count" class="map-count">กำลังค้นหา…</span>
+            </div>
+            <p id="home-location-status" class="home-location-status">
+              <svg class="icon" aria-hidden="true"><use href="#i-pin"></use></svg>
+              แผนที่เริ่มจากพื้นที่ มข. กด “ตำแหน่งของฉัน” เพื่อดูระยะทาง
+            </p>
+            <div id="home-map-list" class="home-map-list" aria-live="polite">
+              <div class="loading-box">กำลังโหลดจุดแบ่งปัน…</div>
+            </div>
+            <a class="btn btn-soft full" href="/explore?view=map">เปิดแผนที่แบบเต็ม <svg class="icon" aria-hidden="true"><use href="#i-arrow"></use></svg></a>
+          </aside>
+        </div>
+        <a id="home-bookings-entry" class="home-bookings-entry" href="/reservations">ดูการจองของฉัน <span aria-hidden="true">→</span></a>
+      </section>
       <section class="container section">
         <div class="section-heading">
           <div>
             <span class="section-kicker">FRESH FROM OUR COMMUNITY</span>
-            <h2>มีอาหารดี ๆ รอแบ่งปัน</h2>
-            <p>ค้นหามื้ออร่อย แล้วนัดรับในเวลาที่สะดวก</p>
+            <h2 id="home-results-title">มีอาหารดี ๆ รอแบ่งปัน</h2>
+            <p id="home-results-copy">ค้นหามื้ออร่อย แล้วนัดรับในเวลาที่สะดวก</p>
           </div>
           <a href="/explore" class="text-link"
             >ดูอาหารทั้งหมด
@@ -174,5 +233,11 @@
       </section>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
+    <div id="home-guide" class="home-guide" hidden aria-live="polite">
+      <div class="guide-shade"></div><div class="guide-card" role="dialog" aria-label="แนะนำการใช้งาน">
+        <span id="guide-progress" class="guide-progress"></span><h2 id="guide-title"></h2><p id="guide-copy"></p>
+        <div class="guide-actions"><button type="button" id="guide-skip">ข้าม</button><button type="button" id="guide-back">ย้อนกลับ</button><button type="button" id="guide-next" class="btn btn-primary">ถัดไป</button></div>
+      </div>
+    </div>
   </body>
 </html>

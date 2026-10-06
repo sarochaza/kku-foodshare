@@ -59,6 +59,7 @@ public class ReservationServiceImpl implements ReservationService {
         r.quantity,
         state,
         r.member.getDisplayName(),
+        r.member.getId(),
         code,
         owner,
         r.createdAt);
@@ -86,6 +87,12 @@ public class ReservationServiceImpl implements ReservationService {
     if (q < 1 || q > 10000) throw new Problem(400, "จำนวนต้องอยู่ระหว่าง 1 ถึง 10,000");
   }
 
+  private void withinPerPersonLimit(FoodPost post, int quantity) {
+    Integer limit = post.getMaxPerPerson();
+    if (limit != null && quantity > limit)
+      throw Problem.conflict("โพสต์นี้จำกัดการจองไม่เกิน " + limit + " " + post.getUnit() + " ต่อคน");
+  }
+
   private void notice(User u, String title, String message, String href) {
     events.publishEvent(new ActivityNotice(u, title, message, href));
   }
@@ -105,6 +112,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
     if (p.getOwner().getId().equals(u.getId())) throw Problem.forbidden();
     open(p);
+    withinPerPersonLimit(p, quantity);
     if (repo.existsByPostIdAndMemberIdAndStatus(postId, u.getId(), ReservationStatus.RESERVED))
       throw Problem.conflict("คุณมีการจองรายการนี้แล้ว กรุณาแก้จำนวนในการจองเดิม");
     if (quantity > p.getAvailableQuantity())
@@ -140,6 +148,13 @@ public class ReservationServiceImpl implements ReservationService {
     return view(r, u);
   }
 
+  @Transactional(readOnly = true)
+  public ReservationView mineForPost(String email, long postId) {
+    User u = members.require(email);
+    return repo.findByPostIdAndMemberIdAndStatus(postId, u.getId(), ReservationStatus.RESERVED)
+        .map(r -> view(r, u)).orElse(null);
+  }
+
   public ReservationView changeQuantity(String email, long id, int quantity) {
     User u = members.require(email);
     Reservation r = locked(id);
@@ -147,6 +162,7 @@ public class ReservationServiceImpl implements ReservationService {
     r.status.requireMutable();
     open(r.post);
     quantity(quantity);
+    withinPerPersonLimit(r.post, quantity);
     int delta = quantity - r.quantity;
     if (delta > r.post.getAvailableQuantity()) throw Problem.conflict("จำนวนอาหารไม่พอ");
     r.post.setReservedQuantity(r.post.getReservedQuantity() + delta);
@@ -205,7 +221,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
     r.post.setReservedQuantity(r.post.getReservedQuantity() - r.quantity);
     r.post.setCollectedQuantity(r.post.getCollectedQuantity() + r.quantity);
-    if (r.post.getCollectedQuantity() == r.post.getQuantity())
+    if (r.post.getCollectedQuantity() + r.post.getOfflineQuantity() == r.post.getQuantity())
       r.post.setStatus(FoodPostStatus.CLAIMED);
     r.status = ReservationStatus.COLLECTED;
     r.updatedAt = now();

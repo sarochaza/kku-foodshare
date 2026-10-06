@@ -41,6 +41,6 @@ public interface FoodPostRepository
   @Query("select p.id from FoodPost p where p.owner.id = :ownerId order by p.id")
   List<Long> findOwnedIds(@Param("ownerId") Long ownerId);
 
-  @Query("select coalesce(sum(p.collectedQuantity),0) from FoodPost p")
+  @Query("select coalesce(sum(p.collectedQuantity + p.offlineQuantity),0) from FoodPost p")
   long totalCollected();
 }

@@ -39,6 +39,10 @@ public class FoodPost {
   @Column(nullable = false)
   private Integer quantity;
 
+  /** Null means the owner has not limited how many units one person may reserve. */
+  @Column(name = "max_per_person")
+  private Integer maxPerPerson;
+
   @Column(nullable = false, length = 50)
   private String unit;
 
@@ -73,6 +77,15 @@ public class FoodPost {
   @Column(nullable = false)
   private int collectedQuantity;
 
+  @Column(nullable = false)
+  private int offlineQuantity;
+
+  public int getOfflineQuantity() { return offlineQuantity; }
+
+  public void setOfflineQuantity(int value) { offlineQuantity = value; }
+
+  public Long getVersion() { return version; }
+
   @Column(length = 500)
   private String allergens;
 
@@ -95,7 +108,7 @@ public class FoodPost {
   }
 
   public int getAvailableQuantity() {
-    return quantity - reservedQuantity - collectedQuantity;
+    return quantity - reservedQuantity - collectedQuantity - offlineQuantity;
   }
 
   public String getAllergens() {
@@ -154,6 +167,14 @@ public class FoodPost {
 
   public void setQuantity(Integer quantity) {
     this.quantity = quantity;
+  }
+
+  public Integer getMaxPerPerson() {
+    return maxPerPerson;
+  }
+
+  public void setMaxPerPerson(Integer value) {
+    this.maxPerPerson = value;
   }
 
   public String getUnit() {

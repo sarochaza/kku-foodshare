@@ -1,6 +1,7 @@
 package com.kku.foodshare.controller.api;
 
 import com.kku.foodshare.dto.request.FoodPostRequest;
+import com.kku.foodshare.dto.request.ExtendPostRequest;
 import com.kku.foodshare.dto.response.*;
 import com.kku.foodshare.security.CurrentIdentity;
 import com.kku.foodshare.service.FoodCatalogService;
@@ -59,6 +60,12 @@ public class FoodCatalogController {
     return service.update(CurrentIdentity.email(a), id, r);
   }
 
+  @PostMapping("/food-posts/{id}/extend")
+  public PostView extend(
+      @PathVariable long id, @Valid @RequestBody ExtendPostRequest r, Authentication a) {
+    return service.extend(CurrentIdentity.email(a), id, r);
+  }
+
   @DeleteMapping("/food-posts/{id}")
   public ResponseEntity<Void> delete(@PathVariable long id, Authentication a) {
     service.delete(CurrentIdentity.email(a), id);
@@ -73,6 +80,11 @@ public class FoodCatalogController {
   @GetMapping("/me/posts")
   public PageView<PostView> mine(@RequestParam(defaultValue = "0") int page, Authentication a) {
     return service.mine(CurrentIdentity.email(a), page);
+  }
+
+  @GetMapping("/me/posts/management-summary")
+  public java.util.Map<String, Long> managementSummary(Authentication a) {
+    return service.managementSummary(CurrentIdentity.email(a));
   }
 
   @GetMapping("/stats")

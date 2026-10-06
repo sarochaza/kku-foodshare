@@ -19,42 +19,214 @@ import {
   paginate,
   ask,
 } from "./ui.js";
-import { createMap, locate, markers, directions } from "./maps.js";
+import {
+  createMap,
+  locate,
+  markers,
+  currentLocationMarker,
+} from "./maps.js";
+import { mountTrip } from "./trip.js";
+import { mountReservation, mountOwnerStock, mountPostExtension } from "./quick-actions.js";
+import { placePicker } from "./places.mjs";
+import { initProfileMenu } from "./profile-menu.mjs";
+import { drawPass, parsePass } from "./pickup.mjs";
 const page = document.body.dataset.page;
+function homeGuide() {
+  const shell = $("#home-guide");
+  if (!shell) return;
+  const key = "foodshare-guide-v2";
+  const replay = new URLSearchParams(location.search).has("guide");
+  try { if (!replay && localStorage.getItem(key)) return; } catch { /* private browsing */ }
+  const steps = [
+    ["#home-search", "ค้นหามื้อที่ถูกใจ", "พิมพ์ชื่ออาหารหรือจุดรับ แล้วดูรายการที่เพื่อน ๆ แบ่งปัน"],
+    ["#home-category-filters", "เลือกสิ่งที่อยากรับ", "กรองอาหาร เครื่องดื่ม ของว่าง หรือเฉพาะรายการที่รับได้ตอนนี้"],
+    ["#home-map", "ดูอาหารบนแผนที่สด", "แตะหมุดเพื่อเปิดการ์ดอาหารและดูจุดนัดรับได้ทันที"],
+    ["#home-locate", "หามื้อที่ใกล้คุณ", "อนุญาตตำแหน่งเมื่อพร้อม แล้วระบบจะเรียงอาหารตามระยะทางให้"],
+    ["#home-food", "เลือกและจองอาหาร", "แตะการ์ดเพื่ออ่านรายละเอียด จำนวนคงเหลือ และเวลานัดรับ"],
+    [matchMedia("(max-width: 600px)").matches ? '.mobile-nav a[href="/posts/new"]' : '.hero-buttons a[href="/posts/new"]', "ส่งต่ออาหารดี ๆ", "กดปุ่มบวกเพื่อปักหมุด ถ่ายรูป และแบ่งปันอาหาร"],
+  ];
+  let index = 0, target;
+  const escapeGuide = (event) => { if (event.key === "Escape") close(); };
+  const close = () => {
+    target?.classList.remove("guide-target"); shell.hidden = true;
+    document.removeEventListener("keydown", escapeGuide);
+    try { localStorage.setItem(key, "done"); } catch { /* private browsing */ }
+  };
+  const show = () => {
+    target?.classList.remove("guide-target");
+    const [selector, title, copy] = steps[index];
+    target = $(selector) || (index === 2 ? $("#home-food") : null);
+    if (target && getComputedStyle(target).display !== "none" && target.getClientRects().length) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.add("guide-target");
+    }
+    $("#guide-title").textContent = title;
+    $("#guide-copy").textContent = copy;
+    $("#guide-progress").textContent = `${index + 1} / ${steps.length}`;
+    $("#guide-back").hidden = index === 0;
+    $("#guide-next").textContent = index === steps.length - 1 ? "เสร็จสิ้น" : "ถัดไป";
+  };
+  $("#guide-skip").onclick = close;
+  $("#guide-back").onclick = () => { index--; show(); };
+  $("#guide-next").onclick = () => { if (++index === steps.length) close(); else show(); };
+  shell.hidden = false; document.addEventListener("keydown", escapeGuide); show();
+  $("#guide-next").focus();
+}
 async function home() {
-  const el = $("#home-food");
+  const el = $("#home-food"),
+    mapList = $("#home-map-list"),
+    state = { category: "", sort: "expiry", now: false },
+    coords = {};
+  let map = null,
+    layer = null,
+    locationMarker = null,
+    mapPosts = [],
+    requestSeq = 0;
+
+  const query = (size) =>
+    new URLSearchParams({
+      category: state.category,
+      sort: state.sort,
+      now: state.now,
+      page: 0,
+      size,
+      ...(coords.lat != null ? {lat: coords.lat, lng: coords.lng} : {}),
+    });
+  const ensureMap = () => {
+    if (!map) map = createMap("home-live-map").map;
+    return map;
+  };
+  const showPreview = (p) => {
+    const preview = $("#home-map-preview");
+    preview.innerHTML = `<button type="button" class="map-preview-close" aria-label="ปิดการ์ดอาหาร">×</button><a class="map-preview-photo" href="/posts/${p.id}">${photo(p)}</a><div class="map-preview-copy"><span>${escape(categories[p.category] || "อาหารแบ่งปัน")}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p><div><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong><a href="/posts/${p.id}">ดูรายละเอียด ${icon("arrow")}</a></div></div>`;
+    preview.hidden = false;
+    $(".map-preview-close", preview).onclick = () => (preview.hidden = true);
+  };
+  const miniCard = (p) =>
+    `<button type="button" class="home-map-item" data-home-post="${p.id}"><span class="home-map-thumb">${photo(p)}</span><span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b>${p.distanceKm != null ? `${p.distanceKm.toFixed(1)} กม.` : `เหลือ ${p.availableQuantity} ${escape(p.unit)}`}</b></span><svg class="icon" aria-hidden="true"><use href="#i-chevron"></use></svg></button>`;
+
   const load = async () => {
-    try {
-      const d = await api("/api/v1/food-posts?sort=latest&size=3");
-      el.innerHTML = d.items.length
-        ? d.items.map(card).join("")
+    const seq = ++requestSeq;
+    $("#home-map-preview").hidden = true;
+    el.innerHTML = '<div class="loading-box">กำลังค้นหาอาหารที่แบ่งปัน…</div>';
+    mapList.innerHTML = '<div class="loading-box">กำลังโหลดจุดแบ่งปัน…</div>';
+    const [listResult, mapResult] = await Promise.allSettled([
+        api("/api/v1/food-posts?" + query(6)),
+        api("/api/v1/food-posts?" + query(200)),
+    ]);
+    if (seq !== requestSeq) return;
+    if (listResult.status === "fulfilled") {
+      const data = listResult.value;
+      $("#home-results-title").textContent = state.category
+        ? `${categories[state.category]}ที่พร้อมแบ่งปัน`
+        : "มีอาหารดี ๆ รอแบ่งปัน";
+      $("#home-results-copy").textContent = `พบ ${data.totalElements} รายการ${state.now ? "ที่รับได้ตอนนี้" : "ในชุมชน KKU"}`;
+      el.innerHTML = data.items.length
+        ? data.items.map(card).join("")
         : empty(
-            "เริ่มต้นมื้อแห่งการแบ่งปัน",
-            "ตอนนี้ยังไม่มีอาหารที่เปิดรับจอง มาเป็นคนแรกที่ส่งต่อมื้อดี ๆ กัน",
-            "/posts/new",
-            "เริ่มแบ่งปันอาหาร",
+            "ยังไม่พบมื้อที่ตรงกับตัวกรอง",
+            "ลองเลือกหมวดอื่นหรือปิดตัวกรอง “รับได้ตอนนี้” แล้วค้นหาอีกครั้ง",
+            "/explore",
+            "สำรวจอาหารทั้งหมด",
           );
-    } catch (e) {
-      errorBox(el, e, load);
+    } else errorBox(el, listResult.reason, load);
+
+    if (mapResult.status === "fulfilled") {
+      const data = mapResult.value;
+      mapPosts = data.items;
+      $("#home-map-count").textContent = `${data.totalElements} จุดแบ่งปัน`;
+      mapList.innerHTML = mapPosts.length
+        ? mapPosts.slice(0, 4).map(miniCard).join("")
+        : empty("ยังไม่มีหมุดในหมวดนี้", "ลองเลือกหมวดอื่นเพื่อดูจุดแบ่งปัน", null);
+      try {
+        layer = markers(ensureMap(), mapPosts, layer, showPreview);
+        if (coords.lat != null) {
+          locationMarker = currentLocationMarker(map, coords, locationMarker);
+          if (state.sort === "nearby") map.setView([coords.lat, coords.lng], 15);
+        }
+        map.invalidateSize();
+      } catch (e) {
+        $("#home-location-status").textContent = e.message;
+      }
+      $$('[data-home-post]', mapList).forEach((button) => {
+        button.onclick = () => {
+          const p = mapPosts.find((item) => item.id === Number(button.dataset.homePost));
+          if (!p) return;
+          ensureMap().setView([p.latitude, p.longitude], 17);
+          showPreview(p);
+        };
+      });
+    } else {
+      errorBox(mapList, mapResult.reason, load);
+      $("#home-map-count").textContent = "โหลดไม่สำเร็จ";
     }
   };
+
+  const useLocation = async () => {
+    try {
+      Object.assign(coords, await locate());
+      state.sort = "nearby";
+      $("#home-sort").value = "nearby";
+      $("#home-location-status").innerHTML = `${icon("locate")} พบตำแหน่งแล้ว กำลังเรียงมื้อที่ใกล้คุณที่สุด`;
+      await load();
+      toast("แสดงตำแหน่งของคุณและเรียงอาหารใกล้สุดแล้ว");
+      return true;
+    } catch (e) {
+      $("#home-location-status").innerHTML = `${icon("pin")} ${escape(e.message)} • ยังดูหมุดอาหารรอบ มข. ได้ตามปกติ`;
+      toast(e.message, true);
+      return false;
+    }
+  };
+
+  $$("#home-category-filters [data-home-category]").forEach((button) => {
+    button.onclick = () => {
+      $$("#home-category-filters [data-home-category]").forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("active", selected);
+        item.setAttribute("aria-pressed", selected);
+      });
+      state.category = button.dataset.homeCategory;
+      load();
+    };
+  });
+  $("#home-available-now").onchange = (event) => {
+    state.now = event.target.checked;
+    event.target.closest(".home-category").classList.toggle("active", state.now);
+    load();
+  };
+  $("#home-sort").onchange = async (event) => {
+    state.sort = event.target.value;
+    if (state.sort === "nearby" && !coords.lat) {
+      const found = await busy($("#home-locate"), useLocation);
+      if (!found) {
+        state.sort = "expiry";
+        event.target.value = "expiry";
+      }
+    } else load();
+  };
+  $("#home-locate").onclick = () => busy($("#home-locate"), useLocation);
   await load();
+  homeGuide();
 }
 async function explore() {
   const params = new URLSearchParams(location.search);
   let state = {
       q: params.get("q") || "",
-      category: "",
-      sort: "expiry",
+      category: params.get("category") || "",
+      sort: params.get("sort") || "expiry",
       page: 0,
-      now: false,
+      now: params.get("now") === "true",
     },
     coords = {},
     map = null,
     layer = null,
+    locationMarker = null,
     mapVisible = params.get("view") === "map",
     requestSeq = 0;
   $("#search").value = state.q;
+  if ($("#sort")) $("#sort").value = state.sort;
+  if ($("#available-now")) $("#available-now").checked = state.now;
+  $$("#category-filters [data-category]").forEach(b => b.classList.toggle("active", b.dataset.category === state.category));
   const loadMap = async () => {
     if (!mapVisible) return;
     try {
@@ -68,6 +240,10 @@ async function explore() {
           }),
       );
       layer = markers(map, d.items, layer);
+      if (coords.lat != null) {
+        locationMarker = currentLocationMarker(map, coords, locationMarker);
+        map.setView([coords.lat, coords.lng], 15);
+      }
       $("#map-status").textContent =
         `พบ ${d.items.length} จุดแบ่งปัน • เลือกหมุดเพื่อดูรายละเอียด${d.totalElements > 200 ? " • แสดง 200 จุดแรก ลองค้นหาให้เจาะจงขึ้น" : ""}`;
       map.invalidateSize();
@@ -81,7 +257,7 @@ async function explore() {
       '<div class="loading-box">กำลังค้นหาอาหาร…</div>';
     try {
       const d = await api(
-        "/api/v1/food-posts?" + new URLSearchParams({ ...state, ...coords }),
+        "/api/v1/food-posts?" + new URLSearchParams({ ...state, ...(coords.lat != null ? {lat: coords.lat, lng: coords.lng} : {}) }),
       );
       if (seq !== requestSeq) return;
       $("#result-count").textContent =
@@ -127,6 +303,7 @@ async function explore() {
   const nearby = async () => {
     try {
       coords = await locate();
+      toggle(true);
       state.sort = "nearby";
       $("#sort").value = "nearby";
       state.page = 0;
@@ -165,36 +342,13 @@ async function detail() {
     el = $("#food-detail");
   try {
     const p = await api("/api/v1/food-posts/" + id);
-    const canReserve =
-      ["AVAILABLE", "LOW_STOCK", "SCHEDULED"].includes(p.status) &&
-      p.availableQuantity > 0;
     const closed = ["CANCELLED", "EXPIRED", "CLAIMED"].includes(p.status);
-    el.innerHTML = `<div class="detail-layout"><section><div class="detail-photo">${photo(p)}</div><div class="detail-panel panel"><span class="section-kicker">${escape(categories[p.category])} · FROM OUR COMMUNITY</span><h1 class="detail-title">${escape(p.title)}</h1><div class="detail-meta">${badge(p.status)}<span>${icon("pin")} ${escape(p.pickupLocationName)}</span></div><h2>รายละเอียดอาหาร</h2><p>${escape(p.description)}</p>${p.allergens ? `<div class="allergen-note"><strong>ส่วนผสมที่อาจทำให้แพ้</strong><br>${escape(p.allergens)}</div>` : ""}</div><section class="detail-panel panel"><h2>${icon("pin")} จุดนัดรับอาหาร</h2><p>${escape(p.pickupLocationName)}</p><div id="detail-map" class="detail-map"></div><p class="field-note" id="detail-map-status">พิกัด ${p.latitude}, ${p.longitude}</p><a class="btn btn-soft full" href="${directions(p)}" target="_blank" rel="noopener">${icon("map")} เปิดเส้นทางไปจุดรับ</a></section></section><aside class="booking-panel panel"><span class="section-kicker">A MEAL MADE FOR SHARING</span><div class="booking-price">แบ่งปันฟรี ♡</div><p>มื้อดี ๆ จากเพื่อนในชุมชน</p><div class="booking-stock"><span>จำนวนที่ยังจองได้</span><span><strong>${p.availableQuantity}</strong> ${escape(p.unit)}</span></div><div class="pickup-time">${icon("clock")}<div><strong>เวลานัดรับ</strong><span>${escape(pickupWindow(p))}</span></div></div>${p.mine ? `<a class="btn btn-primary full" href="/account/posts">จัดการโพสต์และผู้จอง ${icon("arrow")}</a>${!closed ? `<a class="btn btn-soft full" style="margin-top:10px" href="/posts/${p.id}/edit">${icon("edit")} แก้ไขโพสต์</a>` : ""}` : signedIn() ? (canReserve ? `<form id="reserve-form"><label>จำนวนที่ต้องการ (${escape(p.unit)})<input name="quantity" type="number" min="1" max="${p.availableQuantity}" value="1" required></label><button class="btn btn-primary btn-lg full" type="submit">${icon("bag")} จองอาหารนี้</button><p class="field-note center">จองแล้ว ดูรหัสรับอาหารได้ใน “การจองของฉัน”</p></form>` : `<p class="info-note">รายการนี้ยังไม่พร้อมรับจอง</p>`) : `<a class="btn btn-primary full" href="/login">เข้าสู่ระบบเพื่อจองอาหาร ${icon("arrow")}</a>`}<div class="owner-label"><span>${icon("user")}</span><div><small>แบ่งปันโดย</small><strong>${escape(p.ownerName)}</strong></div></div>${signedIn() && !p.mine ? '<button class="report-button" id="report-post">รายงานปัญหาของโพสต์นี้</button>' : ""}</aside></div>`;
-    try {
-      createMap("detail-map").setPin(p.latitude, p.longitude);
-    } catch (e) {
-      $("#detail-map-status").textContent =
-        e.message + " • ใช้ปุ่มเปิดเส้นทางด้านล่างได้";
-    }
-    let key = crypto.randomUUID();
-    $("#reserve-form")?.addEventListener("submit", (e) => {
-      e.preventDefault();
-      busy($("button", e.target), async () => {
-        const qty = Number(e.target.elements.quantity.value);
-        if (
-          !(await ask(
-            "จองมื้อนี้ไว้เลยไหม?",
-            `${p.title} จำนวน ${qty} ${p.unit} • กรุณาไปรับภายในเวลาที่กำหนด`,
-          ))
-        )
-          return;
-        await api(`/api/v1/food-posts/${id}/reservations`, {
-          method: "POST",
-          headers: { "Idempotency-Key": key },
-          body: { quantity: qty },
-        });
-        location.href = "/reservations";
-      });
+    el.innerHTML = `<div class="detail-layout"><section><div class="detail-photo">${photo(p)}</div><div class="detail-panel panel"><span class="section-kicker">${escape(categories[p.category])} · FROM OUR COMMUNITY</span><h1 class="detail-title">${escape(p.title)}</h1><div class="detail-meta"><span data-detail-state>${badge(p.status)}</span><span>${icon("pin")} ${escape(p.pickupLocationName)}</span></div><h2>รายละเอียดอาหาร</h2><p>${escape(p.description)}</p>${p.allergens ? `<div class="allergen-note"><strong>ส่วนผสมที่อาจทำให้แพ้</strong><br>${escape(p.allergens)}</div>` : ""}</div><section class="detail-panel panel"><h2>${icon("pin")} จุดนัดรับอาหาร</h2><p>${escape(p.pickupLocationName)}</p><div id="detail-trip"></div></section></section><aside class="booking-panel panel"><span class="section-kicker">A MEAL MADE FOR SHARING</span><div class="booking-price">แบ่งปันฟรี ♡</div><p>มื้อดี ๆ จากเพื่อนในชุมชน</p><div class="booking-stock"><span>จำนวนที่ยังจองได้</span><span><strong data-detail-stock>${p.availableQuantity}</strong> ${escape(p.unit)}</span></div><div class="pickup-time">${icon("clock")}<div><strong>เวลานัดรับ</strong><span>${escape(pickupWindow(p))}</span></div></div><p id="detail-trip-quick" class="trip-quick" role="status">กำลังตรวจตำแหน่งเพื่อแสดงระยะทางขับรถ…</p>${p.mine ? `<a class="btn btn-primary full" href="/account/posts">จัดการโพสต์และผู้จอง ${icon("arrow")}</a>${!closed ? `<a class="btn btn-soft full" style="margin-top:10px" href="/posts/${p.id}/edit">${icon("edit")} แก้ไขโพสต์</a>` : ""}` : signedIn() ? '<div id="detail-booking" class="quick-booking"></div>' : `<a class="btn btn-primary full" href="/login">เข้าสู่ระบบเพื่อจองอาหาร ${icon("arrow")}</a>`}<div class="owner-label"><span>${icon("user")}</span><div><small>แบ่งปันโดย</small><strong>${escape(p.ownerName)}</strong></div></div>${signedIn() && !p.mine ? '<button class="report-button" id="report-post">รายงานปัญหาของโพสต์นี้</button>' : ""}</aside></div>`;
+    const trip = mountTrip($("#detail-trip"), p, {summaryTarget: $("#detail-trip-quick")});
+    trip.refresh();
+    if (signedIn() && !p.mine) mountReservation($("#detail-booking"), p, trip, (fresh) => {
+      $('[data-detail-stock]').textContent = fresh.availableQuantity;
+      $('[data-detail-state]').innerHTML = badge(fresh.status);
     });
     $("#report-post")?.addEventListener("click", () =>
       busy($("#report-post"), async () => {
@@ -222,44 +376,28 @@ async function editor() {
     map = null,
     previewUrl = null,
     originalTimes = {};
-  form.addEventListener(
-    "invalid",
-    (e) => {
-      if (["latitude", "longitude"].includes(e.target.name))
-        $(".manual-coordinates").open = true;
-    },
-    true,
-  );
-  function pin(lat, lng) {
-    form.elements.latitude.value = Number(lat).toFixed(7);
-    form.elements.longitude.value = Number(lng).toFixed(7);
-    $("#pin-status").textContent =
-      `เลือกจุดรับแล้ว · ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
-  }
+  let picker;
   try {
-    map = createMap("editor-map", pin);
+    map = createMap("editor-map", (lat, lng) => picker?.pick(lat, lng));
   } catch (e) {
     $("#pin-status").textContent = e.message;
+    $(".manual-coordinates").open = true;
   }
-  $("#apply-coordinates").onclick = () => {
-    const lat = Number(form.elements.latitude.value),
-      lng = Number(form.elements.longitude.value);
-    if (
-      !form.elements.latitude.value ||
-      !form.elements.longitude.value ||
-      Math.abs(lat) > 90 ||
-      Math.abs(lng) > 180
-    )
-      return toast("กรุณากรอกพิกัดที่ถูกต้อง", true);
-    pin(lat, lng);
-    map?.setPin(lat, lng);
+  picker = placePicker(form, map, locate);
+  const limitToggle = $("#limit-per-person");
+  const limitField = $("#per-person-limit-field");
+  const maxPerPerson = form.elements.maxPerPerson;
+  const syncPerPersonLimit = () => {
+    const enabled = limitToggle.checked;
+    limitField.hidden = !enabled;
+    maxPerPerson.disabled = !enabled;
+    maxPerPerson.required = enabled;
+    maxPerPerson.max = form.elements.quantity.value || 10000;
+    if (!enabled) maxPerPerson.value = "";
   };
-  $("#use-location").onclick = () =>
-    busy($("#use-location"), async () => {
-      const { lat, lng } = await locate();
-      map?.setPin(lat, lng);
-      pin(lat, lng);
-    });
+  limitToggle.onchange = syncPerPersonLimit;
+  form.elements.quantity.oninput = syncPerPersonLimit;
+  syncPerPersonLimit();
   $("#food-photo").onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -288,8 +426,10 @@ async function editor() {
       };
       form.elements.availableFrom.value = p.availableFrom.slice(0, 16);
       form.elements.availableUntil.value = p.availableUntil.slice(0, 16);
-      pin(p.latitude, p.longitude);
-      map?.setPin(p.latitude, p.longitude);
+      limitToggle.checked = Number.isInteger(p.maxPerPerson);
+      if (limitToggle.checked) maxPerPerson.value = p.maxPerPerson;
+      syncPerPersonLimit();
+      picker.load(p);
       if (p.imageUrl) {
         $("#photo-preview").src = p.imageUrl;
         $("#photo-preview").hidden = false;
@@ -307,6 +447,7 @@ async function editor() {
   }
   form.onsubmit = (e) => {
     e.preventDefault();
+    if (!picker.validate()) return;
     busy($("#save-post"), async () => {
       const error = $("#form-error");
       error.hidden = true;
@@ -317,6 +458,7 @@ async function editor() {
         if (originalTimes[k] && data[k] === originalTimes[k].slice(0, 16))
           data[k] = originalTimes[k];
       data.quantity = Number(data.quantity);
+      if (data.maxPerPerson !== undefined) data.maxPerPerson = Number(data.maxPerPerson);
       data.latitude = Number(data.latitude);
       data.longitude = Number(data.longitude);
       const saved = await api("/api/v1/food-posts" + (id ? "/" + id : ""), {
@@ -351,7 +493,8 @@ async function editor() {
 function reservationCard(r) {
   const p = r.post,
     active = r.status === "RESERVED";
-  return `<article class="reservation-card panel"><div class="reservation-main"><a href="/posts/${p.id}" class="reservation-thumb">${photo(p)}</a><div class="reservation-summary">${badge(r.status)}<h2>${escape(p.title)}</h2><p>${icon("pin")}${escape(p.pickupLocationName)}</p><p>${icon("clock")}${escape(pickupWindow(p))}</p><p>ผู้แบ่งปัน: ${escape(p.ownerName)}</p></div><div class="reservation-quantity"><strong>${r.quantity}</strong>${escape(p.unit)}</div></div><div class="reservation-bottom">${active ? `<div class="pickup-code">แสดงรหัสนี้ให้ผู้แบ่งปัน<strong>${escape(r.pickupCode)}</strong></div>` : `<span class="field-note">เลขอ้างอิง FS-${r.id}</span>`}<div class="row-actions">${active ? `<a class="btn btn-primary btn-sm" href="${directions(p)}" target="_blank" rel="noopener">${icon("map")} เส้นทาง</a><button class="btn btn-white btn-sm" data-change="${r.id}" data-quantity="${r.quantity}" data-max="${p.availableQuantity + r.quantity}">แก้จำนวน</button><button class="btn btn-white btn-sm" data-cancel="${r.id}">ยกเลิก</button>` : ""}</div></div></article>`;
+  const maximum = Math.min(p.availableQuantity + r.quantity, p.maxPerPerson || 10000);
+  return `<article class="reservation-card panel pickup-pass"><div class="pass-heading"><span>KKU FOODSHARE · PICKUP PASS</span><span>FS-${r.id}</span></div><div class="reservation-main"><a href="/posts/${p.id}" class="reservation-thumb">${photo(p)}</a><div class="reservation-summary">${badge(r.status)}<h2>${escape(p.title)}</h2><p>${icon("pin")}${escape(p.pickupLocationName)}</p><p>${icon("clock")}${escape(pickupWindow(p))}</p><p>ผู้แบ่งปัน: ${escape(p.ownerName)}</p></div><div class="reservation-quantity"><strong>${r.quantity}</strong>${escape(p.unit)}</div></div>${active && r.pickupCode ? `<div class="pass-ticket"><div class="pass-qr-wrap"><svg class="pass-qr" data-pass-id="${r.id}" data-pass-code="${escape(r.pickupCode)}"></svg><span>ให้เจ้าของโพสต์สแกน QR</span></div><div class="pass-code-wrap"><span class="section-kicker">SCAN & SHARE</span><h3>บัตรรับอาหารของคุณ</h3><p>แสดง QR นี้ให้เจ้าของโพสต์สแกนเมื่อมาถึงจุดรับ หรือแจ้งรหัส 6 หลักแทน</p><div class="pickup-code">รหัสสำรอง<strong>${escape(r.pickupCode)}</strong></div></div></div>` : ""}<div class="reservation-bottom">${!active ? `<span class="field-note">เลขอ้างอิง FS-${r.id}</span>` : `<span class="field-note">ใช้ได้เฉพาะการจองนี้ • อย่าแชร์ให้คนอื่น</span>`}<div class="row-actions">${active ? `<button type="button" class="btn btn-primary btn-sm" data-trip-reservation="${r.id}">${icon("map")} เส้นทาง / เวลาเดินทาง</button><button class="btn btn-white btn-sm" data-change="${r.id}" data-quantity="${r.quantity}" data-max="${maximum}">แก้จำนวน</button><button class="btn btn-white btn-sm" data-cancel="${r.id}">ยกเลิก</button>` : ""}</div></div></article>`;
 }
 async function reservations(page = 0) {
   const el = $("#reservation-list");
@@ -360,6 +503,25 @@ async function reservations(page = 0) {
     el.innerHTML = d.items.length
       ? d.items.map(reservationCard).join("")
       : empty("ยังไม่มีมื้อที่จองไว้", "ไปเลือกอาหารดี ๆ จากเพื่อนในชุมชนกัน");
+    $$("[data-pass-id]", el).forEach(svg => {
+      try { drawPass(svg, Number(svg.dataset.passId), svg.dataset.passCode); }
+      catch { svg.replaceWith(document.createTextNode("ใช้รหัส 6 หลักด้านข้างแทน")); }
+    });
+    $$('[data-trip-reservation]', el).forEach(button => {
+      button.onclick = () => {
+        const reservation = d.items.find(r => r.id === Number(button.dataset.tripReservation));
+        if (!reservation) return;
+        const card = button.closest('.reservation-card');
+        let panel = card.querySelector('.reservation-trip');
+        if (!panel) {
+          panel = document.createElement('div'); panel.className = 'reservation-trip'; card.append(panel);
+          const widget = mountTrip(panel, reservation.post);
+          panel.querySelector('[data-trip-skip]').hidden = true;
+          widget.refresh();
+        } else {panel.hidden = !panel.hidden;}
+        if (!panel.hidden) panel.scrollIntoView({behavior:'smooth', block:'center'});
+      };
+    });
     paginate(d, reservations);
     $$("[data-cancel]", el).forEach(
       (b) =>
@@ -407,6 +569,286 @@ async function reservations(page = 0) {
     errorBox(el, e, () => reservations(page));
   }
 }
+async function manualPickup(id, page) {
+  let reservationId = id;
+  if (!reservationId) {
+    const reference = await ask(
+      "ค้นหารายการส่งมอบ",
+      "กรอกเฉพาะตัวเลขหลัง FS- เช่น FS-125 ให้กรอก 125",
+      { label: "เลขอ้างอิง", numeric: true, maxLength: 12, pattern: "[0-9]+", confirm: "ถัดไป" },
+    );
+    if (reference === null) return;
+    reservationId = Number(reference);
+    if (!Number.isSafeInteger(reservationId) || reservationId < 1) {
+      toast("เลขอ้างอิงไม่ถูกต้อง", true);
+      return;
+    }
+  }
+  const code = await ask(
+    "ยืนยันการส่งมอบอาหาร",
+    "ขอรหัส 6 หลักจากหน้าการจองของผู้รับ แล้วกรอกด้านล่าง",
+    {
+      label: "รหัสรับอาหาร",
+      numeric: true,
+      maxLength: 6,
+      pattern: "[0-9]{6}",
+      confirm: "ยืนยันรับแล้ว",
+    },
+  );
+  if (code === null) return;
+  await api(`/api/v1/reservations/${reservationId}/collection`, {
+    method: "POST",
+    body: { code },
+  });
+  toast("ยืนยันส่งมอบแล้ว ขอบคุณที่แบ่งปัน");
+  await myPosts(page);
+}
+
+function cameraFrame(video, canvas) {
+  return new Promise((resolve, reject) => {
+    if (!video.videoWidth || !video.videoHeight) {
+      reject(new Error("กล้องยังไม่พร้อม"));
+      return;
+    }
+    const scale = Math.min(1, 960 / video.videoWidth);
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    canvas.getContext("2d", { alpha: false }).drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("อ่านภาพจากกล้องไม่สำเร็จ"))),
+      "image/jpeg",
+      0.76,
+    );
+  });
+}
+
+async function decodeQrImage(blob) {
+  const form = new FormData();
+  form.append("frame", blob, "qr-frame.jpg");
+  return (await api("/api/v1/pickup/scan", { method: "POST", body: form })).value;
+}
+
+async function scanPickup(expectedId, page) {
+  const dialog = $("#scan-dialog"),
+    video = $("#scan-video"),
+    canvas = $("#scan-canvas"),
+    status = $("#scan-status"),
+    stage = $("#scan-camera-stage"),
+    review = $("#scan-review"),
+    actions = $("#scan-review-actions"),
+    success = $("#scan-success"),
+    imageInput = $("#scan-image");
+  if (!dialog) return;
+
+  let stream = null,
+    timer = null,
+    scanning = false,
+    closed = false,
+    needsRefresh = false,
+    currentPass = null,
+    detector = null;
+
+  try {
+    if (window.BarcodeDetector) detector = new BarcodeDetector({ formats: ["qr_code"] });
+  } catch {
+    detector = null;
+  }
+
+  const stopCamera = () => {
+    clearTimeout(timer);
+    timer = null;
+    scanning = false;
+    stream?.getTracks().forEach((track) => track.stop());
+    stream = null;
+    video.srcObject = null;
+  };
+  const close = () => {
+    stopCamera();
+    if (dialog.open) dialog.close();
+  };
+  const showReview = async (pass) => {
+    stopCamera();
+    status.textContent = "พบ QR แล้ว กำลังตรวจสอบข้อมูล…";
+    try {
+      const r = await api(`/api/v1/reservations/${pass.id}`);
+      currentPass = pass;
+      $("#scan-member-photo").src = `/api/v1/reservations/${r.id}/member-photo`;
+      $("#scan-member-name").textContent = r.memberName;
+      $("#scan-reference").textContent = `เลขอ้างอิง FS-${r.id} · จองเมื่อ ${dateTime(r.createdAt)}`;
+      $("#scan-post-title").textContent = r.post.title;
+      $("#scan-quantity").textContent = `${r.quantity} ${r.post.unit}`;
+      $("#scan-location").textContent = r.post.pickupLocationName;
+      $("#scan-window").textContent = pickupWindow(r.post);
+      stage.hidden = true;
+      review.hidden = false;
+      actions.hidden = false;
+      success.hidden = true;
+      $("#scan-confirm").focus();
+    } catch (error) {
+      currentPass = null;
+      stage.hidden = false;
+      review.hidden = true;
+      status.textContent = error.message;
+      timer = setTimeout(startCamera, 1000);
+    }
+  };
+  const acceptValue = async (value) => {
+    const pass = parsePass(value, expectedId);
+    if (!pass) {
+      status.textContent = expectedId
+        ? "QR นี้ไม่ตรงกับผู้จองรายการที่เลือก"
+        : "QR นี้ไม่ใช่บัตรรับอาหารของ KKU FoodShare";
+      return false;
+    }
+    await showReview(pass);
+    return true;
+  };
+  const scanTick = async () => {
+    if (closed || !dialog.open || !stream || scanning || stage.hidden) return;
+    scanning = true;
+    let found = false;
+    try {
+      if (detector) {
+        const results = await detector.detect(video);
+        for (const item of results) {
+          if (await acceptValue(item.rawValue)) {
+            found = true;
+            break;
+          }
+        }
+      } else {
+        const value = await decodeQrImage(await cameraFrame(video, canvas));
+        found = await acceptValue(value);
+      }
+    } catch (error) {
+      if (error.message && !error.message.includes("ยังไม่พบ QR"))
+        status.textContent = error.message;
+    } finally {
+      scanning = false;
+    }
+    if (!found && dialog.open && stream && !stage.hidden)
+      timer = setTimeout(scanTick, detector ? 240 : 650);
+  };
+  const startCamera = async () => {
+    stopCamera();
+    currentPass = null;
+    stage.hidden = false;
+    review.hidden = true;
+    actions.hidden = false;
+    success.hidden = true;
+    imageInput.value = "";
+    status.textContent = "กำลังเปิดกล้อง…";
+    if (!navigator.mediaDevices?.getUserMedia) {
+      status.textContent = "เบราว์เซอร์นี้เปิดกล้องไม่ได้ เลือกรูป QR หรือกรอกรหัสแทนได้";
+      return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+      if (closed || !dialog.open) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      video.srcObject = stream;
+      await video.play();
+      status.textContent = detector
+        ? "เล็ง QR ให้อยู่ในกรอบ ระบบจะอ่านให้อัตโนมัติ"
+        : "เล็ง QR ให้อยู่ในกรอบ ระบบกำลังอ่านภาพจากกล้อง";
+      scanTick();
+    } catch {
+      stopCamera();
+      status.textContent = "เปิดกล้องไม่ได้ กรุณาอนุญาตกล้อง เลือกรูป QR หรือกรอกรหัสแทน";
+    }
+  };
+
+  dialog.onclose = () => {
+    closed = true;
+    stopCamera();
+    dialog.onclose = null;
+    if (needsRefresh) myPosts(page);
+  };
+  $("#scan-close").onclick = close;
+  $("#scan-fallback").onclick = () => {
+    close();
+    manualPickup(expectedId, page).catch((error) => toast(error.message, true));
+  };
+  imageInput.onchange = async () => {
+    const file = imageInput.files?.[0];
+    if (!file) return;
+    imageInput.value = "";
+    stopCamera();
+    status.textContent = "กำลังอ่าน QR จากรูป…";
+    try {
+      await acceptValue(await decodeQrImage(file));
+    } catch (error) {
+      stage.hidden = false;
+      review.hidden = true;
+      status.textContent = error.message;
+    }
+  };
+  $("#scan-retry").onclick = startCamera;
+  $("#scan-confirm").onclick = () =>
+    busy($("#scan-confirm"), async () => {
+      if (!currentPass) return;
+      await api(`/api/v1/reservations/${currentPass.id}/collection`, {
+        method: "POST",
+        body: { code: currentPass.code },
+      });
+      needsRefresh = true;
+      actions.hidden = true;
+      success.hidden = false;
+      $("#scan-done").focus();
+      toast("ยืนยันส่งมอบแล้ว ขอบคุณที่แบ่งปัน");
+    });
+  $("#scan-done").onclick = close;
+  dialog.showModal();
+  await startCamera();
+}
+
+let ownerFilter = "all";
+const ownerPostOpen = (p) => ["AVAILABLE", "LOW_STOCK", "SCHEDULED", "FULL"].includes(p.status);
+const ownerMatches = (p, filter) =>
+  filter === "all" ||
+  (filter === "waiting" && p.reservedQuantity > 0) ||
+  (filter === "open" && ownerPostOpen(p)) ||
+  (filter === "done" && !ownerPostOpen(p));
+
+function bookingRow(r) {
+  const statusCopy = {
+    RESERVED: "รอยืนยันการส่งมอบ",
+    COLLECTED: "ส่งมอบเรียบร้อย",
+    CANCELLED: "ผู้รับยกเลิกแล้ว",
+    EXPIRED: "เลยเวลารับอาหาร",
+  }[r.status] || r.status;
+  return `<article class="booking-row" data-booking-row="${r.id}">
+    <div class="booking-person">
+      <img class="booking-avatar" src="/api/v1/reservations/${r.id}/member-photo" alt="รูปโปรไฟล์ ${escape(r.memberName)}" loading="lazy">
+      <div><strong>${escape(r.memberName)}</strong><small>FS-${r.id} · จองเมื่อ ${escape(dateTime(r.createdAt))}</small></div>
+    </div>
+    <div class="booking-state">${badge(r.status)}<small>${escape(statusCopy)}</small></div>
+    <div class="booking-details">
+      <span><small>จำนวน</small><strong>${r.quantity} ${escape(r.post.unit)}</strong></span>
+      <span><small>เวลานัดรับ</small><strong>${escape(pickupWindow(r.post))}</strong></span>
+    </div>
+    ${r.status === "RESERVED" ? `<div class="row-actions booking-actions"><button class="btn btn-primary btn-sm" data-scan="${r.id}">${icon("camera")} สแกน QR</button><button class="btn btn-white btn-sm" data-collect="${r.id}">กรอกรหัส</button></div>` : ""}
+  </article>`;
+}
+
+function wireBookingActions(box, page) {
+  $$('[data-collect]', box).forEach((button) =>
+    (button.onclick = () =>
+      busy(button, () => manualPickup(Number(button.dataset.collect), page))),
+  );
+  $$('[data-scan]', box).forEach((button) =>
+    (button.onclick = () => scanPickup(Number(button.dataset.scan), page)),
+  );
+}
 async function myPosts(page = 0) {
   const el = $("#my-posts");
   try {
@@ -414,8 +856,17 @@ async function myPosts(page = 0) {
     el.innerHTML = d.items.length
       ? d.items
           .map(
-            (p) =>
-              `<article class="managed-card panel"><div class="managed-overview"><a class="reservation-thumb" href="/posts/${p.id}">${photo(p)}</a><div class="managed-info">${badge(p.status)}<h2>${escape(p.title)}</h2><p>${escape(pickupWindow(p))}</p><p>${icon("pin")} ${escape(p.pickupLocationName)}</p></div><div class="managed-counts"><span><strong>${p.availableQuantity}</strong>ยังจองได้</span><span><strong>${p.reservedQuantity}</strong>รอมารับ</span><span><strong>${p.collectedQuantity}</strong>รับแล้ว</span></div></div><div class="managed-toolbar"><button class="btn btn-soft btn-sm" data-bookings="${p.id}">${icon("bag")} ดูผู้จอง / ยืนยันรับ</button><div class="row-actions">${!["CANCELLED", "EXPIRED"].includes(p.status) ? `<a class="btn btn-white btn-sm" href="/posts/${p.id}/edit">${icon("edit")} แก้ไข</a><button class="btn btn-white btn-sm" data-close="${p.id}">${icon("close")} ปิดโพสต์</button>` : ""}</div></div><div class="booking-list" id="bookings-${p.id}" hidden></div></article>`,
+            (p) => {
+              const progress = p.quantity
+                ? Math.round(((p.collectedQuantity + p.offlineQuantity) / p.quantity) * 100)
+                : 0;
+              return `<article class="managed-card panel" data-owner-card data-owner-status="${p.status}" data-owner-waiting="${p.reservedQuantity}" ${ownerMatches(p, ownerFilter) ? "" : "hidden"}>
+                <div class="managed-overview"><a class="reservation-thumb" href="/posts/${p.id}">${photo(p)}</a><div class="managed-info">${badge(p.status)}<h2>${escape(p.title)}</h2><p>${icon("clock")} ${escape(pickupWindow(p))}</p><p>${icon("pin")} ${escape(p.pickupLocationName)}</p>${p.maxPerPerson ? `<p class="field-note">จำกัดคนละไม่เกิน ${p.maxPerPerson} ${escape(p.unit)}</p>` : ""}</div><div class="managed-counts"><span><strong>${p.availableQuantity}</strong>ยังจองได้</span><span><strong>${p.reservedQuantity}</strong>รอมารับ</span><span><strong>${p.collectedQuantity}</strong>รับผ่านเว็บ</span><span><strong>${p.offlineQuantity}</strong>แจกนอกเว็บ</span></div></div>
+                <div class="managed-progress"><div><span>ความคืบหน้าการส่งมอบ</span><strong>${p.collectedQuantity + p.offlineQuantity} / ${p.quantity} ${escape(p.unit)}</strong></div><progress value="${p.collectedQuantity + p.offlineQuantity}" max="${Math.max(1, p.quantity)}">${progress}%</progress></div>
+                ${p.status === "EXPIRED" && p.availableQuantity > 0 ? `<section class="expired-nudge"><strong>เวลารับหมดแล้ว แต่ยังเหลือ ${p.availableQuantity} ${escape(p.unit)}</strong><span>ต้องการขยายเวลารับต่อไหม?</span><button type="button" class="btn btn-green btn-sm" data-extend="${p.id}">${icon("clock")} ขยายเวลารับ</button></section>` : ""}
+                <div class="managed-toolbar">${!["CANCELLED", "EXPIRED"].includes(p.status) && new Date(p.availableUntil + "+07:00") > new Date() ? `<button type="button" class="btn btn-green btn-sm" data-stock="${p.id}" aria-expanded="false" aria-controls="stock-${p.id}">${icon("edit")} จัดการจำนวน</button>` : ""}<button class="btn btn-soft btn-sm" data-bookings="${p.id}">${icon("bag")} ผู้จอง ${p.reservedQuantity ? `(${p.reservedQuantity} รอรับ)` : ""}</button><div class="row-actions">${!["CANCELLED", "EXPIRED", "CLAIMED"].includes(p.status) ? `<a class="btn btn-white btn-sm" href="/posts/${p.id}/edit">${icon("edit")} แก้ไข</a><button class="btn btn-white btn-sm" data-close="${p.id}">${icon("close")} ปิดโพสต์</button>` : ""}</div></div><section class="owner-extension" id="extension-${p.id}" hidden></section><section class="owner-stock" id="stock-${p.id}" hidden></section><div class="booking-list" id="bookings-${p.id}" hidden></div>
+              </article>`;
+            },
           )
           .join("")
       : empty(
@@ -424,7 +875,43 @@ async function myPosts(page = 0) {
           "/posts/new",
           "แบ่งปันอาหาร",
         );
+    $("#owner-total-posts").textContent = d.totalElements;
+    api("/api/v1/me/posts/management-summary")
+      .then((summary) => {
+        $("#owner-total-posts").textContent = summary.totalPosts;
+        $("#owner-open-posts").textContent = summary.openPosts;
+        $("#owner-waiting-count").textContent = summary.waitingCount;
+        $("#owner-collected-count").textContent = summary.collectedCount + summary.offlineCount;
+      })
+      .catch(() => {
+        $("#owner-open-posts").textContent = d.items.filter(ownerPostOpen).length;
+        $("#owner-waiting-count").textContent = d.items.reduce((sum, p) => sum + p.reservedQuantity, 0);
+        $("#owner-collected-count").textContent = d.items.reduce((sum, p) => sum + p.collectedQuantity + p.offlineQuantity, 0);
+      });
     paginate(d, myPosts);
+    $$('[data-stock]', el).forEach((button) => {
+      let widget;
+      button.onclick = () => {
+        const box = $("#stock-" + button.dataset.stock);
+        box.hidden = !box.hidden;
+        button.setAttribute('aria-expanded', String(!box.hidden));
+        if (!box.hidden) {
+          if (!widget) widget = mountOwnerStock(box, Number(button.dataset.stock), () => myPosts(page));
+          else widget.refresh();
+          box.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+      };
+    });
+    $$('[data-extend]', el).forEach((button) => {
+      let widget;
+      button.onclick = () => {
+        const post = d.items.find((item) => item.id === Number(button.dataset.extend));
+        const box = $("#extension-" + button.dataset.extend);
+        box.hidden = false;
+        if (!widget) widget = mountPostExtension(box, post, () => myPosts(page));
+        box.scrollIntoView({behavior:'smooth', block:'nearest'});
+      };
+    });
     $$("[data-close]", el).forEach(
       (b) =>
         (b.onclick = () =>
@@ -458,41 +945,35 @@ async function myPosts(page = 0) {
               "/api/v1/food-posts/" + b.dataset.bookings + "/reservations",
             );
             box.innerHTML = rows.length
-              ? rows
-                  .map(
-                    (r) =>
-                      `<div class="booking-row"><div><strong>${escape(r.memberName)}</strong><small>${r.quantity} ${escape(r.post.unit)} · FS-${r.id}</small></div>${badge(r.status)}${r.status === "RESERVED" ? `<button class="btn btn-primary btn-sm" data-collect="${r.id}">${icon("check")} ยืนยันส่งมอบ</button>` : ""}</div>`,
-                  )
-                  .join("")
+              ? rows.map(bookingRow).join("")
               : '<p class="field-note">ยังไม่มีผู้จองในโพสต์นี้</p>';
-            $$("[data-collect]", box).forEach(
-              (button) =>
-                (button.onclick = () =>
-                  busy(button, async () => {
-                    const code = await ask(
-                      "ยืนยันการส่งมอบอาหาร",
-                      "ขอรหัส 6 หลักจากหน้าการจองของผู้รับ แล้วกรอกด้านล่าง",
-                      {
-                        label: "รหัสรับอาหาร",
-                        numeric: true,
-                        maxLength: 6,
-                        pattern: "[0-9]{6}",
-                        confirm: "ยืนยันรับแล้ว",
-                      },
-                    );
-                    if (code === null) return;
-                    await api(
-                      "/api/v1/reservations/" +
-                        button.dataset.collect +
-                        "/collection",
-                      { method: "POST", body: { code } },
-                    );
-                    toast("ยืนยันส่งมอบแล้ว ขอบคุณที่แบ่งปัน");
-                    await myPosts(page);
-                  })),
-            );
+            wireBookingActions(box, page);
           })),
     );
+    $$('[data-owner-filter]').forEach((button) => {
+      button.classList.toggle("active", button.dataset.ownerFilter === ownerFilter);
+      button.onclick = () => {
+        ownerFilter = button.dataset.ownerFilter;
+        $$('[data-owner-filter]').forEach((item) =>
+          item.classList.toggle("active", item === button),
+        );
+        d.items.forEach((post) => {
+          const card = $(`[data-bookings="${post.id}"]`, el)?.closest('[data-owner-card]');
+          if (card) card.hidden = !ownerMatches(post, ownerFilter);
+        });
+      };
+    });
+    const openGlobalScanner = () => scanPickup(null, page);
+    $("#owner-scan-any").onclick = openGlobalScanner;
+    $("#owner-mobile-scan").onclick = openGlobalScanner;
+    $("#owner-show-waiting").onclick = () => {
+      $('[data-owner-filter="waiting"]').click();
+      const first = $('[data-owner-card]:not([hidden]) [data-bookings]', el);
+      if (first) {
+        first.scrollIntoView({ behavior: "smooth", block: "center" });
+        if ($(`#bookings-${first.dataset.bookings}`).hidden) first.click();
+      } else toast("ตอนนี้ยังไม่มีผู้จองที่รอมารับ");
+    };
   } catch (e) {
     errorBox(el, e, () => myPosts(page));
   }
@@ -640,5 +1121,6 @@ const boot = {
   account,
   admin,
 };
+initProfileMenu();
 if (boot[page])
   Promise.resolve(boot[page]()).catch((e) => toast(e.message, true));

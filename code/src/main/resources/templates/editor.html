@@ -64,6 +64,25 @@
                 /></label>
               </div>
             </div>
+            <section class="per-person-limit" aria-describedby="per-person-help">
+              <label class="limit-toggle">
+                <input id="limit-per-person" type="checkbox" />
+                <span>จำกัดจำนวนที่จองได้ต่อคน</span>
+              </label>
+              <label id="per-person-limit-field" hidden>
+                สูงสุดต่อคน
+                <input
+                  name="maxPerPerson"
+                  type="number"
+                  min="1"
+                  max="10000"
+                  inputmode="numeric"
+                  disabled
+                  placeholder="เช่น 2"
+                />
+              </label>
+              <p id="per-person-help" class="field-note">เปิดใช้เมื่อต้องการแบ่งให้หลายคนได้อย่างทั่วถึง ผู้จองแก้จำนวนเองเกินค่านี้ไม่ได้</p>
+            </section>
             <label
               >รายละเอียด <span class="required">*</span
               ><textarea
@@ -112,7 +131,15 @@
         <aside>
           <section class="panel form-panel map-panel">
             <h2><span class="section-number">03</span> ปักหมุดจุดรับ</h2>
-            <p class="field-note">แตะบนแผนที่หรือลากหมุดเพื่อเลือกจุดนัดรับ</p>
+            <div class="place-picker">
+              <label for="place-search">ค้นหาอาคาร จุดรับ หรือชื่อสถานที่</label>
+              <div class="place-search-row"><input id="place-search" type="search" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="place-results" aria-expanded="false" aria-describedby="place-search-status" placeholder="เช่น หอสมุด มข. หรือ Complex" /><button type="button" id="place-search-button" class="btn btn-primary">ค้นหาเพิ่ม</button></div>
+              <div id="place-results" role="listbox" aria-label="สถานที่แนะนำ" hidden></div>
+              <p id="place-search-status" class="field-note" role="status">พิมพ์อย่างน้อย 3 ตัวอักษร · แนะนำ มข. และขอนแก่นทันที · กด “ค้นหาเพิ่ม” เมื่อต้องการค้นหานอกรายการ</p>
+            </div>
+            <input type="hidden" name="latitude" />
+            <input type="hidden" name="longitude" />
+            <p class="field-note">แตะบนแผนที่หรือลากหมุดเพื่อปรับจุดนัดรับ</p>
             <div id="editor-map" class="editor-map"></div>
             <button type="button" id="use-location" class="btn btn-soft full">
               <svg class="icon" aria-hidden="true">
@@ -124,28 +151,26 @@
               ยังไม่ได้เลือกตำแหน่ง
             </p>
             <details class="manual-coordinates">
-              <summary>กรอกพิกัดด้วยตัวเอง</summary>
+              <summary>ตัวเลือกขั้นสูง</summary>
               <p class="field-note">
                 ใช้ละติจูดและลองจิจูดจากจุดนัดรับบนแอปแผนที่
               </p>
               <div class="form-row">
                 <label
                   >ละติจูด<input
-                    name="latitude"
+                    id="manual-latitude"
                     type="number"
                     step="any"
                     min="-90"
                     max="90"
-                    required
                     placeholder="16.4745" /></label
                 ><label
                   >ลองจิจูด<input
-                    name="longitude"
+                    id="manual-longitude"
                     type="number"
                     step="any"
                     min="-180"
                     max="180"
-                    required
                     placeholder="102.8237"
                 /></label>
               </div>

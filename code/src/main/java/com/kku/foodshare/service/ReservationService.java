@@ -6,6 +6,8 @@ import java.util.List;
 public interface ReservationService {
   ReservationView reserve(String email, long postId, int quantity, String key);
 
+  ReservationView mineForPost(String email, long postId);
+
   ReservationView get(String email, long id);
 
   ReservationView changeQuantity(String email, long id, int quantity);

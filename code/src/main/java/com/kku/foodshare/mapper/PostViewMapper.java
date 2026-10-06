@@ -23,7 +23,7 @@ public class PostViewMapper {
         && !state.equals("CLAIMED")) state = "EXPIRED";
     else if (state.equals("AVAILABLE") || state.equals("LOW_STOCK")) {
       if (p.getAvailableQuantity() == 0)
-        state = p.getCollectedQuantity() == p.getQuantity() ? "CLAIMED" : "FULL";
+        state = p.getCollectedQuantity() + p.getOfflineQuantity() == p.getQuantity() ? "CLAIMED" : "FULL";
       else if (p.getAvailableFrom().isAfter(LocalDateTime.now(clock))) state = "SCHEDULED";
     }
     String image = images.findByPostId(p.getId()).map(i -> "/media/" + i.filename).orElse(null);
@@ -57,6 +57,8 @@ public class PostViewMapper {
         p.getAllergens(),
         image,
         email != null && p.getOwner().getEmail().equalsIgnoreCase(email),
-        distance);
+        distance,
+        p.getOfflineQuantity(),
+        p.getMaxPerPerson());
   }
 }

@@ -8,6 +8,7 @@ public record ReservationView(
     int quantity,
     String status,
     String memberName,
+    Long memberId,
     String pickupCode,
     boolean owner,
     LocalDateTime createdAt) {}

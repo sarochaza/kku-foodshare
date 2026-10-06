@@ -24,4 +24,6 @@ public record PostView(
     String allergens,
     String imageUrl,
     boolean mine,
-    Double distanceKm) {}
+    Double distanceKm,
+    int offlineQuantity,
+    Integer maxPerPerson) {}

@@ -53,13 +53,13 @@ export function locate() {
         Error("อุปกรณ์นี้ไม่รองรับตำแหน่ง กรุณาปักหมุดเองบนแผนที่"),
       );
     navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
       () => reject(Error("เข้าถึงตำแหน่งไม่ได้ คุณยังเลือกจุดบนแผนที่ได้เอง")),
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
     );
   });
 }
-export function markers(map, posts, oldLayer) {
+export function markers(map, posts, oldLayer, onSelect = null) {
   if (oldLayer) map.removeLayer(oldLayer);
   const layer = L.layerGroup().addTo(map);
   posts.forEach((p) => {
@@ -74,7 +74,8 @@ export function markers(map, posts, oldLayer) {
     const el = document.createElement("div");
     el.className = "map-popup";
     el.innerHTML = `<strong>${escape(p.title)}</strong><span>เหลือ ${p.availableQuantity} ${escape(p.unit)}</span><a href="/posts/${p.id}">ดูรายละเอียด →</a>`;
-    marker.bindPopup(el);
+    if (onSelect) marker.on("click", () => onSelect(p));
+    else marker.bindPopup(el);
   });
   if (posts.length)
     map.fitBounds(
@@ -82,6 +83,29 @@ export function markers(map, posts, oldLayer) {
       { padding: [35, 35], maxZoom: 15 },
     );
   return layer;
+}
+export function currentLocationMarker(map, coords, oldMarker = null) {
+  if (oldMarker) {
+    if (oldMarker.accuracyCircle) map.removeLayer(oldMarker.accuracyCircle);
+    map.removeLayer(oldMarker);
+  }
+  const marker = L.marker([coords.lat, coords.lng], {
+    zIndexOffset: 1000,
+    icon: L.divIcon({
+      className: "current-location-marker",
+      html: '<span><i></i></span>',
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+    }),
+  }).addTo(map);
+  if (Number.isFinite(coords.accuracy) && coords.accuracy > 0) {
+    marker.accuracyCircle = L.circle([coords.lat, coords.lng], {
+      radius: coords.accuracy, color: "#347ce2", weight: 1, fillOpacity: 0.08,
+      interactive: false,
+    }).addTo(map);
+  }
+  marker.bindTooltip(`ตำแหน่งของคุณ${Number.isFinite(coords.accuracy) ? " · ความคลาดเคลื่อนประมาณ " + Math.round(coords.accuracy) + " เมตร" : ""}`, { direction: "top", offset: [0, -14] });
+  return marker;
 }
 export function directions(p) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.latitude + "," + p.longitude)}`;

@@ -8,4 +8,6 @@ public interface ProfileImageService {
   void updateImage(String email, byte[] imageBytes);
 
   Optional<ProfileImageResponse> getImage(String email);
+
+  Optional<ProfileImageResponse> getImageByUserId(long userId);
 }

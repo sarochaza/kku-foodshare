@@ -1,3 +1,5 @@
+> ผลและคำสั่งของรุ่นล่าสุด: [PHASE5-VERIFICATION.md](PHASE5-VERIFICATION.md)
+
 # Tests
 
 ## JUnit / Mockito / H2

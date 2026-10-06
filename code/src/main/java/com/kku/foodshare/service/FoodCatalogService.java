@@ -1,6 +1,7 @@
 package com.kku.foodshare.service;
 
 import com.kku.foodshare.dto.request.FoodPostRequest;
+import com.kku.foodshare.dto.request.ExtendPostRequest;
 import com.kku.foodshare.dto.response.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,6 +9,8 @@ public interface FoodCatalogService {
   PostView create(String email, FoodPostRequest input);
 
   PostView update(String email, long id, FoodPostRequest input);
+
+  PostView extend(String email, long id, ExtendPostRequest input);
 
   PostView get(long id, String email);
 
@@ -27,6 +30,8 @@ public interface FoodCatalogService {
       String email);
 
   PageView<PostView> mine(String email, int page);
+
+  java.util.Map<String, Long> managementSummary(String email);
 
   java.util.Map<String, Long> stats();
 }

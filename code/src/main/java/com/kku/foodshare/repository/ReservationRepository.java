@@ -12,9 +12,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
   Optional<Reservation> findByMemberIdAndRequestKey(Long member, String key);
 
+  Optional<Reservation> findByPostIdAndMemberIdAndStatus(Long post, Long member, ReservationStatus status);
+
   boolean existsByPostIdAndMemberIdAndStatus(Long post, Long member, ReservationStatus status);
 
   List<Reservation> findByPostIdAndStatus(Long id, ReservationStatus status);
+
+  @Query("select coalesce(max(r.quantity), 0) from Reservation r where r.post.id=:post and r.status=:status")
+  int maxQuantityByPostIdAndStatus(
+      @Param("post") long postId, @Param("status") ReservationStatus status);
 
   List<Reservation> findByPostIdOrderByCreatedAtDesc(Long id);
 

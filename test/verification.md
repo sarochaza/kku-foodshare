@@ -1,5 +1,15 @@
 # Final verification — 2026-10-06
 
+## Phase 1 home UI revision
+
+The Home page now reuses the existing food catalog API for a live Leaflet map, category and availability filters, sorting, explicit current-location access with a graceful fallback, marker previews, and the first-time guide. The mobile bottom navigation and existing backend flows remain unchanged.
+
+- JavaScript module syntax: PASS (`app.js`, `maps.js`)
+- HTML duplicate-id check: PASS
+- CSS structural brace check: PASS
+- Browser journey: updated with Home guide, map marker preview, category filter, geolocation marker and responsive coverage
+- Full Maven/browser rerun in the delivery workspace: blocked because Maven Central and a Playwright browser binary were unavailable there; run the commands in `test/README.md` in the normal Docker/development environment before deployment
+
 ## Executed checks
 
 | Check | Result |

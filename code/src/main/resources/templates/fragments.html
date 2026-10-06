@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/css/app.css" />
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
     <script src="/vendor/leaflet/leaflet.js" defer></script>
+    <script src="/vendor/pickup-qr.js" defer></script>
     <script src="/js/app.js" type="module"></script>
   </head>
   <body>
@@ -135,10 +136,19 @@
             aria-label="การแจ้งเตือน"
             ><svg class="icon" aria-hidden="true">
               <use href="#i-bell"></use></svg></a
-          ><a class="account-link" th:if="${viewer != null}" href="/account"
-            ><img src="/account/photo" alt="" /><span
-              th:text="${viewer.name}"
-            ></span></a
+          ><div class="profile-menu-wrap" th:if="${viewer != null}">
+            <button id="profile-menu-button" class="account-link" type="button" aria-expanded="false" aria-controls="profile-menu" aria-label="เปิดเมนูโปรไฟล์">
+              <img src="/account/photo" alt="" /><span th:text="${viewer.name}"></span>
+            </button>
+            <div id="profile-menu" class="profile-menu" role="menu" hidden>
+              <a class="profile-menu-head" href="/account" role="menuitem"><img src="/account/photo" alt="" /><span><strong th:text="${viewer.name}"></strong><small>ดูและแก้ไขโปรไฟล์</small></span></a>
+              <a href="/reservations" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg>การจองของฉัน</a>
+              <a href="/account/posts" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>โพสต์ของฉัน</a>
+              <a href="/notifications" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>การแจ้งเตือน</a>
+              <a href="/account" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg>ตั้งค่าโปรไฟล์</a>
+              <form th:action="@{/logout}" method="post"><button class="profile-menu-logout" type="submit"><svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>ออกจากระบบ</button></form>
+            </div>
+          </div>
           ><a th:if="${viewer == null}" href="/login" class="login-link"
             >เข้าสู่ระบบ</a
           ><a class="btn btn-primary header-post" href="/posts/new"
@@ -149,14 +159,21 @@
           >
         </div>
       </div>
+      <nav class="container owner-shortcut-nav" th:if="${viewer != null}" aria-label="ทางลัดผู้แบ่งปัน">
+        <a class="owner-shortcut" href="/account/posts" th:attr="aria-current=${active=='my-posts'?'page':null}">
+          <svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg>
+          <strong>โพสต์ของฉัน</strong><span>จัดการจำนวนและผู้จอง</span>
+          <svg class="icon shortcut-arrow" aria-hidden="true"><use href="#i-arrow"></use></svg>
+        </a>
+      </nav>
       <nav class="mobile-nav" aria-label="เมนูมือถือ">
-        <a href="/explore" th:classappend="${active=='explore'?'active':''}"
+        <a href="/" th:classappend="${active=='home'?'active':''}"
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+          ><span>หน้าแรก</span></a
+        ><a href="/explore" th:classappend="${active=='explore'?'active':''}"
           ><svg class="icon" aria-hidden="true">
             <use href="#i-search"></use></svg
           ><span>ค้นหา</span></a
-        ><a href="/explore?view=map"
-          ><svg class="icon" aria-hidden="true"><use href="#i-map"></use></svg
-          ><span>แผนที่</span></a
         ><a href="/posts/new" class="mobile-post"
           ><span
             ><svg class="icon" aria-hidden="true">
@@ -169,7 +186,7 @@
           ><span>การจอง</span></a
         ><a href="/account" th:classappend="${active=='account'?'active':''}"
           ><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg
-          ><span>บัญชี</span></a
+          ><span>โปรไฟล์</span></a
         >
       </nav>
     </header>
