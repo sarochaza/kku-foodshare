@@ -2,7 +2,7 @@ import {createMap,locate} from './maps.js';
 import {asDate} from './ui.js';
 import {originState,fetchRoute,straightDistance,formatMetres,directionsUrl} from './routes.mjs';
 let counter=0;
-export function mountTrip(root,post,{summaryTarget=null}={}) {
+export function mountTrip(root,post,{summaryTarget=null,onOriginConfirmed=()=>{}}={}) {
   const id=`trip-map-${++counter}`;
   root.classList.add('trip-panel');
   root.innerHTML=`<h3>ระยะทางและเวลาไปรับอาหาร</h3><p class="field-note">ตรวจจุดเริ่มต้นก่อนจอง หากหมุดไม่ตรง แตะแผนที่หรือลากหมุดสีน้ำเงินเพื่อแก้ไข</p><label>วิธีเดินทาง<select data-trip-mode><option value="driving">🚗 ขับรถ</option><option value="walking">🚶 เดินเท้า</option></select></label><div class="trip-actions"><button type="button" class="btn btn-soft" data-trip-locate>ใช้ตำแหน่งปัจจุบัน</button><button type="button" class="btn btn-primary" data-trip-confirm disabled>ยืนยันจุดเริ่มต้น</button></div><div id="${id}" class="trip-map" role="region" aria-label="แผนที่จุดเริ่มต้นและจุดรับอาหาร"></div><p class="trip-legend">🔵 จุดเริ่มต้นของคุณ · 🍱 จุดรับอาหาร</p><p data-trip-status role="status" class="field-note">ยังไม่ได้ระบุจุดเริ่มต้น</p><div data-trip-summary class="trip-summary" role="status">เลือกตำแหน่งและยืนยัน เพื่อดูระยะทางและเวลาโดยประมาณ</div><a data-trip-directions class="btn btn-soft full" target="_blank" rel="noopener noreferrer" hidden>เปิด Google Maps จากจุดนี้</a><button type="button" class="trip-skip" data-trip-skip>จองต่อโดยไม่ตรวจตำแหน่ง</button><p class="field-note trip-attribution">เส้นทาง © OpenStreetMap contributors / <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">FOSSGIS / OSRM</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">แจ้งแก้ไขแผนที่</a></p>`;
@@ -52,7 +52,7 @@ export function mountTrip(root,post,{summaryTarget=null}={}) {
     finally{clearTimeout(timeout);}
   }
   $('[data-trip-locate]').onclick=refresh;
-  confirm.onclick=()=>{state.confirm();status.textContent='ยืนยันจุดเริ่มต้นแล้ว';calculate();};
+  confirm.onclick=()=>{state.confirm();status.textContent='ยืนยันจุดเริ่มต้นแล้ว';onOriginConfirmed({...state.point},mode.value);calculate();};
   mode.onchange=()=>{if(state.point)calculate();else clearRoute();};
   navigation.onclick=e=>{
     if(!state.ready()) {e.preventDefault();clearRoute();status.textContent='ตำแหน่งอุปกรณ์เกิน 1 นาที กรุณาตรวจใหม่และยืนยันก่อนนำทาง';refresh();}

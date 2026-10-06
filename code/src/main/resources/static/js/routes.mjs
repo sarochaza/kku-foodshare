@@ -17,6 +17,11 @@ export function directionsUrl(origin,post,mode) {
   valid(origin,post,mode);
   return 'https://www.google.com/maps/dir/?'+new URLSearchParams({api:1,origin:`${origin.lat},${origin.lng}`,destination:`${post.latitude},${post.longitude}`,travelmode:mode});
 }
+export function mapsUrl(post,origin=null,mode='driving') {
+  if (origin && validCoordinates(origin.lat,origin.lng)) return directionsUrl(origin,post,mode);
+  if (!validCoordinates(post?.latitude,post?.longitude)) throw Error('พิกัดจุดรับอาหารไม่ถูกต้อง');
+  return 'https://www.google.com/maps/dir/?'+new URLSearchParams({api:1,destination:`${post.latitude},${post.longitude}`,travelmode:mode});
+}
 export function routeSummary(route) {
   if(!route || !Number.isFinite(route.distance) || route.distance<0 || !Number.isFinite(route.duration) || route.duration<0 || route.geometry?.type!=='LineString' || !Array.isArray(route.geometry.coordinates) || route.geometry.coordinates.length<2 || route.geometry.coordinates.some(p=>!validCoordinates(p[1],p[0]))) throw Error('ไม่พบข้อมูลเส้นทางที่ถูกต้อง');
   return {distance:route.distance,minutes:Math.max(1,Math.ceil(route.duration/60)),coordinates:route.geometry.coordinates.map(([lng,lat])=>[lat,lng])};

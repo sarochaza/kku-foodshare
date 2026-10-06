@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {straightDistance, routeUrl, routeSummary, directionsUrl, originState, fetchRoute} from '../../main/resources/static/js/routes.mjs';
+import {straightDistance, routeUrl, routeSummary, directionsUrl, mapsUrl, originState, fetchRoute} from '../../main/resources/static/js/routes.mjs';
 test('walking and driving use different real routing profiles and longitude-first coordinates',()=>{
  const a={lat:16.47,lng:102.82},b={latitude:16.48,longitude:102.83};
  assert.match(routeUrl(a,b,'walking'),/routed-foot\/route\/v1\/driving\/102.82,16.47;102.83,16.48/);
@@ -9,6 +9,21 @@ test('walking and driving use different real routing profiles and longitude-firs
 test('navigation contains confirmed origin, destination and selected travel mode',()=>{
  const url=new URL(directionsUrl({lat:16.47,lng:102.82},{latitude:16.48,longitude:102.83},'walking'));
  assert.equal(url.searchParams.get('origin'),'16.47,102.82');assert.equal(url.searchParams.get('travelmode'),'walking');assert.equal(url.searchParams.get('destination'),'16.48,102.83');
+});
+test('Google Maps directions preserve the confirmed reserver origin and exact pickup destination',()=>{
+ const post={latitude:16.481234,longitude:102.817654};
+ const url=new URL(mapsUrl(post,{lat:16.472345,lng:102.825678},'driving'));
+ assert.equal(url.pathname,'/maps/dir/');
+ assert.equal(url.searchParams.get('origin'),'16.472345,102.825678');
+ assert.equal(url.searchParams.get('destination'),'16.481234,102.817654');
+ assert.equal(url.searchParams.get('travelmode'),'driving');
+});
+test('Google Maps directions use the device current location when no reserver origin was confirmed',()=>{
+ const url=new URL(mapsUrl({latitude:16.4768,longitude:102.82325}));
+ assert.equal(url.pathname,'/maps/dir/');
+ assert.equal(url.searchParams.get('origin'),null);
+ assert.equal(url.searchParams.get('destination'),'16.4768,102.82325');
+ assert.equal(url.searchParams.get('travelmode'),'driving');
 });
 test('distance is metres; seconds round up to minutes; invalid route is rejected',()=>{
  assert.deepEqual(routeSummary({distance:950,duration:750,geometry:{type:'LineString',coordinates:[[102.82,16.47],[102.83,16.48]]}}),{distance:950,minutes:13,coordinates:[[16.47,102.82],[16.48,102.83]]});

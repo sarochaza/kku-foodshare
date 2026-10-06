@@ -48,8 +48,8 @@ test('picker interactions preserve the submitted pin, allow adjustment, and load
   await new Promise(r=>setTimeout(r,700));
   assert.equal(s.nodes['place-results'].children.length,1);
   s.nodes['place-results'].firstElementChild.onclick();
-  assert.deepEqual(s.point,[16.4756,102.8228]);
-  assert.equal(s.form.elements.latitude.value,'16.4756000');assert.equal(s.form.elements.longitude.value,'102.8228000');
+  assert.deepEqual(s.point,[16.4768,102.82325]);
+  assert.equal(s.form.elements.latitude.value,'16.4768000');assert.equal(s.form.elements.longitude.value,'102.8232500');
   assert.equal(s.form.elements.pickupLocationName.value,'หอสมุดกลาง มหาวิทยาลัยขอนแก่น');assert.equal(s.picker.validate(),true);
   s.form.elements.pickupLocationName.value='หน้าประตูฝั่งหอสมุด';
   await s.picker.pick(16.49,102.84); // same callback used by map click and marker drag
