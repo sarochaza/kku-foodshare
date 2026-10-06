@@ -61,6 +61,12 @@ public class PageController {
     return "notifications";
   }
 
+  @GetMapping("/members/{id}")
+  public String member(@PathVariable long id, Model m) {
+    m.addAttribute("memberId", id);
+    return "member-profile";
+  }
+
   @GetMapping("/admin")
   public String admin(Authentication a) {
     members.admin(CurrentIdentity.email(a));

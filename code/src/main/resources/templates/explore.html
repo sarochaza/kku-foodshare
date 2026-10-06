@@ -48,6 +48,7 @@
           ><label class="chip check-chip"
             ><input type="checkbox" id="available-now" /> รับได้ตอนนี้</label
           >
+          <span class="owner-filter" aria-label="ตัวกรองเจ้าของโพสต์"><button type="button" data-owner="mine">ของฉัน</button><button type="button" data-owner="others">ของคนอื่น</button></span>
         </div>
         <div class="view-switch" aria-label="มุมมอง">
           <button id="list-view" class="active" aria-label="แสดงรายการ">
@@ -59,11 +60,14 @@
           </button>
         </div>
       </div>
-      <section id="explore-map-shell" class="map-shell" hidden>
+      <section id="explore-map-shell" class="map-shell map-shell-rich" hidden>
         <div id="explore-map" class="map-canvas"></div>
-        <p class="map-caption" id="map-status">
-          เลือกหมุดเพื่อดูรายละเอียดอาหาร • แสดงได้สูงสุด 200 จุด
-        </p>
+        <aside class="explore-map-aside">
+          <span class="section-kicker">NEAR THE CAMPUS</span><h2>เลือกมื้อที่อยากแวะ</h2>
+          <p class="map-caption" id="map-status">เลือกหมุดเพื่อดูรายละเอียดอาหาร</p>
+          <div id="explore-map-list" class="explore-map-list"></div>
+          <button type="button" id="explore-map-full" class="btn btn-soft full">ขยายแผนที่</button>
+        </aside>
       </section>
       <div class="results-heading">
         <h2 id="result-count">อาหารที่พร้อมแบ่งปัน</h2>
