@@ -14,6 +14,10 @@
 - Reduced the visible home filters and made “รับได้ตอนนี้” a compact separate control; all original filter and sorting behavior remains available.
 - Moved the comment thread immediately after the image gallery on post detail. Home cards show a compact first-comment preview that links to the full thread.
 - Comments now notify the post owner with the commenter’s profile image, name and comment preview. Notification preferences collapse into one small expandable row and notification rows are compact.
+- Notifications are grouped in the UI as reservations, comments, interested food and other updates. Mobile layouts compact reservation cards, booking panels and owner-management controls without changing reservation or stock logic.
+- Home uses an image-led equal-card gallery layout: three columns on desktop, responsive columns on smaller screens, and a fixed square image area with `object-fit: cover` for every post regardless of source image dimensions.
+- Search now uses the equal-card gallery layout and includes a compact owner filter: all posts, my posts, or other members’ posts. The map view has a full map plus a compact nearby-food side list. Each card displays the owner avatar and links to a public member page listing that member’s non-cancelled sharing history.
+- Search and map initialization now tolerate a page that does not include optional map-only controls, so a missing map expansion button cannot stop the food feed from loading.
 
 ## Database migration
 
@@ -24,8 +28,8 @@
 From the folder that contains `compose.yaml`:
 
 ```powershell
-Copy-Item .env.example .env
-# fill APP_SECRET and DATABASE_PASSWORD in .env if it is a first-time setup
+$envFile = Get-ChildItem "C:\Users\CHOMP2O\OneDrive\เดสก์ท็อป\1\KKU-FoodShare-Phase6-FairBooking-Extension" -Filter .env -Recurse | Select-Object -First 1
+Copy-Item $envFile.FullName ".\.env" -Force
 docker compose -p kku-foodshare-phase1 up --build -d
 ```
 
@@ -37,6 +41,6 @@ Do not commit or include `.env` in a hand-off ZIP.
 
 - `node --check src/main/resources/static/js/app.js`
 - `node --check src/main/resources/static/js/ui.js`
-- `node --test src/test/js/*.test.mjs` — 32 passing
+- `node --test src/test/js/*.test.mjs` — 9 test files passing
 
 The current packaging environment does not contain Maven, so `mvn -o -B test` and the package command must be run in the normal project/Docker environment before release.

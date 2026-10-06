@@ -230,6 +230,7 @@ async function explore() {
       q: params.get("q") || "",
       category: params.get("category") || "",
       sort: params.get("sort") || "expiry",
+      ownership: params.get("ownership") || "",
       page: 0,
       now: params.get("now") === "true",
     },
@@ -242,6 +243,10 @@ async function explore() {
   $("#search").value = state.q;
   if ($("#sort")) $("#sort").value = state.sort;
   if ($("#available-now")) $("#available-now").checked = state.now;
+  const mapShell = $("#explore-map-shell");
+  const mapList = $("#explore-map-list");
+  const mapStatus = $("#map-status");
+  const mapFullButton = $("#explore-map-full");
   $$("#category-filters [data-category]").forEach(b => b.classList.toggle("active", b.dataset.category === state.category));
   const loadMap = async () => {
     if (!mapVisible) return;
@@ -256,15 +261,16 @@ async function explore() {
           }),
       );
       layer = markers(map, d.items, layer);
+      if (mapList) mapList.innerHTML = d.items.slice(0, 5).map(p => `<a class="explore-map-item" href="/posts/${p.id}">${p.imageUrl ? `<img src="${escape(p.imageUrl)}" alt="">` : `<span class="map-item-placeholder">${icon("food")}</span>`}<span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b>เหลือ ${p.availableQuantity} ${escape(p.unit)}</b></span></a>`).join("") || "<p class=field-note>ยังไม่มีรายการตามตัวกรองนี้</p>";
       if (coords.lat != null) {
         locationMarker = currentLocationMarker(map, coords, locationMarker);
         map.setView([coords.lat, coords.lng], 15);
       }
-      $("#map-status").textContent =
+      if (mapStatus) mapStatus.textContent =
         `พบ ${d.items.length} จุดแบ่งปัน • เลือกหมุดเพื่อดูรายละเอียด${d.totalElements > 200 ? " • แสดง 200 จุดแรก ลองค้นหาให้เจาะจงขึ้น" : ""}`;
       map.invalidateSize();
     } catch (e) {
-      $("#map-status").textContent = e.message;
+      if (mapStatus) mapStatus.textContent = e.message;
     }
   };
   const load = async () => {
@@ -279,7 +285,7 @@ async function explore() {
       $("#result-count").textContent =
         `อาหารพร้อมแบ่งปัน ${d.totalElements} รายการ`;
       $("#food-results").innerHTML = d.items.length
-        ? d.items.map(card).join("")
+        ? d.items.map(feedCard).join("")
         : empty(
             "ยังไม่เจอเมนูที่ค้นหา",
             "ลองเปลี่ยนคำค้นหรือตัวกรอง แล้วกลับมาดูอาหารจากเพื่อน ๆ อีกครั้ง",
@@ -289,6 +295,8 @@ async function explore() {
         state.page = n;
         load();
       });
+      hydrateFeedComments($("#food-results"));
+      wireFeedMenus($("#food-results"));
       await loadMap();
     } catch (e) {
       if (seq === requestSeq) errorBox($("#food-results"), e, load);
@@ -316,6 +324,13 @@ async function explore() {
     state.page = 0;
     load();
   };
+  $$('[data-owner]').forEach(button => button.onclick = () => {
+    if (!signedIn() && button.dataset.owner === "mine") { location.href = "/login"; return; }
+    state.ownership = state.ownership === button.dataset.owner ? "" : button.dataset.owner;
+    $$('[data-owner]').forEach(item => item.classList.toggle("active", item.dataset.owner === state.ownership));
+    state.page = 0; load();
+  });
+  $$('[data-owner]').forEach(item => item.classList.toggle("active", item.dataset.owner === state.ownership));
   const nearby = async () => {
     try {
       coords = await locate();
@@ -341,16 +356,29 @@ async function explore() {
   };
   function toggle(show) {
     mapVisible = show;
-    $("#explore-map-shell").hidden = !show;
-    $("#map-view").classList.toggle("active", show);
-    $("#list-view").classList.toggle("active", !show);
+    if (mapShell) mapShell.hidden = !show;
+    $("#map-view")?.classList.toggle("active", show);
+    $("#list-view")?.classList.toggle("active", !show);
     if (show) loadMap();
   }
-  $("#map-view").onclick = () => toggle(true);
-  $("#list-view").onclick = () => toggle(false);
-  $("#explore-map-shell").hidden = !mapVisible;
-  $("#map-view").classList.toggle("active", mapVisible);
-  $("#list-view").classList.toggle("active", !mapVisible);
+  $("#map-view")?.addEventListener("click", () => toggle(true));
+  $("#list-view")?.addEventListener("click", () => toggle(false));
+  mapFullButton?.addEventListener("click", () => { mapShell?.classList.toggle("map-expanded"); map?.invalidateSize(); });
+  if (mapShell) mapShell.hidden = !mapVisible;
+  $("#map-view")?.classList.toggle("active", mapVisible);
+  $("#list-view")?.classList.toggle("active", !mapVisible);
+  await load();
+}
+async function memberProfile() {
+  const id = Number(document.body.dataset.memberId), profile = $("#member-profile"), posts = $("#member-posts");
+  const load = async (page = 0) => {
+    try {
+      const [member, data] = await Promise.all([api(`/api/v1/members/${id}`), api(`/api/v1/members/${id}/posts?page=${page}`)]);
+      profile.innerHTML = `<img src="/api/v1/members/${member.id}/photo" alt=""><div><span class="section-kicker">KKU FOODSHARE MEMBER</span><h1>${escape(member.name)}</h1><p>ดูรายการอาหารที่สมาชิกคนนี้เคยแบ่งปัน</p></div>`;
+      posts.innerHTML = data.items.length ? data.items.map(feedCard).join("") : empty("ยังไม่มีประวัติการแบ่งปัน", "สมาชิกคนนี้ยังไม่มีโพสต์อาหารที่เปิดให้ดู", null);
+      hydrateFeedComments(posts); wireFeedMenus(posts); paginate(data, load);
+    } catch (e) { errorBox(profile, e, load); }
+  };
   await load();
 }
 async function detail() {
@@ -1011,6 +1039,7 @@ async function myPosts(page = 0) {
 }
 async function notifications(page = 0) {
   const el = $("#notification-list");
+  let selectedType = "ALL";
   try {
     const preferences = await api("/api/v1/me/notification-preferences");
     const preferenceForm = $("#notification-preference-form");
@@ -1020,19 +1049,19 @@ async function notifications(page = 0) {
       preferenceForm.onsubmit = e => { e.preventDefault(); busy($("button", preferenceForm), async () => { await api("/api/v1/me/notification-preferences", {method:"PUT", body:{categories: $$('input[name=categories]:checked', preferenceForm).map(i=>i.value), keywords: preferenceForm.elements.keywords.value}}); toast("บันทึกความสนใจแล้ว"); }); };
     }
     const d = await api("/api/v1/me/notifications?page=" + page);
-    el.innerHTML = d.items.length
-      ? d.items
+    const render = () => {
+      const items = selectedType === "ALL" ? d.items : d.items.filter(n => n.type === selectedType);
+      el.innerHTML = items.length
+      ? items
           .map(
             (n) =>
               `<article class="notification-card ${n.read ? "" : "unread"}"><img class="notification-avatar" src="${n.actorId ? `/api/v1/members/${n.actorId}/photo` : "/images/default-profile.png"}" alt=""><div><h3>${escape(n.actorName || n.title)}</h3><p>${escape(n.actorName ? n.message : n.title + " · " + n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}" aria-label="เปิดการแจ้งเตือน">เปิด</a></article>`,
-          )
-          .join("")
+          ).join("")
       : empty(
-          "ยังไม่มีการแจ้งเตือน",
-          "เมื่อมีความคืบหน้าการจอง เราจะแจ้งให้คุณทราบที่นี่",
+          selectedType === "ALL" ? "ยังไม่มีการแจ้งเตือน" : "ยังไม่มีรายการประเภทนี้",
+          "เมื่อมีความคืบหน้าการจองหรือการแบ่งปัน เราจะแจ้งให้คุณทราบที่นี่",
         );
-    paginate(d, notifications);
-    $$("[data-read]", el).forEach(
+      $$("[data-read]", el).forEach(
       (a) =>
         (a.onclick = async (e) => {
           e.preventDefault();
@@ -1045,7 +1074,11 @@ async function notifications(page = 0) {
             toast(e.message, true);
           }
         }),
-    );
+      );
+    };
+    $$("[data-notification-type]").forEach(button => button.onclick = () => { selectedType = button.dataset.notificationType; $$("[data-notification-type]").forEach(item => { const active = item === button; item.classList.toggle("active", active); item.setAttribute("aria-pressed", active); }); render(); });
+    render();
+    paginate(d, notifications);
   } catch (e) {
     errorBox(el, e, () => notifications(page));
   }
@@ -1155,6 +1188,7 @@ const boot = {
   editor,
   reservations,
   "my-posts": myPosts,
+  "member-profile": memberProfile,
   notifications,
   account,
   admin,
