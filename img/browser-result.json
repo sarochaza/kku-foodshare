@@ -1,0 +1,119 @@
+{
+  "journey": [
+    "Register and login owner",
+    "Create post, click real Leaflet coordinate, upload image and read persisted data",
+    "Search and matching map pin",
+    "Reserve through UI; private pickup code and stock deduction",
+    "Change reservation quantity",
+    "Owner confirms collection using receiver code",
+    "Edit profile",
+    "Persistent notifications",
+    "Tile failure notice and manual coordinate fallback",
+    "Denied geolocation recovery",
+    "Accessible dialog cancellation with empty required field"
+  ],
+  "viewports": [
+    {
+      "width": 360,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/posts/1",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/account/posts",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/posts/1",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/account/posts",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/posts/1",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/account/posts",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/posts/1",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/account/posts",
+      "overflow": false
+    }
+  ],
+  "javascriptErrors": [],
+  "result": "PASS"
+}

@@ -1,0 +1,20 @@
+services:
+  app:
+    environment:
+      APP_BASE_URL: https://${DOMAIN:?Set DOMAIN to your real hostname}
+      COOKIE_SECURE: "true"
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN to your real hostname}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+volumes:
+  caddy_data:
+  caddy_config:

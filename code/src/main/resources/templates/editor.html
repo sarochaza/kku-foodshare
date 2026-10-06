@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('แบ่งปันอาหาร')}"></head>
+  <body data-page="editor" th:attr="data-post-id=${postId}">
+    <header th:replace="~{fragments :: header('post')}"></header>
+    <main class="container page-main editor-main">
+      <a href="/account/posts" class="back-link">← โพสต์ของฉัน</a>
+      <div class="page-heading">
+        <span class="section-kicker">SHARE A MEAL, SHARE A SMILE</span>
+        <h1 th:text="${postId==0?'แบ่งปันอาหารดี ๆ':'แก้ไขโพสต์อาหาร'}"></h1>
+        <p>บอกรายละเอียดสักนิด แล้วส่งต่อมื้อดี ๆ ให้เพื่อนในชุมชน</p>
+      </div>
+      <form id="post-form" class="editor-layout">
+        <div>
+          <section class="panel form-panel">
+            <h2><span class="section-number">01</span> วันนี้มีอะไรแบ่งปัน?</h2>
+            <label class="upload-zone" id="upload-zone"
+              ><input
+                type="file"
+                id="food-photo"
+                accept="image/png,image/jpeg"
+              /><img id="photo-preview" alt="รูปอาหารที่เลือก" hidden /><span
+                class="upload-placeholder"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-camera"></use></svg
+                ><strong>เพิ่มรูปอาหารให้น่ารับ</strong
+                ><small>แตะเพื่อเลือกรูป JPG / PNG ไม่เกิน 5 MB</small></span
+              ></label
+            ><label
+              >ชื่ออาหาร <span class="required">*</span
+              ><input
+                name="title"
+                maxlength="150"
+                required
+                placeholder="เช่น ข้าวกะเพราไข่ดาว จากงานประชุม"
+            /></label>
+            <div class="form-row">
+              <label
+                >ประเภทอาหาร <span class="required">*</span
+                ><select name="category">
+                  <option value="FOOD">🍱 อาหาร</option>
+                  <option value="DRINK">🥤 เครื่องดื่ม</option>
+                  <option value="SNACK">🥐 ของว่าง</option>
+                </select></label
+              >
+              <div class="form-row quantity-row">
+                <label
+                  >จำนวน <span class="required">*</span
+                  ><input
+                    name="quantity"
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value="1"
+                    required /></label
+                ><label
+                  >หน่วย <span class="required">*</span
+                  ><input
+                    name="unit"
+                    maxlength="50"
+                    value="กล่อง"
+                    required
+                    placeholder="กล่อง / ชิ้น"
+                /></label>
+              </div>
+            </div>
+            <label
+              >รายละเอียด <span class="required">*</span
+              ><textarea
+                name="description"
+                maxlength="1000"
+                rows="4"
+                required
+                placeholder="บอกสภาพอาหาร เวลาที่ปรุง และสิ่งที่ผู้รับควรรู้"
+              ></textarea></label
+            ><label
+              >ส่วนผสมที่อาจทำให้แพ้ <small>(ถ้าทราบ)</small
+              ><input
+                name="allergens"
+                maxlength="500"
+                placeholder="เช่น ไข่ นม ถั่ว หรืออาหารทะเล"
+            /></label>
+          </section>
+          <section class="panel form-panel">
+            <h2><span class="section-number">02</span> นัดรับเวลาไหนดี?</h2>
+            <div class="form-row">
+              <label
+                >เริ่มรับได้ <span class="required">*</span
+                ><input
+                  type="datetime-local"
+                  name="availableFrom"
+                  required /></label
+              ><label
+                >รับภายใน <span class="required">*</span
+                ><input type="datetime-local" name="availableUntil" required
+              /></label>
+            </div>
+            <p class="field-note">
+              เวลาประเทศไทย • กรุณาเลือกช่วงที่สะดวกส่งมอบอาหาร
+            </p>
+            <div class="info-note">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-shield"></use>
+              </svg>
+              <span
+                >แบ่งปันเฉพาะอาหารที่ยังปลอดภัย
+                พร้อมแจ้งข้อมูลการเก็บรักษาให้ผู้รับทราบ</span
+              >
+            </div>
+          </section>
+        </div>
+        <aside>
+          <section class="panel form-panel map-panel">
+            <h2><span class="section-number">03</span> ปักหมุดจุดรับ</h2>
+            <p class="field-note">แตะบนแผนที่หรือลากหมุดเพื่อเลือกจุดนัดรับ</p>
+            <div id="editor-map" class="editor-map"></div>
+            <button type="button" id="use-location" class="btn btn-soft full">
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-locate"></use>
+              </svg>
+              ใช้ตำแหน่งปัจจุบัน
+            </button>
+            <p id="pin-status" class="field-note" role="status">
+              ยังไม่ได้เลือกตำแหน่ง
+            </p>
+            <details class="manual-coordinates">
+              <summary>กรอกพิกัดด้วยตัวเอง</summary>
+              <p class="field-note">
+                ใช้ละติจูดและลองจิจูดจากจุดนัดรับบนแอปแผนที่
+              </p>
+              <div class="form-row">
+                <label
+                  >ละติจูด<input
+                    name="latitude"
+                    type="number"
+                    step="any"
+                    min="-90"
+                    max="90"
+                    required
+                    placeholder="16.4745" /></label
+                ><label
+                  >ลองจิจูด<input
+                    name="longitude"
+                    type="number"
+                    step="any"
+                    min="-180"
+                    max="180"
+                    required
+                    placeholder="102.8237"
+                /></label>
+              </div>
+              <button
+                id="apply-coordinates"
+                type="button"
+                class="btn btn-white btn-sm"
+              >
+                แสดงหมุดตามพิกัด
+              </button>
+            </details>
+            <label
+              >ชื่อจุดรับ / คำแนะนำ <span class="required">*</span
+              ><input
+                name="pickupLocationName"
+                maxlength="255"
+                required
+                placeholder="เช่น โต๊ะหน้าหอสมุดฝั่งประตูหลัก"
+            /></label>
+          </section>
+          <div class="editor-submit">
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <button
+              class="btn btn-primary btn-lg full"
+              type="submit"
+              id="save-post"
+            >
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-plus"></use>
+              </svg>
+              เผยแพร่โพสต์อาหาร
+            </button>
+            <p class="field-note center">ข้อมูลจะปรากฏให้สมาชิกในชุมชนเห็น</p>
+          </div>
+        </aside>
+      </form>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

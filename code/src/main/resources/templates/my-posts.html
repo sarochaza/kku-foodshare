@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('โพสต์ของฉัน')}"></head>
+  <body data-page="my-posts">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main">
+      <div class="page-heading heading-with-action">
+        <div>
+          <span class="section-kicker">YOUR LITTLE ACTS OF KINDNESS</span>
+          <h1>โพสต์อาหารของฉัน</h1>
+          <p>จัดการอาหารที่แบ่งปัน และยืนยันการส่งมอบให้เพื่อน</p>
+        </div>
+        <a class="btn btn-primary" href="/posts/new"
+          ><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+          แบ่งปันเพิ่ม</a
+        >
+      </div>
+      <div id="my-posts" class="managed-posts" aria-live="polite">
+        <div class="loading-box">กำลังโหลดโพสต์…</div>
+      </div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

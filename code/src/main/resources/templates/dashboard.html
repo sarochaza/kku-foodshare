@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('อาหารใกล้คุณ')}"></head>
+  <body data-page="dashboard">
+    <header th:replace="~{fragments :: header('explore')}"></header>
+    <main class="container page-main">
+      <section class="page-hero">
+        <div>
+          <span class="eyebrow">A LITTLE CLOSER, A LITTLE KINDER</span>
+          <h1>มื้อดี ๆ <span>อยู่ใกล้คุณ</span></h1>
+          <p>เลือกอาหารที่ถูกใจ จองไว้ แล้วแวะไปรับได้เลย</p>
+          <span class="location-label"
+            ><svg class="icon" aria-hidden="true">
+              <use href="#i-pin"></use>
+            </svg>
+            ชุมชนมหาวิทยาลัยขอนแก่น</span
+          >
+        </div>
+        <img src="/images/mascot_landing.webp" alt="" class="page-mascot" />
+      </section>
+      <form id="search-form" class="search-toolbar">
+        <label class="search-input"
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-search"></use></svg
+          ><input
+            id="search"
+            name="q"
+            placeholder="ค้นหาชื่ออาหาร หรือจุดรับอาหาร…"
+            aria-label="ค้นหาอาหาร" /></label
+        ><button class="btn btn-primary" type="submit">ค้นหา</button
+        ><button class="btn btn-white" type="button" id="nearby-button">
+          <svg class="icon" aria-hidden="true">
+            <use href="#i-locate"></use>
+          </svg>
+          ใกล้ฉัน
+        </button>
+      </form>
+      <div class="filter-row">
+        <div class="chips" id="category-filters">
+          <button data-category="" class="chip active" type="button">
+            ทั้งหมด</button
+          ><button data-category="FOOD" class="chip" type="button">
+            🍱 อาหาร</button
+          ><button data-category="DRINK" class="chip" type="button">
+            🥤 เครื่องดื่ม</button
+          ><button data-category="SNACK" class="chip" type="button">
+            🥐 ของว่าง</button
+          ><label class="chip check-chip"
+            ><input type="checkbox" id="available-now" /> รับได้ตอนนี้</label
+          >
+        </div>
+        <div class="view-switch" aria-label="มุมมอง">
+          <button id="list-view" class="active" aria-label="แสดงรายการ">
+            <svg class="icon" aria-hidden="true">
+              <use href="#i-grid"></use>
+            </svg></button
+          ><button id="map-view" aria-label="แสดงแผนที่">
+            <svg class="icon" aria-hidden="true"><use href="#i-map"></use></svg>
+          </button>
+        </div>
+      </div>
+      <section id="explore-map-shell" class="map-shell" hidden>
+        <div id="explore-map" class="map-canvas"></div>
+        <p class="map-caption" id="map-status">
+          เลือกหมุดเพื่อดูรายละเอียดอาหาร • แสดงได้สูงสุด 200 จุด
+        </p>
+      </section>
+      <div class="results-heading">
+        <h2 id="result-count">อาหารที่พร้อมแบ่งปัน</h2>
+        <label
+          >เรียงตาม
+          <select id="sort">
+            <option value="expiry">หมดเวลารับก่อน</option>
+            <option value="latest">โพสต์ล่าสุด</option>
+            <option value="nearby">ใกล้ฉัน</option>
+          </select></label
+        >
+      </div>
+      <div id="food-results" class="food-grid" aria-live="polite">
+        <div class="loading-box">กำลังโหลดรายการอาหาร…</div>
+      </div>
+      <nav
+        class="pagination"
+        id="pagination"
+        aria-label="หน้ารายการอาหาร"
+      ></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

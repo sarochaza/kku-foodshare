@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('สมัครสมาชิก')}"></head>
+  <body data-page="register">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container auth-layout">
+      <aside class="auth-art">
+        <span class="eyebrow">A COMMUNITY THAT CARES</span>
+        <h2>มื้อเล็ก ๆ ของเรา<br /><span>ความสุขใหญ่ ๆ ของใคร</span></h2>
+        <p>เริ่มต้นเรื่องราวดี ๆ ด้วยการแบ่งปัน</p>
+        <img src="/images/register-mascot.webp" alt="มาสคอต FoodShare" />
+        <div class="auth-art-bottom">
+          <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          KKU FOODSHARE COMMUNITY
+        </div>
+      </aside>
+      <section class="auth-form-panel">
+        <span class="auth-symbol"
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+        ></span>
+        <h1>เริ่มแบ่งปันสิ่งดี ๆ</h1>
+        <p class="auth-subtitle">สร้างบัญชี แล้วมาเป็นส่วนหนึ่งของชุมชน</p>
+        <p th:if="${error}" th:text="${error}" class="form-error"></p>
+        <form
+          th:action="@{/register}"
+          th:object="${registerRequest}"
+          method="post"
+          class="auth-form"
+        >
+          <label
+            >ชื่อที่แสดง<input
+              th:field="*{displayName}"
+              maxlength="80"
+              required
+              autocomplete="name"
+              placeholder="อยากให้เพื่อนเรียกคุณว่าอะไร" /><small
+              class="field-error"
+              th:errors="*{displayName}"
+            ></small></label
+          ><label
+            >อีเมล<input
+              type="email"
+              th:field="*{email}"
+              required
+              maxlength="254"
+              autocomplete="email"
+              placeholder="your@email.com" /><small
+              class="field-error"
+              th:errors="*{email}"
+            ></small></label
+          ><label
+            >รหัสผ่าน<input
+              type="password"
+              th:field="*{password}"
+              minlength="8"
+              maxlength="72"
+              required
+              autocomplete="new-password"
+              placeholder="อย่างน้อย 8 ตัวอักษร" /><small
+              class="field-error"
+              th:errors="*{password}"
+            ></small></label
+          ><button class="btn btn-primary btn-lg full" type="submit">
+            สร้างบัญชี FoodShare
+            <svg class="icon" aria-hidden="true">
+              <use href="#i-arrow"></use>
+            </svg>
+          </button>
+        </form>
+        <p class="auth-bottom">
+          มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a>
+        </p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

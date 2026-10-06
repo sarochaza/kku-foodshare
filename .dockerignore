@@ -1,0 +1,11 @@
+**/target
+**/node_modules
+**/.git
+.env
+.env.*
+!.env.example
+**/uploads
+**/*.zip
+**/*.log
+.superpowers
+tmp

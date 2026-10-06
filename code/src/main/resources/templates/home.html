@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('แบ่งปันอาหาร เติมรอยยิ้ม')}"></head>
+  <body data-page="home">
+    <header th:replace="~{fragments :: header('home')}"></header>
+    <main>
+      <section class="landing-hero">
+        <div class="container hero-layout">
+          <div class="hero-copy">
+            <span class="eyebrow"
+              ><svg class="icon" aria-hidden="true">
+                <use href="#i-leaf"></use>
+              </svg>
+              GOOD FOOD. GOOD COMMUNITY.</span
+            >
+            <h1>
+              อาหารดี ๆ<br />มีไว้<span class="highlight"
+                >แบ่งปัน<svg viewBox="0 0 300 20" aria-hidden="true">
+                  <path d="M5 14Q140-5 295 9" /></svg
+              ></span>
+            </h1>
+            <p>
+              มื้อที่เหลือของเรา อาจเป็นมื้อที่ใช่ของใคร<br />มาร่วมแบ่งปันอาหารดี
+              ๆ และลดการทิ้ง<br
+                class="desktop-break"
+              />ไปด้วยกันในชุมชนมหาวิทยาลัยขอนแก่น
+            </p>
+            <div class="hero-buttons">
+              <a href="/explore" class="btn btn-primary btn-lg"
+                >ค้นหาอาหารใกล้ฉัน
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-arrow"></use></svg></a
+              ><a href="/posts/new" class="btn btn-white btn-lg"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-plus"></use>
+                </svg>
+                เริ่มแบ่งปัน</a
+              >
+            </div>
+            <div class="hero-reassurance">
+              <span
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-check"></use>
+                </svg>
+                แบ่งปันฟรี</span
+              ><span
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-check"></use>
+                </svg>
+                นัดรับใกล้คุณ</span
+              ><span
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-check"></use>
+                </svg>
+                ดีต่อโลก</span
+              >
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="hero-orbit"></div>
+            <img
+              class="hero-food"
+              src="/images/food-basil-rice.webp"
+              alt="ภาพอาหารสำหรับแนะนำการแบ่งปัน"
+            /><img
+              class="hero-sandwich"
+              src="/images/food-sandwich.webp"
+              alt=""
+            />
+            <div class="floating-note note-top">
+              <span class="note-icon"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-heart"></use></svg
+              ></span>
+              <div>
+                <strong>ความอิ่มที่ส่งต่อได้</strong
+                ><small>เริ่มต้นจากการแบ่งปันเล็ก ๆ</small>
+              </div>
+            </div>
+            <div class="floating-note note-bottom">
+              <span>🌱</span>
+              <div>
+                <strong>อิ่มท้อง อิ่มใจ</strong
+                ><small>ให้ทุกมื้อมีความหมาย</small>
+              </div>
+            </div>
+            <span class="art-spark spark-one">✳</span
+            ><span class="art-spark spark-two">✦</span>
+          </div>
+        </div>
+      </section>
+      <section class="container section">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">FRESH FROM OUR COMMUNITY</span>
+            <h2>มีอาหารดี ๆ รอแบ่งปัน</h2>
+            <p>ค้นหามื้ออร่อย แล้วนัดรับในเวลาที่สะดวก</p>
+          </div>
+          <a href="/explore" class="text-link"
+            >ดูอาหารทั้งหมด
+            <svg class="icon" aria-hidden="true">
+              <use href="#i-arrow"></use></svg
+          ></a>
+        </div>
+        <div id="home-food" class="food-grid" aria-live="polite">
+          <div class="loading-box">กำลังค้นหาอาหารที่แบ่งปัน…</div>
+        </div>
+      </section>
+      <section class="how-section" id="how">
+        <div class="container">
+          <div class="section-heading centered">
+            <div>
+              <span class="section-kicker">SHARING IS SIMPLE</span>
+              <h2>จากหนึ่งมื้อ สู่รอยยิ้มอีกหนึ่งคน</h2>
+              <p>แบ่งปันง่าย ๆ ใน 3 ขั้นตอน</p>
+            </div>
+          </div>
+          <div class="steps-grid">
+            <article>
+              <span class="step-number">01</span>
+              <div class="step-icon blue">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-search"></use>
+                </svg>
+              </div>
+              <h3>หาอาหารที่ถูกใจ</h3>
+              <p>เลือกรายการที่อยากรับ<br />ดูจำนวนและเวลานัดรับบนแผนที่</p>
+            </article>
+            <article>
+              <span class="step-number">02</span>
+              <div class="step-icon green">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-bag"></use>
+                </svg>
+              </div>
+              <h3>จองมื้อของคุณ</h3>
+              <p>ระบุจำนวนที่ต้องการ<br />ระบบจะเก็บรหัสรับอาหารให้คุณ</p>
+            </article>
+            <article>
+              <span class="step-number">03</span>
+              <div class="step-icon peach">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-heart"></use>
+                </svg>
+              </div>
+              <h3>นัดรับ แล้วส่งต่อรอยยิ้ม</h3>
+              <p>ไปตามหมุดในเวลานัดรับ<br />แสดงรหัสให้ผู้แบ่งปันยืนยัน</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="container section">
+        <div class="share-banner">
+          <div>
+            <span class="eyebrow">SMALL ACTION, BIG KINDNESS</span>
+            <h2>มีอาหารเหลืออยู่ไหม?<br />ส่งต่อความอร่อยกันเถอะ</h2>
+            <p>
+              อาหารจากงานประชุม ขนม หรือผลไม้ที่ยังทานได้<br />มื้อเล็ก ๆ
+              ของคุณสร้างรอยยิ้มได้มากกว่าที่คิด
+            </p>
+            <a class="btn btn-primary" href="/posts/new"
+              ><svg class="icon" aria-hidden="true">
+                <use href="#i-plus"></use>
+              </svg>
+              แบ่งปันอาหารเลย</a
+            >
+          </div>
+          <img
+            src="/images/register-mascot.webp"
+            alt="มาสคอต KKU FoodShare"
+            loading="lazy"
+          />
+        </div>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

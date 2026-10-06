@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('จัดการชุมชน')}"></head>
+  <body data-page="admin">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main">
+      <div class="page-heading">
+        <span class="section-kicker">COMMUNITY CARE</span>
+        <h1>ดูแลชุมชน FoodShare</h1>
+        <p>ตรวจสอบรายงานอย่างเป็นธรรม ทุกการดำเนินการมีการบันทึก</p>
+      </div>
+      <div class="chips admin-tabs">
+        <button class="chip active" data-admin-tab="reports">รายงานโพสต์</button
+        ><button class="chip" data-admin-tab="users">สมาชิก</button>
+      </div>
+      <div id="admin-content" class="admin-content"></div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

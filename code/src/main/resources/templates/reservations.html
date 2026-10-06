@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('การจองของฉัน')}"></head>
+  <body data-page="reservations">
+    <header th:replace="~{fragments :: header('reservations')}"></header>
+    <main class="container page-main narrow">
+      <div class="page-heading">
+        <span class="section-kicker">YOUR NEXT GOOD MEAL</span>
+        <h1>การจองของฉัน</h1>
+        <p>มื้อที่คุณจองไว้ พร้อมรหัสสำหรับรับอาหาร</p>
+      </div>
+      <div class="info-note">
+        <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg
+        ><span
+          >อย่าลืมไปรับในเวลาที่กำหนด หากไม่สะดวก
+          ยกเลิกเพื่อส่งต่อโอกาสให้เพื่อน</span
+        >
+      </div>
+      <div id="reservation-list" class="reservation-list" aria-live="polite">
+        <div class="loading-box">กำลังโหลดการจอง…</div>
+      </div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

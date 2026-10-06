@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('การแจ้งเตือน')}"></head>
+  <body data-page="notifications">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main narrow">
+      <div class="page-heading">
+        <span class="section-kicker">A LITTLE UPDATE FOR YOU</span>
+        <h1>การแจ้งเตือน</h1>
+        <p>ติดตามการจองและเรื่องราวการแบ่งปันของคุณ</p>
+      </div>
+      <div
+        id="notification-list"
+        class="notification-list"
+        aria-live="polite"
+      ></div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

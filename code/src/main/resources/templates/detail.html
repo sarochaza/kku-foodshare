@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('รายละเอียดอาหาร')}"></head>
+  <body data-page="detail" th:attr="data-post-id=${postId}">
+    <header th:replace="~{fragments :: header('explore')}"></header>
+    <main class="container page-main">
+      <a href="/explore" class="back-link">← กลับไปเลือกอาหาร</a>
+      <div id="food-detail" aria-live="polite">
+        <div class="loading-box">กำลังโหลดรายละเอียด…</div>
+      </div>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>
