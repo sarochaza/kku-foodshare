@@ -29,6 +29,7 @@
         <div class="success-note" th:if="${param.registered}">
           สมัครสำเร็จ เข้าสู่ระบบเพื่อเริ่มแบ่งปันได้เลย
         </div>
+        <div class="success-note" th:if="${param.resetSuccess}">ตั้งรหัสผ่านใหม่สำเร็จแล้ว เข้าสู่ระบบด้วยรหัสผ่านใหม่ได้เลย</div>
         <form th:action="@{/login}" method="post" class="auth-form">
           <label
             >อีเมล<input

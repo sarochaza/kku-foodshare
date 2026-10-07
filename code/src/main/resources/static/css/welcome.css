@@ -1,0 +1,144 @@
+/* Landing polish is scoped so existing food, QR and owner screens keep their layout. */
+.site-header { background: #ffffffed; backdrop-filter: blur(16px); }
+.header-inner { gap: 24px; }
+.desktop-nav { gap: 20px; }
+.desktop-nav a { min-height: 44px; transition: color .18s ease; }
+.desktop-nav a.active:after { width: 24px; transition: width .18s ease; }
+.login-link { display: inline-flex; align-items: center; min-height: 44px; }
+.welcome-page { --ink: #173b55; --blue: #1688ee; --green: #238968; background: #fcfefd; }
+.welcome-page .landing-hero {
+  position: relative; padding: 64px 0 70px;
+  background: radial-gradient(ellipse at 80% 20%, #cfefff 0%, transparent 55%),
+    radial-gradient(ellipse at 12% 90%, #ddf6e9 0%, transparent 48%), #f4fbff;
+  border-bottom: 1px solid #dfefe9;
+}
+.welcome-page .landing-hero:before {
+  content: ''; position: absolute; width: 330px; height: 330px; border-radius: 50%;
+  left: -270px; top: 45px; background: #c9ebfd; pointer-events: none;
+}
+.welcome-page .hero-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr); gap: 38px; }
+.welcome-page .hero-copy { min-width: 0; position: relative; z-index: 1; }
+.welcome-page .hero-copy .eyebrow {
+  padding: 8px 15px; border: 1px solid #cce6f8; background: #e5f4ff;
+  border-radius: 999px; color: #167ed0; font-size: 13px; letter-spacing: .2px;
+}
+.welcome-page .hero-copy h1 { font-size: clamp(34px, 3.65vw, 54px); line-height: 1.45; letter-spacing: -1px; margin: 20px 0 18px; }
+.welcome-page .highlight { color: #0886e8; }
+.welcome-page .hero-copy > p { font-size: 16px; line-height: 1.85; }
+.welcome-page .hero-copy > .guest-hero-caption { font-size: 13px; color: #477a89; margin-top: 10px; }
+.welcome-page .home-search { max-width: 550px; margin-top: 22px; background: #fff; border: 1px solid #d5e7ef; border-radius: 18px; box-shadow: 0 9px 28px #255f8010; }
+.welcome-page .home-search input { min-width: 0; font-size: 13px; }
+.welcome-page .home-search button { min-width: 64px; min-height: 44px; border-radius: 12px; padding-inline: 12px; }
+.welcome-page .hero-buttons { flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.welcome-page .hero-buttons .btn { min-height: 50px; padding: 12px 22px; border-radius: 999px; font-size: 15px; }
+.welcome-page .btn-primary { background: linear-gradient(135deg, #1197fa, #347ce2); box-shadow: 0 7px 18px #1688ee25, inset 0 1px 0 #ffffff40; }
+.welcome-page .hero-buttons .btn-white { border-color: #9ed1f5; color: #167ed0; background: #ffffffc9; }
+.welcome-share-link { flex-basis: 100%; color: #287c63; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; min-height: 44px; display: flex; align-items: center; }
+.welcome-page .hero-reassurance { flex-wrap: wrap; gap: 10px 18px; color: #456778; }
+.welcome-page .guest-account-entry { margin-top: 14px; gap: 12px; }
+.welcome-page .guest-account-entry .btn { border-radius: 999px; min-height: 44px; font-size: 13px; }
+.welcome-page .guest-login { font-size: 13px; }
+.welcome-page .welcome-art { height: auto; min-width: 0; position: relative; padding: 18px 0 30px; }
+.welcome-illustration { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 38px 38px 90px 38px; border: 7px solid #ffffffc0; box-shadow: 0 25px 55px #24608a18; }
+.welcome-page .floating-note { border: 1px solid #fff; background: #ffffffeb; box-shadow: 0 10px 28px #2a6c8018; padding: 13px 17px; border-radius: 18px; }
+.welcome-page .note-top { left: -12px; top: 0; transform: rotate(-3deg); animation: welcome-float 6s ease-in-out infinite; }
+.welcome-page .note-bottom { bottom: 12px; right: 0; transform: rotate(2deg); animation: welcome-float 7s ease-in-out infinite reverse; }
+.welcome-page .spark-two { top: -24px; right: 12px; color: #96be60; font-size: 32px; }
+.welcome-page .guest-start { padding-top: 46px; padding-bottom: 36px; }
+.welcome-page .guest-start-heading { text-align: center; }
+.welcome-page .guest-role-grid { gap: 20px; }
+.welcome-page .guest-role-grid article { background: linear-gradient(135deg, #fff, #f1f9ff); border-color: #dcebf1; padding: 28px; box-shadow: 0 10px 28px #315a7110; border-radius: 24px; transition: transform .2s, box-shadow .2s; }
+.welcome-page .guest-role-grid article:nth-child(2) { background: linear-gradient(135deg, #fff, #effaf2); }
+.welcome-page .guest-role-grid article:hover { transform: translateY(-3px); box-shadow: 0 15px 35px #315a7118; }
+.welcome-page .guest-role-icon { border-radius: 16px; box-shadow: inset 0 1px 0 #fff; }
+.welcome-page .guest-role-grid a { display: inline-flex; align-items: center; min-height: 44px; border-radius: 999px; padding: 8px 17px; background: #e7f2ff; color: #246fb4; }
+.welcome-page .guest-role-grid article:nth-child(2) a { background: #e2f4e8; color: #257b59; }
+.welcome-page .guest-safety { border: 1px solid #e1eee5; background: #f4faf5; border-radius: 16px; padding: 14px 18px; }
+.welcome-page .home-discover { padding-top: 32px; }
+.welcome-page .home-map-item { grid-template-columns: 58px minmax(0, 1fr); }
+.welcome-page .section { padding-block: 48px; }
+.welcome-page .how-section { background: linear-gradient(160deg, #f0f9ff, #f0faf4); border-block: 1px solid #e1eee9; }
+.welcome-page .steps-grid article { background: #ffffffc9; border: 1px solid #deeceb; padding: 25px 20px; border-radius: 24px; box-shadow: 0 8px 24px #29526909; }
+.welcome-page .share-banner { border: 1px solid #dcebe3; border-radius: 30px; background: linear-gradient(120deg, #eaf7f1, #eef8ff); }
+.welcome-faq { max-width: 860px; padding-top: 12px; padding-bottom: 58px; }
+.welcome-faq-list { display: grid; gap: 12px; }
+.welcome-faq details { border: 1px solid #deebe8; border-radius: 18px; background: white; box-shadow: 0 5px 20px #294f6506; overflow: hidden; }
+.welcome-faq summary { list-style: none; min-height: 56px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 14px; font-weight: 500; cursor: pointer; }
+.welcome-faq summary::-webkit-details-marker { display: none; }
+.welcome-faq summary:after { content: '+'; color: #1688ee; font-size: 23px; font-weight: 400; }
+.welcome-faq details[open] summary:after { content: '−'; }
+.welcome-faq details[open] { background: #f8fcff; border-color: #c3e1f3; }
+.welcome-faq details p { padding: 0 20px 20px; font-size: 14px; line-height: 1.9; }
+.welcome-faq summary:focus-visible { outline: 3px solid #347ce280; outline-offset: -4px; border-radius: 18px; }
+.welcome-closing { text-align: center; font-size: 13px; margin-top: 32px; color: #568271; }
+.welcome-closing .icon { color: #51a284; width: 17px; }
+@keyframes welcome-float { 50% { translate: 0 -6px; } }
+@media (max-width: 1100px) {
+  .header-inner { gap: 16px; }
+  .desktop-nav { gap: 14px; font-size: 13px; }
+  .header-post { padding-inline: 14px; font-size: 13px; }
+  .welcome-page .hero-layout { gap: 26px; }
+  .welcome-page .floating-note { padding: 10px 12px; }
+}
+@media (max-width: 900px) {
+  .desktop-nav { display: none; }
+  .header-actions { margin-left: auto; }
+  .welcome-page .hero-layout { grid-template-columns: 1fr; gap: 28px; }
+  .welcome-page .hero-copy { max-width: 620px; }
+  .welcome-page .hero-copy h1 { font-size: clamp(34px, 6vw, 48px); }
+  .welcome-page .welcome-art { width: min(620px, 100%); margin: 0 auto; }
+  .welcome-page .landing-hero { padding: 36px 0 34px; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .header-inner { height: auto; flex-wrap: wrap; gap: 6px 16px; padding-block: 12px 4px; }
+  .desktop-nav { display: flex; order: 3; flex-basis: 100%; margin-left: 0; justify-content: center; gap: 28px; }
+  .desktop-nav a { padding: 10px 0 14px; }
+  .desktop-nav a.active:after { bottom: 5px; }
+}
+@media (min-width: 901px) and (max-width: 1050px) {
+  .header-inner { gap: 12px; }
+  .brand { font-size: 24px; gap: 8px; }
+  .desktop-nav { gap: 12px; font-size: 12px; }
+  .header-actions { gap: 8px; }
+  .header-post { padding-inline: 10px; font-size: 12px; }
+}
+@media (max-width: 600px) {
+  .header-inner { gap: 10px; }
+  .header-actions .icon-button { min-width: 44px; min-height: 44px; }
+  .account-link { min-width: 44px; min-height: 44px; justify-content: center; }
+  .welcome-page .hero-copy h1 { font-size: clamp(29px, 7.7vw, 44px); margin: 16px 0 14px; letter-spacing: -.5px; }
+  .welcome-page .hero-copy > p { font-size: 14px; }
+  .welcome-page .hero-copy > .guest-hero-caption { font-size: 12px; }
+  .welcome-page .hero-copy .eyebrow { font-size: 12px; padding: 6px 12px; }
+  .welcome-page .hero-buttons .btn { padding: 11px 15px; min-height: 48px; font-size: 13px; flex: 1 1 120px; }
+  .welcome-page .home-search { padding: 6px; gap: 5px; margin-top: 16px; }
+  .welcome-page .home-search .icon { width: 18px; margin-left: 5px; }
+  .welcome-page .home-search input { font-size: 12px; padding-inline: 3px; }
+  .welcome-page .hero-reassurance { gap: 7px 12px; font-size: 11px; }
+  .welcome-page .guest-account-entry { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .welcome-page .guest-login { font-size: 12px; }
+  .welcome-page .welcome-art { margin-top: 0; padding: 12px 0 24px; }
+  .welcome-illustration { border-radius: 24px 24px 58px 24px; border-width: 4px; }
+  .welcome-page .floating-note { gap: 8px; padding: 9px 12px; }
+  .welcome-page .floating-note strong { font-size: 12px; }
+  .welcome-page .floating-note small { font-size: 10px; }
+  .welcome-page .note-icon { width: 30px; height: 30px; }
+  .welcome-page .note-top { left: 0; top: 0; }
+  .welcome-page .note-bottom { display: flex; bottom: 4px; right: 0; }
+  .welcome-page .note-bottom > span { font-size: 22px; }
+  .welcome-page .spark-two { display: none; }
+  .welcome-page .guest-start { padding-top: 30px; padding-bottom: 18px; }
+  .welcome-page .guest-role-grid article { padding: 20px; border-radius: 20px; }
+  .welcome-page .guest-role-grid { gap: 14px; }
+  .welcome-page .section { padding-block: 32px; }
+  .welcome-page .home-discover { padding-top: 24px; }
+  .welcome-page .share-banner { border-radius: 22px; }
+  .welcome-faq { padding-bottom: 36px; }
+  .welcome-faq summary { padding-inline: 16px; font-size: 14px; }
+  .welcome-faq details p { padding-inline: 16px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .welcome-page .floating-note { animation: none; }
+  .welcome-page .guest-role-grid article, .desktop-nav a, .welcome-page .btn { transition: none; }
+}
