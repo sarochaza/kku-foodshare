@@ -37,7 +37,8 @@ class WebPagesTest {
         .andExpect(content().string(org.hamcrest.Matchers.containsString("สร้างสังคมที่ยั่งยืน")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("/images/welcome-community.webp")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("data-nav=\"map\"")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"home-page-size\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("id=\"home-page-size\""))))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"comments-dialog\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"image-viewer\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"guest-start\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("สร้างบัญชีฟรี")))
@@ -50,6 +51,29 @@ class WebPagesTest {
     mvc.perform(get("/home"))
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrl("/"));
+  }
+
+  @Test
+  void signedInHomeAndDashboardOpenFoodDiscoveryWithoutLandingHero() throws Exception {
+    User member = new User();
+    member.setEmail("signed-in-home@test.local");
+    member.setPassword("unused");
+    member.setDisplayName("Signed In Home Tester");
+    users.saveAndFlush(member);
+
+    mvc.perform(get("/").with(user(member.getEmail()).roles("USER")))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/explore"));
+    mvc.perform(get("/home").with(user(member.getEmail()).roles("USER")))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("มื้อดี ๆ"))))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"explore-map\"")));
+    mvc.perform(get("/explore").with(user(member.getEmail()).roles("USER")))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("มื้อดี ๆ"))))
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("data-nav=\"home\""))))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("data-nav=\"editor\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"explore-map\"")));
   }
 
   @Test
@@ -106,7 +130,7 @@ class WebPagesTest {
     user.setDisplayName("Profile Menu Tester");
     users.saveAndFlush(user);
 
-    mvc.perform(get("/").with(user(user.getEmail()).roles("USER")))
+    mvc.perform(get("/explore").with(user(user.getEmail()).roles("USER")))
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.containsString("profile-menu-button")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"profile-menu\"")))
@@ -114,8 +138,26 @@ class WebPagesTest {
         .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/account/posts\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/notifications\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("action=\"/logout\"")));
-    mvc.perform(get("/").with(user(user.getEmail()).roles("USER")))
+    mvc.perform(get("/explore").with(user(user.getEmail()).roles("USER")))
         .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("id=\"guest-start\""))));
+  }
+
+  @Test
+  @Transactional
+  void dashboardAndExploreRenderTheSameSharingMapWithSidebarAndPreview() throws Exception {
+    User member = new User();
+    member.setEmail("shared-map-page@test.local");
+    member.setPassword("unused");
+    member.setDisplayName("Shared Map Tester");
+    users.saveAndFlush(member);
+    for (String path : new String[] {"/home", "/explore"}) {
+      mvc.perform(get(path).param("view", "map").with(user(member.getEmail()).roles("USER")))
+          .andExpect(status().isOk())
+          .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"map-shell map-shell-rich\"")))
+          .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"explore-map-aside\"")))
+          .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"explore-map-preview\"")))
+          .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"manual-location-button\"")));
+    }
   }
 
   @Test

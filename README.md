@@ -1,4 +1,4 @@
-> รุ่นล่าสุด: Phase 5 Quick Actions — ดู [วิธีรันและสิ่งที่เปลี่ยน](PHASE5-QUICK-ACTIONS-NOTES.md)
+> รุ่นล่าสุดในชุดนี้: Phase 9 UI polish — ดู [รายละเอียด Phase 9](PHASE9-VISUAL-POLISH-NOTES.md)
 > อัปเกรดจากรุ่นเดิมให้ใช้ `.env` เดิมและ `-p kku-foodshare-phase1` เพื่อใช้ฐานข้อมูลเดิม
 
 # KKU FoodShare
@@ -14,43 +14,51 @@
 bash scripts/setup-env.sh
 # Windows PowerShell: powershell -ExecutionPolicy Bypass -File scripts/setup-env.ps1
 
-docker compose up --build -d
-docker compose ps
+docker compose -p kku-foodshare-phase1 -f docker-compose.yml up --build -d
+docker compose -p kku-foodshare-phase1 -f docker-compose.yml ps
 ```
 
-เปิด **http://localhost:8080** แล้วสมัครสมาชิก ไม่มีบัญชีหรือรหัสผ่านเริ่มต้นที่ฝังไว้ ระบบสร้างตารางด้วย Flyway ให้อัตโนมัติ รูปอาหารและฐานข้อมูลเก็บใน Docker volumes และอยู่ต่อหลัง restart
+เปิด URL ตาม `APP_PORT` ใน `.env` (ค่าเริ่มต้นคือ **http://localhost:8080**; หากใช้ `.env` เดิมที่ตั้ง 8081 ให้เปิด **http://localhost:8081**) แล้วสมัครสมาชิก ไม่มีบัญชีหรือรหัสผ่านเริ่มต้นที่ฝังไว้ ระบบสร้างตารางด้วย Flyway ให้อัตโนมัติ รูปอาหารและฐานข้อมูลเก็บใน Docker volumes และอยู่ต่อหลัง restart
 
-- หยุดชั่วคราว: `docker compose down` (ข้อมูลยังอยู่)
-- ตรวจ log: `docker compose logs -f app`
+- หยุดชั่วคราว: `docker compose -p kku-foodshare-phase1 -f docker-compose.yml down` (ข้อมูลยังอยู่)
+- ตรวจ log: `docker compose -p kku-foodshare-phase1 -f docker-compose.yml logs -f app`
 - สุขภาพระบบ: `/actuator/health`
 - Swagger: `/swagger-ui/index.html`, OpenAPI JSON: `/v3/api-docs`
 
-อย่าใช้ `docker compose down -v` หากต้องการเก็บข้อมูล เพราะคำสั่งนี้ลบ volumes
+อย่าใช้ `docker compose down -v` หากต้องการเก็บข้อมูล เพราะคำสั่งนี้ลบ volumes. `docker-compose.yml` เป็นชื่อไฟล์ตามใบงาน; `compose.yaml` ยังเก็บไว้รองรับคำสั่งจากเอกสาร Phase ก่อนหน้า และต้องคงค่าฐาน Compose ให้ตรงกัน
 
 ## Deploy ขึ้นเซิร์ฟเวอร์จริง
 
 เตรียม VPS ที่รัน Docker ได้ มี RAM เริ่มต้นประมาณ 2 GB และพื้นที่ถาวร โดเมนชี้ A/AAAA record มายังเซิร์ฟเวอร์ และเปิด port 80/443
 
-1. นำโค้ดขึ้นเครื่อง แล้วรัน setup-env เพียงครั้งแรก
-2. ใส่ `DOMAIN=foodshare.example.org` เป็นโดเมนจริงใน `.env`
-3. รันคำสั่งด้านล่าง Caddy จะขอ TLS certificate และตั้ง HTTPS ให้
+1. Push โค้ดขึ้น GitHub และนำเวอร์ชันที่ผ่าน Pull Request ไปยัง `main` ตาม workflow ของรายวิชา
+2. บน VPS ให้รัน `bash scripts/setup-env.sh` จากนั้นใส่ `DOMAIN=foodshare.example.org` ใน `.env`
+3. ถ้าย้ายฐานข้อมูลเดิม ให้คง `APP_SECRET` เดิมไว้และใช้ขั้นตอนใน [`doc/deployment.md`](doc/deployment.md) ก่อนเปิดเว็บสาธารณะ
+4. ถ้าเริ่มฐานข้อมูลใหม่ ให้รันคำสั่งด้านล่าง Caddy จะขอ TLS certificate และตั้ง HTTPS ให้
 
 ```bash
-docker compose -f compose.yaml -f compose.production.yaml up --build -d
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml up --build -d
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml ps
 ```
 
 เว็บจะอยู่ที่ `https://<DOMAIN>` production override ตั้ง secure cookie และ base URL ให้แล้ว แอปพอร์ต 8080 ผูกเฉพาะ loopback; ฐานข้อมูลไม่เปิดพอร์ตออกภายนอก เก็บ `.env` เป็นความลับและสำรอง `APP_SECRET` คู่กับข้อมูล รหัสนี้ใช้ถอดรหัสรับอาหารเดิม การเปลี่ยนโดยไม่มีแผนย้ายข้อมูลทำให้รหัสที่ยังค้างอ่านไม่ได้
 
 โครงการนี้เตรียมสำหรับ **แอป 1 instance** เนื่องจาก session, rate limiter อยู่ในหน่วยความจำ และรูปเก็บบน volume หากต้อง scale หลาย instance ให้ย้าย session/rate limit ไป shared store และรูปไป object storage ก่อน
 
-แพ็กเกจนี้ยังไม่ได้ publish ไปยังบัญชี cloud ของเจ้าของโครงการ จึงยังไม่มี public URL ของระบบจริง
+### Deployment URL
+
+- Public URL: **กรอก URL จริงหลัง Deploy ก่อนส่งงาน**
+- Swagger UI: `https://<DOMAIN>/swagger-ui/index.html`
+- Health check: `https://<DOMAIN>/actuator/health`
+
+แพ็กเกจนี้ยังไม่ได้ publish ไปยังบัญชี cloud ของเจ้าของโครงการ จึงยังไม่มี public URL จริง การเริ่ม stack ครั้งแรกจะสร้างฐานข้อมูลว่าง; การย้ายสมาชิก/โพสต์/รูปจาก Docker ในเครื่องต้องสำรองและ restore แยกตาม [`doc/deployment.md`](doc/deployment.md).
 
 ## ตั้งบัญชีผู้ดูแล
 
 สมัครสมาชิกจากหน้าเว็บก่อน แล้วกำหนดสิทธิ์ให้ **อีเมลของคุณเอง** ในฐานข้อมูล:
 
 ```bash
-docker compose exec db psql -U foodshare -d foodshare
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml exec db psql -U foodshare -d foodshare
 ```
 
 ```sql
@@ -109,7 +117,9 @@ cd code
 - `code/` — Spring Boot source, migration, JUnit/Mockito tests และ frontend
 - `test/` — วิธีตรวจระบบและ browser journey
 - `doc/architecture.md` — สถาปัตยกรรม, SOLID/GoF, schema และ UML/Mermaid
-- `doc/deployment.md` — deploy, สำรอง/กู้คืน และ troubleshooting
+- `doc/deployment.md` — VPS deploy, สำรอง/กู้คืน PostgreSQL และรูป, troubleshooting
+- `scripts/backup-local.ps1` — สำรองฐานข้อมูลและรูปจาก Docker บน Windows
+- `scripts/restore-vps.sh` — ตรวจฐานข้อมูลว่างและ restore ขึ้น VPS
 - `doc/api.md` — API/session/CSRF contract
 - `doc/google-maps-link.md` — วิธีใช้ลิงก์ Google Maps เพื่อกำหนดจุดรับและตรวจหมุด
 - `doc/demo-script.md` — ลำดับนำเสนอและ slide outline

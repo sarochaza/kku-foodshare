@@ -49,7 +49,9 @@ export function createMap(id, onPick = null) {
 const LOCATION_CACHE_KEY = "kku-foodshare-location-v1";
 let locationAttempt=0;
 function usableLocation(p) {
-  return Number.isFinite(Number(p?.lat)) && Number.isFinite(Number(p?.lng)) &&
+  return p?.lat != null && p?.lng != null && p?.timestamp != null &&
+    p.lat !== "" && p.lng !== "" && p.timestamp !== "" &&
+    Number.isFinite(Number(p.lat)) && Number.isFinite(Number(p.lng)) &&
     Math.abs(Number(p.lat)) <= 90 && Math.abs(Number(p.lng)) <= 180 &&
     Number.isFinite(Number(p?.timestamp));
 }
@@ -58,6 +60,12 @@ function readLockedLocation() {
     const p = JSON.parse(sessionStorage.getItem(LOCATION_CACHE_KEY) || "null");
     return usableLocation(p) ? p : null;
   } catch { return null; }
+}
+function locationError(error) {
+  if (error?.code === 1) return Error("ยังไม่ได้อนุญาตตำแหน่งให้เว็บไซต์ กรุณาอนุญาตในเบราว์เซอร์แล้วลองอีกครั้ง");
+  if (error?.code === 2) return Error("อุปกรณ์ยังระบุตำแหน่งไม่ได้ ลองเปิดบริการตำแหน่งหรือเลือกจุดบนแผนที่");
+  if (error?.code === 3) return Error("หาตำแหน่งไม่ทันเวลา ลองกดใกล้ฉันอีกครั้งหรือเลือกจุดบนแผนที่");
+  return Error("เข้าถึงตำแหน่งไม่ได้ คุณยังเลือกจุดบนแผนที่ได้เอง");
 }
 function lockLocation(p,persist=true) {
   const result = {lat:Number(p.lat),lng:Number(p.lng),accuracy:Number(p.accuracy),timestamp:Date.now()};
@@ -82,13 +90,13 @@ export function locate({fresh=false}={}) {
     const options={enableHighAccuracy:true,timeout:12000,maximumAge:0};
     const savePosition=position=>lockLocation({lat:position.coords.latitude,lng:position.coords.longitude,accuracy:position.coords.accuracy},attempt===locationAttempt);
     if (!geo.watchPosition) {
-      return geo.getCurrentPosition(p=>resolve(savePosition(p)),()=>reject(Error("เข้าถึงตำแหน่งไม่ได้ คุณยังเลือกจุดบนแผนที่ได้เอง")),options);
+      return geo.getCurrentPosition(p=>resolve(savePosition(p)),error=>reject(locationError(error)),options);
     }
     let watchId=null,timeoutId=null,best=null,previousAccurate=null,stableCount=0,settled=false;
     const clear=()=>{clearTimeout(timeoutId);if(watchId!==null)geo.clearWatch?.(watchId);};
     const finish=p=>{if(settled)return;settled=true;clear();resolve(lockLocation(p,attempt===locationAttempt));};
-    timeoutId=setTimeout(()=>best ? finish(best) : fail(),8000);
-    const fail=()=>{if(settled)return;settled=true;clear();reject(Error("เข้าถึงตำแหน่งไม่ได้ คุณยังเลือกจุดบนแผนที่ได้เอง"));};
+    timeoutId=setTimeout(()=>best ? finish(best) : fail({code:3}),8000);
+    const fail=error=>{if(settled)return;settled=true;clear();reject(locationError(error));};
     try {
       watchId=geo.watchPosition(position=>{
         const p={lat:position.coords.latitude,lng:position.coords.longitude,accuracy:position.coords.accuracy};
@@ -99,7 +107,7 @@ export function locate({fresh=false}={}) {
           previousAccurate=p;
           if (stableCount>=2) finish(best);
         } else { previousAccurate=null;stableCount=0; }
-      },()=>best ? finish(best) : fail(),options);
+      },error=>best ? finish(best) : fail(error),options);
       if (settled && watchId!==null) geo.clearWatch?.(watchId);
     } catch { fail(); }
   });

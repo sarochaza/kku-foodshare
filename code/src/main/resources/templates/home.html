@@ -28,11 +28,6 @@
             <div class="hero-buttons">
               <a href="/explore" class="btn btn-primary btn-lg"
                 ><svg class="icon" aria-hidden="true"><use href="#i-food"></use></svg>เริ่มค้นหาอาหาร</a
-              ><a href="#how" class="btn btn-white btn-lg"
-                ><svg class="icon" aria-hidden="true">
-                  <use href="#i-leaf"></use>
-                </svg>
-                วิธีใช้งาน</a
               >
               <a href="/posts/new" class="welcome-share-link">มีอาหารอยากแบ่งปัน? เริ่มสร้างโพสต์</a>
             </div>
@@ -115,6 +110,7 @@
             </select>
           </label>
           <label class="home-now-compact"><input id="home-available-now" type="checkbox" /> รับได้ตอนนี้</label>
+          <a class="home-sharing-map-icon" data-sharing-map href="/explore?view=map" aria-label="เปิดแผนที่แบ่งปัน"><svg class="icon" aria-hidden="true"><use href="#i-map"></use></svg></a>
         </div>
 
         <div class="home-map-intro"><h2>ดูตำแหน่งอาหารก่อนเลือกจอง</h2><p class="field-note">🍱 หมุดอาหาร · 🔵 ตำแหน่งของคุณ · เลือกหมุดแล้วเปิดรายละเอียดเพื่อเลือกเดินเท้าหรือขับรถ และตรวจเวลาไปรับ</p></div>
@@ -139,7 +135,7 @@
             <div id="home-map-list" class="home-map-list" aria-live="polite">
               <div class="loading-box">กำลังโหลดจุดแบ่งปัน…</div>
             </div>
-            <a class="btn btn-soft full" href="/explore?view=map">เปิดแผนที่แบบเต็ม</a>
+            <a class="btn btn-soft full" data-sharing-map href="/explore?view=map">เปิดแผนที่แบ่งปัน</a>
           </aside>
         </div>
         <a th:if="${viewer != null}" id="home-bookings-entry" class="home-bookings-entry" href="/reservations">ดูการจองของฉัน</a>
@@ -152,7 +148,6 @@
             <p id="home-results-copy">ค้นหามื้ออร่อย แล้วนัดรับในเวลาที่สะดวก</p>
           </div>
           <div class="feed-display-controls">
-            <label>แสดงต่อหน้า<select id="home-page-size" aria-label="จำนวนโพสต์ต่อหน้า"><option value="6">6 โพสต์</option><option value="12">12 โพสต์</option><option value="24">24 โพสต์</option></select></label>
             <a href="/explore" class="text-link">ดูอาหารทั้งหมด</a>
           </div>
         </div>
@@ -221,8 +216,10 @@
             >
           </div>
           <img
-            src="/images/register-mascot.webp"
-            alt="มาสคอต KKU FoodShare"
+            src="/images/foodshare-community-photo.png"
+            width="1536"
+            height="1024"
+            alt="การส่งต่ออาหารในบรรยากาศชุมชนมหาวิทยาลัย"
             loading="lazy"
           />
         </div>

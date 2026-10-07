@@ -2,8 +2,9 @@
 const BASE = 'https://photon.komoot.io';
 const searchCache=new Map();
 const KKU_CENTER={lat:16.4745,lng:102.8237};
-const SEARCH_RADIUS_KM=8;
-const KKU_SEARCH_BBOX='102.748,16.402,102.900,16.547';
+// Keep KKU results at the top while allowing the rest of central Khon Kaen.
+const SEARCH_RADIUS_KM=25;
+const KKU_SEARCH_BBOX='102.660,16.350,103.000,16.610';
 const LOCAL_PLACES=Object.freeze([
   {name:'มหาวิทยาลัยขอนแก่น',label:'มหาวิทยาลัยขอนแก่น · ตำบลในเมือง · ขอนแก่น',lat:16.4745,lng:102.8237,aliases:['มข','มข.','มหาวิทยาลัยขอนแก่น','khon kaen university','kku']},
   {name:'หอสมุดกลาง มหาวิทยาลัยขอนแก่น',label:'หอสมุดกลาง · มหาวิทยาลัยขอนแก่น',lat:16.4768,lng:102.82325,aliases:['หอสมุด','หอสมุดกลาง','library','central library','kkulib']},
@@ -90,7 +91,7 @@ async function request(path, params, signal, fetcher) {
 export async function searchRemotePlaces(query, signal, fetcher = fetch) {
   if (query.trim().length < 3) return [];
   const cached=cachedPlaces(query);if(cached)return cached;
-  const features = await request('api/', {q:query.trim(),countrycode:'TH',lat:KKU_CENTER.lat,lon:KKU_CENTER.lng,zoom:15,location_bias_scale:0.2,bbox:KKU_SEARCH_BBOX,lang:'th',limit:20}, signal, fetcher);
+  const features = await request('api/', {q:query.trim(),countrycode:'TH',lat:KKU_CENTER.lat,lon:KKU_CENTER.lng,zoom:13,location_bias_scale:0.2,bbox:KKU_SEARCH_BBOX,lang:'th',limit:30}, signal, fetcher);
   const places=nearbyKkuPlaces(features.map(place).filter(p=>p && p.country?.toUpperCase()==='TH'))
     .sort((a,b)=>distanceKm(KKU_CENTER,a)-distanceKm(KKU_CENTER,b)).slice(0,5);
   if(searchCache.size>=50)searchCache.delete(searchCache.keys().next().value);
@@ -142,7 +143,7 @@ export function placePicker(form, map, locate) {
     finally { clearTimeout(timeout); }
   }
   function render(places, source='local') {
-    close();status.textContent=places.length ? (source==='local'?'พบสถานที่ใกล้ มข. ภายใน 8 กม. เลือกแล้วปรับจุดนัดรับได้':'พบสถานที่ใกล้ มข. ภายใน 8 กม. เลือกแล้วปรับจุดนัดรับได้') : 'ไม่พบสถานที่ใกล้ มข. ลองชื่ออื่น หรือเลือกบนแผนที่ / ตัวเลือกขั้นสูง';
+    close();status.textContent=places.length ? 'พบสถานที่ใน มข. และตัวเมืองขอนแก่น · สถานที่ใกล้ มข. จะแสดงก่อน' : 'ไม่พบสถานที่ในบริเวณนี้ ลองชื่ออื่น หรือเลือกบนแผนที่ / ตัวเลือกขั้นสูง';
     for(const p of places) {
       const button=document.createElement('button');button.type='button';button.className='place-result';button.setAttribute('role','option');
       const title=document.createElement('strong');title.textContent=p.name;
@@ -151,14 +152,14 @@ export function placePicker(form, map, locate) {
       button.onclick=()=>{pin(p.lat,p.lng,p.label);map?.setPin(p.lat,p.lng);input.value=p.name;name.value=p.name.slice(0,255);input.blur();status.textContent='เลือกสถานที่แล้ว สามารถแก้ชื่อจุดนัดรับให้ละเอียดขึ้นได้';};results.append(button);
     }
     results.hidden=!places.length;input.setAttribute('aria-expanded',String(!!places.length));
-    if(places.length && matchMedia('(max-width: 600px)').matches) input.scrollIntoView({block:'start',behavior:'smooth'});
+    if(places.length && matchMedia('(max-width: 600px)').matches) input.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
   async function runRemoteSearch(local=localPlaces(input.value.trim())) {
     const q=input.value.trim();if(q.length<3)return;
     const seq=++searchRevision;clearTimeout(timer);searchController?.abort();
     const controller=new AbortController();searchController=controller;
     const timeout=setTimeout(()=>controller.abort(),8000);
-    status.textContent='กำลังค้นหาสถานที่เพิ่มเติม…';
+    status.textContent=local.length?'กำลังค้นหาเพิ่ม · แสดงสถานที่ใกล้ มข. ที่พบแล้ว':'กำลังค้นหาสถานที่ในขอนแก่น…';
     try {
       const places=await searchRemotePlaces(q,controller.signal);
       if(seq!==searchRevision) return;
@@ -168,19 +169,18 @@ export function placePicker(form, map, locate) {
   }
   input.addEventListener('input',()=>{
     cancelSearch();const q=input.value.trim();
-    status.textContent=q.length<3 ? 'พิมพ์อย่างน้อย 3 ตัวอักษร' : 'กำลังค้นหา มข. และขอนแก่น…';
-    if(q.length<3) return;
-    timer=setTimeout(()=>{
-      const places=localPlaces(q);render(places);remoteSearch=()=>runRemoteSearch(places);
-      timer=setTimeout(()=>runRemoteSearch(places),350);
-    },250);
+    if(q.length<3) {status.textContent='พิมพ์อย่างน้อย 3 ตัวอักษร';return;}
+    const places=localPlaces(q);render(places);
+    if(!places.length) status.textContent='กำลังค้นหาสถานที่ในขอนแก่น…';
+    remoteSearch=()=>runRemoteSearch(places);
+    timer=setTimeout(()=>runRemoteSearch(places),550);
   });
   input.addEventListener('keydown',e=>{
     if(e.key==='Escape') cancelSearch();
     if(e.key==='ArrowDown' && !results.hidden) {e.preventDefault();results.firstElementChild?.focus();}
     if(e.key==='Enter') {e.preventDefault();if(!results.hidden)results.firstElementChild?.click();else remoteSearch?.();}
   });
-  document.getElementById('place-search-button')?.addEventListener('click',()=>{if(remoteSearch)remoteSearch();else input.dispatchEvent(new Event('input'));});
+  document.getElementById('place-search-button')?.addEventListener('click',()=>{if(input.value.trim().length>=3)runRemoteSearch(localPlaces(input.value.trim()));else input.dispatchEvent(new Event('input'));});
   results.addEventListener('keydown',e=>{
     if(e.key==='ArrowDown'||e.key==='ArrowUp') {e.preventDefault();(e.key==='ArrowDown'?e.target.nextElementSibling:e.target.previousElementSibling)?.focus();}
     if(e.key==='Escape') {cancelSearch();input.focus();}

@@ -50,3 +50,16 @@ test('a late older location request cannot replace a newer confirmed location',a
  callbacks[0](position(16.5,102.8,20));callbacks[0](position(16.50001,102.80001,10));await older;
  assert.equal(JSON.parse(saved.get('kku-foodshare-location-v1')).lat,16.60001);
 });
+test('denied permission and GPS timeout produce actionable errors',async()=>{
+ for(const [code,expected] of [[1,/อนุญาต/],[2,/บริการตำแหน่ง/],[3,/ไม่ทันเวลา/]]) {
+  const sandbox={Date,setTimeout,clearTimeout,sessionStorage:{getItem:()=>null},navigator:{geolocation:{watchPosition(_ok,fail){fail({code});return 1;},clearWatch(){}}}};
+  runInNewContext(source+'\nglobalThis.locate=locate;',sandbox);
+  await assert.rejects(sandbox.locate(),expected);
+ }
+});
+test('null cached coordinates cannot silently turn into a false origin at zero zero',async()=>{
+ let asked=0;
+ const sandbox={Date,sessionStorage:{getItem:()=>JSON.stringify({lat:null,lng:null,timestamp:1})},navigator:{geolocation:{getCurrentPosition(_ok,fail){asked++;fail({code:1});}}}};
+ runInNewContext(source+'\nglobalThis.locate=locate;',sandbox);
+ await assert.rejects(sandbox.locate(),/อนุญาต/);assert.equal(asked,1);
+});

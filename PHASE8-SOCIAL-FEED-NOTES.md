@@ -1,3 +1,7 @@
+> รุ่นล่าสุด: ดู `PHASE8-MAPS-AUTH-POLISHED-NOTES.md` สำหรับแผนที่ร่วมกัน การแก้ใกล้ฉัน หน้า login/register และการเอาคำความคิดเห็นออกจากหัว dialog
+
+> อัปเดตล่าสุด: ดู `PHASE8-COMMENTS-REPLIES-NOTES.md` สำหรับการ์ดที่ลดความสูง คอมเมนต์แบบกดเปิด และระบบตอบกลับ ตัวเลือกแสดงต่อหน้าถูกนำออกแล้ว
+
 # Phase 8 — Social Feed
 
 ## What changed

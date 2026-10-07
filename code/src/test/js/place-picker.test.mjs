@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import * as placeModule from '../../main/resources/static/js/places.mjs';
 import { localPlaces, placePicker, searchRemotePlaces } from '../../main/resources/static/js/places.mjs';
 // Minimal DOM adapter: execute real picker handlers; mock only browser/remote boundaries.
@@ -24,6 +25,24 @@ function setup() {
   return {nodes,form,picker,get point(){return point;}};
 }
 const answer=(name='หอสมุด',lat=16.47,lng=102.82)=>({ok:true,json:async()=>({features:[{geometry:{coordinates:[lng,lat]},properties:{name,countrycode:'TH',city:'ขอนแก่น'}}]})});
+test('home controls stay aligned and the comments feature remains without its header strip',()=>{
+  const root=new URL('../../main/resources/',import.meta.url);
+  const home=readFileSync(new URL('templates/home.html',root),'utf8');
+  const fragments=readFileSync(new URL('templates/fragments.html',root),'utf8');
+  const css=readFileSync(new URL('static/css/app.css',root),'utf8');
+  assert.match(home,/class="home-sort"/);assert.match(home,/class="home-now-compact"/);assert.match(home,/class="home-sharing-map-icon"/);
+  assert.match(css,/\.home-discovery-toolbar > \.home-sharing-map-icon/);assert.match(css,/grid-template-columns: minmax\(0,1fr\) auto 50px/);
+  assert.doesNotMatch(fragments,/<header class="comments-heading"/);
+  assert.match(fragments,/id="comments-dialog"[\s\S]*class="comments-close"/);
+  assert.match(fragments,/data-comments-form/);assert.match(fragments,/data-comments-list/);
+});
+test('About page shows clearly labeled demo contact channels',()=>{
+  const root=new URL('../../main/resources/',import.meta.url);
+  const about=readFileSync(new URL('templates/about.html',root),'utf8');
+  const css=readFileSync(new URL('static/css/about.css',root),'utf8');
+  assert.match(about,/ช่องทางตัวอย่างสำหรับเดโม/);assert.match(about,/foodshare@example\.com/);assert.match(about,/FoodShare · KKU/);
+  assert.match(css,/\.about-contact-grid/);assert.match(css,/\.about-contact-grid \{ grid-template-columns: minmax\(0,1fr\); \}/);
+});
 test('local KKU aliases return instant KKU-first suggestions without a network request',()=>{
   for(const query of ['หอสมุด','library','complex']) {
     const places=localPlaces(query);
@@ -41,6 +60,14 @@ test('remote search is Thailand-limited, restricted to nearby KKU, and cached',a
   assert.match(url,/countrycode=TH/);
   assert.equal(first[0].name,'สถานที่ขอนแก่น');
   assert.deepEqual(second,first);
+});
+test('remote search can return up to five Khon Kaen places while ranking the closest KKU result first',async()=>{
+  const coords=[[16.48,102.83],[16.50,102.84],[16.52,102.86],[16.43,102.80],[16.55,102.88],[16.40,102.79]];
+  const fetcher=async()=>({ok:true,json:async()=>({features:coords.map(([lat,lng],i)=>({geometry:{coordinates:[lng,lat]},properties:{name:`สถานที่ ${i+1}`,countrycode:'TH',city:'ขอนแก่น'}}))})});
+  const places=await searchRemotePlaces('สถานที่สำหรับทดสอบขอนแก่น',undefined,fetcher);
+  assert.equal(places.length,5);
+  assert.equal(places[0].name,'สถานที่ 1');
+  assert.ok(places.every(p=>p.label.includes('ขอนแก่น')));
 });
 test('remote suggestions automatically join local matches after the search debounce',async()=>{
   const s=setup();let calls=0;globalThis.fetch=async()=>{calls++;return answer('Library Annex',16.475,102.824);};

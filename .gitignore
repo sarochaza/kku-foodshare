@@ -4,6 +4,8 @@
 **/target/
 **/node_modules/
 **/uploads/
+backups/
+*.dump
 *.log
 .idea/
 .DS_Store

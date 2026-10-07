@@ -18,6 +18,7 @@ import {
   card,
   feedCard,
   gallery,
+  commentButton,
   paginate,
   ask,
 } from "./ui.js";
@@ -33,7 +34,9 @@ import { placePicker } from "./places.mjs";
 import { initProfileMenu } from "./profile-menu.mjs";
 import { initNavigation } from "./navigation.mjs";
 import { initImageViewer } from "./image-viewer.mjs";
-import { postPageSize } from "./feed-options.mjs";
+import { initComments, openPostComments } from "./comments.mjs";
+import { sharingMapUrl, mapFeedRequest, focusFoodMap, hasLocation } from "./map-discovery.mjs";
+import { initAuthUI } from "./auth.mjs";
 import { drawPass, parsePass } from "./pickup.mjs";
 import { setDefaultOrigin, fetchRoadDistances, formatMetres } from "./routes.mjs";
 const page = document.body.dataset.page;
@@ -99,7 +102,7 @@ function homeGuide() {
 async function home() {
   const el = $("#home-food"),
     mapList = $("#home-map-list"),
-    state = { category: "", sort: "expiry", now: false, page: 0, size: postPageSize(new URLSearchParams(location.search).get("size"), 6) },
+    state = { category: "", sort: "expiry", now: false, page: 0 },
     coords = {};
   let map = null,
     layer = null,
@@ -117,6 +120,9 @@ async function home() {
       size,
       ...(coords.lat != null ? {lat: coords.lat, lng: coords.lng} : {}),
     });
+  const updateMapEntry = () => {
+    $$('[data-sharing-map]').forEach(link => { link.href = sharingMapUrl(state); });
+  };
   const ensureMap = () => {
     if (!map) map = createMap("home-live-map").map;
     return map;
@@ -132,11 +138,12 @@ async function home() {
 
   const load = async () => {
     const seq = ++requestSeq;
+    updateMapEntry();
     $("#home-map-preview").hidden = true;
     el.innerHTML = '<div class="loading-box">กำลังค้นหาอาหารที่แบ่งปัน…</div>';
     mapList.innerHTML = '<div class="loading-box">กำลังโหลดจุดแบ่งปัน…</div>';
     const [listResult, mapResult] = await Promise.allSettled([
-        api("/api/v1/food-posts?" + query(state.size)),
+        api("/api/v1/food-posts?" + query(6)),
         api("/api/v1/food-posts?" + query(200, 0)),
     ]);
     if (seq !== requestSeq) return;
@@ -154,7 +161,6 @@ async function home() {
             "/explore",
             "สำรวจอาหารทั้งหมด",
           );
-      hydrateFeedComments(el);
       wireFeedMenus(el);
       paginate(data, n => { state.page = n; return load(); });
     } else errorBox(el, listResult.reason, load);
@@ -170,9 +176,7 @@ async function home() {
         layer = markers(ensureMap(), mapPosts, layer, showPreview);
         if (coords.lat != null) {
           locationMarker = currentLocationMarker(map, coords, locationMarker);
-          const bounds=[...mapPosts.map(p=>[p.latitude,p.longitude]),[coords.lat,coords.lng]];
-          if(mapPosts.length) map.fitBounds(bounds,{padding:[40,40],maxZoom:15});
-          else map.setView([coords.lat,coords.lng],15);
+          focusFoodMap(map, mapPosts, coords, state.sort === "nearby");
         }
         map.invalidateSize();
       } catch (e) {
@@ -239,7 +243,7 @@ async function home() {
   $("#home-sort").onchange = async (event) => {
     state.sort = event.target.value;
     state.page = 0;
-    if (state.sort === "nearby" && !coords.lat) {
+    if (state.sort === "nearby" && !hasLocation(coords)) {
       const found = await busy($("#home-locate"), () => useLocation({fresh:true}));
       if (!found) {
         state.sort = "expiry";
@@ -248,18 +252,6 @@ async function home() {
     } else load();
   };
   $("#home-locate").onclick = () => busy($("#home-locate"), () => useLocation({fresh:true}));
-  const homeSizeSelect = $("#home-page-size");
-  if (homeSizeSelect) {
-    homeSizeSelect.value = String(state.size);
-    homeSizeSelect.onchange = event => {
-      state.size = postPageSize(event.target.value, 6);
-      state.page = 0;
-      const url = new URL(location.href);
-      url.searchParams.set("size", state.size);
-      history.replaceState(history.state, "", url);
-      return load();
-    };
-  }
   if (signedIn()) void useLocation({silent:true});
   await load();
   homeGuide();
@@ -268,12 +260,6 @@ function reportPost(postId, commentId = null) {
   return ask("แจ้งปัญหาให้ผู้ดูแล", "เลือกเหตุผล เช่น โพสต์เล่น, ข้อมูลไม่ถูกต้อง, ไม่เหมาะสม, สแปม หรืออื่น ๆ", {label:"เหตุผล", maxLength:1000, confirm:"ส่งรายงาน"}).then(async (reason) => {
     if (!reason) return; await api("/api/v1/reports", {method:"POST", body:{postId:Number(postId), commentId, reason}}); toast("ส่งรายงานให้ผู้ดูแลแล้ว");
   });
-}
-async function hydrateFeedComments(root) {
-  // This preview endpoint is protected in the current backend. A public page
-  // must not auto-navigate to login just to load optional comment previews.
-  if (!signedIn()) return;
-  await Promise.all($$("[data-comment-preview]", root).map(async (slot) => { try { const d=await api(`/api/v1/food-posts/${slot.dataset.commentPreview}/comments?size=1`); const c=d.items?.[0]; slot.innerHTML=c ? `<img src="/api/v1/members/${c.authorId}/photo" alt=""><span><strong>${escape(c.authorName)}</strong> ${escape(c.body)}</span>` : "ถามรายละเอียดหรือดูความคิดเห็น"; } catch { /* the post is still usable without the preview */ } }));
 }
 function wireFeedMenus(root) {
   $$('[data-feed-menu]', root).forEach((button) => button.onclick = () => { const menu=$("#feed-menu-"+button.dataset.feedMenu); $$('[id^="feed-menu-"]',root).forEach(x=>{if(x!==menu)x.hidden=true;}); menu.hidden=!menu.hidden; });
@@ -291,13 +277,14 @@ function wireFeedMenus(root) {
 }
 async function explore() {
   const params = new URLSearchParams(location.search);
+  const requestedNearby = params.get("sort") === "nearby";
   let state = {
       q: params.get("q") || "",
       category: params.get("category") || "",
-      sort: params.get("sort") || "expiry",
+      sort: requestedNearby ? "expiry" : params.get("sort") || "expiry",
     ownership: params.get("ownership") || "",
       page: 0,
-      size: postPageSize(params.get("size")),
+      size: 12,
       now: params.get("now") === "true",
     },
     coords = {},
@@ -306,26 +293,18 @@ async function explore() {
     locationMarker = null,
     mapVisible = params.get("view") === "map",
     requestSeq = 0,
+    mapRequestSeq = 0,
     locationSeq = 0;
   $("#search").value = state.q;
   if ($("#sort")) $("#sort").value = state.sort;
   if ($("#available-now")) $("#available-now").checked = state.now;
-  const sizeSelect = $("#page-size");
-  if (sizeSelect) {
-    sizeSelect.value = String(state.size);
-    sizeSelect.onchange = event => {
-      state.size = postPageSize(event.target.value);
-      state.page = 0;
-      const url = new URL(location.href);
-      url.searchParams.set("size", state.size);
-      history.replaceState(history.state, "", url);
-      return load();
-    };
-  }
   const mapShell = $("#explore-map-shell");
   const mapList = $("#explore-map-list");
   const mapStatus = $("#map-status");
   const mapFullButton = $("#explore-map-full");
+  const nearbyStatus = $("#nearby-status"), manualLocation = $("#manual-location-button");
+  let manualPick = null;
+  const locationMessage = message => { if (nearbyStatus) { nearbyStatus.hidden = false; nearbyStatus.textContent = message; } };
   const showMapPost = p => {
     const preview = $("#explore-map-preview");
     if (!preview || !p) return;
@@ -336,17 +315,11 @@ async function explore() {
   $$("#category-filters [data-category]").forEach(b => b.classList.toggle("active", b.dataset.category === state.category));
   const loadMap = async () => {
     if (!mapVisible) return;
+    const seq = ++mapRequestSeq;
     try {
       if (!map) map = createMap("explore-map").map;
-      const d = await api(
-        "/api/v1/food-posts/map?" +
-          new URLSearchParams({
-            q: state.q,
-            category: state.category,
-            now: state.now,
-            ownership: state.ownership,
-          }),
-      );
+      const d = await api(mapFeedRequest(state, coords));
+      if (seq !== mapRequestSeq || !mapVisible) return;
       layer = markers(map, d.items, layer, p => showMapPost(p));
       if (mapList) mapList.innerHTML = d.items.slice(0, 5).map(p => `<button type="button" class="explore-map-item" data-explore-post="${p.id}">${p.imageUrl ? `<img src="${escape(p.imageUrl)}" alt="">` : `<span class="map-item-placeholder">${icon("food")}</span>`}<span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b>เหลือ ${p.availableQuantity} ${escape(p.unit)}</b></span></button>`).join("") || "<p class=field-note>ยังไม่มีรายการตามตัวกรองนี้</p>";
       $$('[data-explore-post]', mapList).forEach(button => button.onclick = () => {
@@ -358,15 +331,13 @@ async function explore() {
       if (coords.lat != null) void hydrateRoadDistances(d.items.slice(0, 5), coords, () => mapVisible);
       if (coords.lat != null) {
         locationMarker = currentLocationMarker(map, coords, locationMarker);
-        const bounds=[...d.items.map(p=>[p.latitude,p.longitude]),[coords.lat,coords.lng]];
-        if(d.items.length) map.fitBounds(bounds,{padding:[40,40],maxZoom:15});
-        else map.setView([coords.lat,coords.lng],15);
+        focusFoodMap(map, d.items, coords, state.sort === "nearby");
       }
       if (mapStatus) mapStatus.textContent =
-        `พบ ${d.items.length} จุดแบ่งปัน • เลือกหมุดเพื่อดูรายละเอียด${d.totalElements > 200 ? " • แสดง 200 จุดแรก ลองค้นหาให้เจาะจงขึ้น" : ""}`;
+        `พบ ${d.items.length} จุดแบ่งปัน${state.sort === "nearby" ? " • เรียงหมุดใกล้คุณตามระยะเส้นตรง" : " • เลือกหมุดเพื่อดูรายละเอียด"}${d.totalElements > 200 ? " • แสดง 200 จุดแรก ลองค้นหาให้เจาะจงขึ้น" : ""}`;
       map.invalidateSize();
     } catch (e) {
-      if (mapStatus) mapStatus.textContent = e.message;
+      if (seq === mapRequestSeq && mapVisible && mapStatus) mapStatus.textContent = e.message;
     }
   };
   const load = async () => {
@@ -391,7 +362,6 @@ async function explore() {
         state.page = n;
         load();
       });
-      hydrateFeedComments($("#food-results"));
       wireFeedMenus($("#food-results"));
       if (coords.lat != null) void hydrateRoadDistances(d.items, coords, () => seq === requestSeq);
       await loadMap();
@@ -430,46 +400,88 @@ async function explore() {
   $$('[data-owner]').forEach(item => item.classList.toggle("active", item.dataset.owner === state.ownership));
   const nearby = async ({fresh=true}={}) => {
     const request=++locationSeq;
+    locationMessage("กำลังหาตำแหน่งของคุณ… หากมีคำขอจากเบราว์เซอร์ ให้กดอนุญาต");
     try {
       const position=await locate({fresh});
       if(request!==locationSeq) return false;
       coords = position;
+      mapRequestSeq++;
       setDefaultOrigin(position);
-      toggle(true);
+      cancelManualPick();
+      toggle(true, {reload:false, resetExpanded:true});
       state.sort = "nearby";
       $("#sort").value = "nearby";
       state.page = 0;
+      locationMessage(`พบตำแหน่งแล้ว${Number.isFinite(position.accuracy) ? ` • คลาดเคลื่อนประมาณ ${Math.round(position.accuracy)} เมตร` : ""} • กดใกล้ฉันอีกครั้งเพื่ออัปเดตตำแหน่ง`);
+      if (manualLocation) manualLocation.hidden = true;
       await load();
+      return true;
     } catch (e) {
       if(request!==locationSeq) return false;
       toast(e.message, true);
+      locationMessage(e.message + " หรือกดเลือกจุดของฉันบนแผนที่");
+      if (manualLocation) manualLocation.hidden = false;
       if (state.sort === "nearby") {
         state.sort = "expiry";
         $("#sort").value = "expiry";
       }
+      return false;
     }
   };
-  $("#nearby-button").onclick = () => busy($("#nearby-button"), () => nearby({fresh:false}));
+  $("#nearby-button").onclick = () => busy($("#nearby-button"), () => nearby({fresh:true}));
   $("#sort").onchange = (e) => {
     state.sort = e.target.value;
     state.page = 0;
-      if (state.sort === "nearby" && !coords.lat) nearby({fresh:false});
+      if (state.sort === "nearby" && !hasLocation(coords)) nearby({fresh:false});
     else load();
   };
-  function toggle(show) {
+  function toggle(show, {reload=true, resetExpanded=false}={}) {
     mapVisible = show;
+    if (!show) { mapRequestSeq++; cancelManualPick(); }
     if (mapShell) mapShell.hidden = !show;
+    if (resetExpanded) {
+      mapShell?.classList.remove("map-expanded");
+      if (mapFullButton) { mapFullButton.textContent = "ขยายแผนที่"; mapFullButton.setAttribute("aria-expanded", "false"); }
+    }
     $("#map-view")?.classList.toggle("active", show);
     $("#list-view")?.classList.toggle("active", !show);
+    $("#map-view")?.setAttribute("aria-pressed", String(show));
+    $("#list-view")?.setAttribute("aria-pressed", String(!show));
     const url = new URL(location.href);
     if (show) url.searchParams.set("view", "map");
     else url.searchParams.delete("view");
     history.replaceState(history.state, "", url);
     window.dispatchEvent(new CustomEvent("foodshare:viewchange", { detail: { map: show } }));
-    if (show) loadMap();
+    if (show) {
+      requestAnimationFrame(() => map?.invalidateSize());
+      if (reload) void loadMap();
+    }
   }
-  $("#map-view")?.addEventListener("click", () => toggle(true));
+  $("#map-view")?.addEventListener("click", () => toggle(true, {resetExpanded:true}));
   $("#list-view")?.addEventListener("click", () => toggle(false));
+  function cancelManualPick() {
+    if (manualPick && map) map.off("click", manualPick);
+    manualPick = null;
+    if (manualLocation) manualLocation.disabled = false;
+    mapShell?.classList.remove("map-picking-origin");
+  }
+  manualLocation?.addEventListener("click", () => {
+    locationSeq++; cancelManualPick(); toggle(true, {resetExpanded:true});
+    if (!map) return;
+    manualLocation.disabled = true;
+    mapShell?.classList.add("map-picking-origin");
+    locationMessage("แตะจุดที่คุณอยู่บนแผนที่หนึ่งครั้ง เพื่อเรียงอาหารใกล้จุดนั้น");
+    manualPick = async event => {
+      locationSeq++; cancelManualPick();
+      mapRequestSeq++;
+      coords = {lat: event.latlng.lat, lng: event.latlng.lng, source: "manual"};
+      setDefaultOrigin(coords); state.sort = "nearby"; state.page = 0; $("#sort").value = "nearby";
+      locationMessage("ใช้จุดที่คุณเลือกบนแผนที่ • กดใกล้ฉันเพื่อเปลี่ยนกลับเป็นตำแหน่ง GPS");
+      await load();
+    };
+    map.on("click", manualPick);
+    mapShell?.scrollIntoView({block:"center", behavior:"smooth"});
+  });
   mapFullButton?.addEventListener("click", () => {
     const expanded = mapShell?.classList.toggle("map-expanded");
     if (mapFullButton) { mapFullButton.textContent = expanded ? "ดูข้อมูล" : "ขยายแผนที่"; mapFullButton.setAttribute("aria-expanded", String(Boolean(expanded))); }
@@ -478,7 +490,10 @@ async function explore() {
   if (mapShell) mapShell.hidden = !mapVisible;
   $("#map-view")?.classList.toggle("active", mapVisible);
   $("#list-view")?.classList.toggle("active", !mapVisible);
+  $("#map-view")?.setAttribute("aria-pressed", String(mapVisible));
+  $("#list-view")?.setAttribute("aria-pressed", String(!mapVisible));
   await load();
+  if (requestedNearby) { void nearby({fresh:false}); return; }
   const initialLocationRequest=++locationSeq;
   void locate().then(async p=>{if(initialLocationRequest===locationSeq){coords=p;setDefaultOrigin(p);await load();}}).catch(()=>{});
 }
@@ -489,7 +504,7 @@ async function memberProfile() {
       const [member, data] = await Promise.all([api(`/api/v1/members/${id}`), api(`/api/v1/members/${id}/posts?page=${page}`)]);
       profile.innerHTML = `<img src="/api/v1/members/${member.id}/photo" alt=""><div><span class="section-kicker">KKU FOODSHARE MEMBER</span><h1>${escape(member.name)}</h1><p>ดูรายการอาหารที่สมาชิกคนนี้เคยแบ่งปัน</p></div>`;
       posts.innerHTML = data.items.length ? data.items.map(feedCard).join("") : empty("ยังไม่มีประวัติการแบ่งปัน", "สมาชิกคนนี้ยังไม่มีโพสต์อาหารที่เปิดให้ดู", null);
-      hydrateFeedComments(posts); wireFeedMenus(posts); paginate(data, load);
+      wireFeedMenus(posts); paginate(data, load);
     } catch (e) { errorBox(profile, e, load); }
   };
   await load();
@@ -505,9 +520,10 @@ async function detail() {
     trip.refresh();
     const commentsPanel = document.createElement("section");
     commentsPanel.className = "detail-panel panel comments-panel";
-    commentsPanel.innerHTML = `<h2>ความคิดเห็น <span id="comments-count">${p.commentCount || 0}</span></h2><div id="post-comments"></div>`;
-    $(".detail-route-panel", el).after(commentsPanel);
-    mountComments(Number(id));
+    commentsPanel.id = "post-comments";
+    commentsPanel.innerHTML = commentButton(p);
+    $(".detail-food-content", el).after(commentsPanel);
+    if (location.hash === "#post-comments") openPostComments(p, $("[data-open-comments]", commentsPanel));
     if (signedIn() && !p.mine) mountReservation($("#detail-booking"), p, trip, (fresh) => {
       $('[data-detail-stock]').textContent = fresh.availableQuantity;
       $('[data-detail-state]').innerHTML = badge(fresh.status);
@@ -531,22 +547,6 @@ async function detail() {
   } catch (e) {
     errorBox(el, e, detail);
   }
-}
-async function mountComments(postId) {
-  const el = $("#post-comments"); if (!el) return;
-  if (!signedIn()) {
-    el.innerHTML = '<a class="btn btn-soft" href="/login">เข้าสู่ระบบเพื่อดูและแสดงความคิดเห็น</a>';
-    return;
-  }
-  const load = async () => {
-    const d = await api(`/api/v1/food-posts/${postId}/comments`);
-    el.innerHTML = `<div class="comment-list">${d.items.map(c => `<article class="comment"><img src="/api/v1/members/${c.authorId}/photo" alt=""><div><strong>${escape(c.authorName)}</strong><time>${escape(dateTime(c.createdAt))}</time><p>${escape(c.body)}</p></div>${c.canDelete ? `<button type="button" data-delete-comment="${c.id}">ลบ</button>` : ""}${signedIn() ? `<button type="button" data-report-comment="${c.id}">รายงาน</button>` : ""}</article>`).join("") || "<p class=field-note>ยังไม่มีความคิดเห็น</p>"}</div>${signedIn() ? `<form id="comment-form" class="comment-form"><img src="/account/photo" alt=""><textarea name="body" maxlength="800" required placeholder="เขียนความคิดเห็นอย่างสุภาพ"></textarea><button class="btn btn-primary" type="submit">ส่ง</button></form>` : `<a class="btn btn-soft" href="/login">เข้าสู่ระบบเพื่อแสดงความคิดเห็น</a>`}`;
-    $("#comments-count").textContent = d.totalElements;
-    $("#comment-form", el)?.addEventListener("submit", e => { e.preventDefault(); busy($("button", e.currentTarget), async () => { await api(`/api/v1/food-posts/${postId}/comments`, {method:"POST", body:{body:e.currentTarget.elements.body.value}}); await load(); }); });
-    $$('[data-delete-comment]', el).forEach(b => b.onclick = () => busy(b, async () => { await api(`/api/v1/comments/${b.dataset.deleteComment}`, {method:"DELETE"}); await load(); }));
-    $$('[data-report-comment]', el).forEach(b => b.onclick = () => busy(b, async () => { const reason = await ask("รายงานความคิดเห็น", "เลือกเหตุผล เช่น ไม่เหมาะสมหรือสแปม", {label:"เหตุผล", maxLength:1000, confirm:"ส่งรายงาน"}); if (reason) { await api("/api/v1/reports", {method:"POST", body:{postId, commentId:Number(b.dataset.reportComment), reason}}); toast("ส่งรายงานแล้ว"); } }));
-  };
-  try { await load(); } catch (e) { errorBox(el, e, load); }
 }
 async function editor() {
   const form = $("#post-form");
@@ -763,7 +763,7 @@ async function savedPosts(page = 0) {
     el.innerHTML = d.items.length
       ? d.items.map(feedCard).join("")
       : empty("ยังไม่มีโพสต์ที่บันทึก", "กดรูปหัวใจบนโพสต์อาหารที่สนใจ แล้วกลับมาดูได้ที่นี่", "/explore", "ค้นหาอาหาร");
-    hydrateFeedComments(el); wireFeedMenus(el); paginate(d, savedPosts);
+    wireFeedMenus(el); paginate(d, savedPosts);
   } catch (e) { errorBox(el, e, () => savedPosts(page)); }
 }
 async function manualPickup(id, page) {
@@ -1336,5 +1336,7 @@ const boot = {
 initProfileMenu();
 initNavigation();
 initImageViewer();
+initComments();
+initAuthUI();
 if (boot[page])
   Promise.resolve(boot[page]()).catch((e) => toast(e.message, true));

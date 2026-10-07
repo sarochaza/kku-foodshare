@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {postPageSize} from '../../main/resources/static/js/feed-options.mjs';
+import {sharingMapUrl, mapFeedRequest, focusFoodMap, hasLocation} from '../../main/resources/static/js/map-discovery.mjs';
 const app = await readFile(new URL('../../main/resources/static/js/app.js', import.meta.url), 'utf8');
 
 function harness(name, search = '') {
   const nodes = new Map(), calls = []; let onPage;
   const $ = selector => {
     if (!nodes.has(selector)) nodes.set(selector, {innerHTML: '', value: '', textContent: '', hidden: true,
-      classList: {toggle() {}}, addEventListener() {}, closest: () => null});
+      classList: {toggle() {}}, setAttribute() {}, addEventListener() {}, closest: () => null});
     return nodes.get(selector);
   };
   const source = name === 'home'
@@ -17,7 +17,7 @@ function harness(name, search = '') {
   const location = {search, href: `https://foodshare.local/${name === 'home' ? '' : 'explore'}${search}`};
   const history = {state: {}, replaceState(_state, _unused, url) {location.href = String(url);}};
   const helpers = {$, $$: () => [], api: async url => {calls.push(url); return {items: [], page: Number(new URL(url, location.href).searchParams.get('page')), totalElements: 30, totalPages: 5};},
-    location, history, postPageSize, signedIn: () => false, homeGuide() {},
+    location, history, sharingMapUrl, mapFeedRequest, focusFoodMap, hasLocation, signedIn: () => false, homeGuide() {},
     categories: {}, empty: () => 'empty', errorBox: (_el, error) => {throw error;},
     paginate: (_data, callback) => {onPage = callback;},
     hydrateFeedComments() {}, wireFeedMenus() {},
@@ -27,30 +27,25 @@ function harness(name, search = '') {
   return {boot, $, calls, page: n => onPage(n), location};
 }
 
-test('page size only accepts the offered counts with safe defaults', () => {
-  for (const size of [6, 12, 24]) assert.equal(postPageSize(String(size)), size);
-  for (const invalid of [null, '', 0, -1, 200, 'oops']) assert.equal(postPageSize(invalid), 12);
-  assert.equal(postPageSize('oops', 6), 6);
+test('page size controls are removed from home and search', async () => {
+  for (const name of ['home', 'explore', 'dashboard']) {
+    const html = await readFile(new URL(`../../main/resources/templates/${name}.html`, import.meta.url), 'utf8');
+    assert.doesNotMatch(html, /แสดงต่อหน้า|id="(?:home-)?page-size"/);
+  }
 });
 
-test('home page count and pagination use the real list query while map stays at 200 on page zero', async () => {
+test('home pagination remains at six cards while the map stays at 200 on page zero', async () => {
   const h = harness('home'); await h.boot();
-  assert.equal(h.$('#home-page-size').value, '6');
   await h.page(2);
   assert.match(h.calls.at(-2), /page=2&size=6/);
   assert.match(h.calls.at(-1), /page=0&size=200/);
-  await h.$('#home-page-size').onchange({target: {value: '24'}});
-  assert.match(h.calls.at(-2), /page=0&size=24/);
-  assert.match(h.calls.at(-1), /page=0&size=200/);
-  assert.equal(new URL(h.location.href).searchParams.get('size'), '24');
 });
 
-test('search count sends the chosen size while keeping filters and resetting page', async () => {
+test('search keeps category, ownership and availability filters with fixed pagination', async () => {
   const h = harness('explore', '?size=6&q=rice&category=FOOD&ownership=others&now=true');
-  await h.boot(); assert.equal(h.$('#page-size').value, '6');
-  await h.$('#page-size').onchange({target: {value: '24'}});
+  await h.boot(); await h.page(2);
   const query = new URL(h.calls.at(-1), 'https://foodshare.local').searchParams;
-  assert.equal(query.get('size'), '24'); assert.equal(query.get('page'), '0');
+  assert.equal(query.get('size'), '12'); assert.equal(query.get('page'), '2');
   assert.equal(query.get('q'), 'rice'); assert.equal(query.get('category'), 'FOOD');
   assert.equal(query.get('ownership'), 'others'); assert.equal(query.get('now'), 'true');
 });

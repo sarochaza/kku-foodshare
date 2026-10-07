@@ -18,6 +18,18 @@ public class PostComment {
   @JoinColumn(name = "author_id", nullable = false)
   public User author;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "parent_comment_id")
+  public PostComment parent;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "reply_to_comment_id")
+  public PostComment replyTo;
+
+  public Long getId() { return id; }
+  public User getAuthor() { return author; }
+  public LocalDateTime getDeletedAt() { return deletedAt; }
+
   @Column(nullable = false, length = 800)
   public String body;
 

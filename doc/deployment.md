@@ -1,71 +1,98 @@
-# Deployment and operations
+# Deployment and database operations
 
-## ค่าที่ต้องเตรียม
+## Production layout
 
-| ค่า | ต้องใช้เมื่อ | ความหมาย |
-|---|---|---|
-| DATABASE_URL/USER/PASSWORD | รัน Java โดยตรง | JDBC PostgreSQL; Docker Compose จัดการให้ |
-| APP_SECRET | ทุก environment | สุ่มอย่างน้อย 32 ตัวอักษร เก็บถาวรเพื่อถอดรหัสรับอาหาร |
-| UPLOAD_DIR | Java โดยตรง | โฟลเดอร์ถาวรที่แอปเขียนได้ |
-| DOMAIN | Production Compose | ชื่อโดเมนจริง ไม่ใส่ https หรือ path |
-| APP_BASE_URL | Java โดยตรง / SMTP | URL สาธารณะที่ถูกต้องของระบบ |
-| COOKIE_SECURE | HTTPS | ตั้ง true; production Compose ตั้งให้ |
-| SPRING_PROFILES_ACTIVE | ทางเลือก | google, mail หรือ google,mail |
-| MAP_TILE_URL/ATTRIBUTION | ทางเลือก | ผู้ให้บริการ tiles และเครดิตที่ต้องแสดง |
+This project is prepared for one Spring Boot app, one private PostgreSQL 17 service, persistent Docker volumes for PostgreSQL and `/app/uploads`, and Caddy as the public HTTPS proxy. PostgreSQL and the app port are not exposed publicly; only Caddy ports 80/443 are published. The setup is intended for a low-traffic course project, not multiple app instances.
 
-Production ใช้ reverse proxy ที่เชื่อถือได้และปิดการเข้าถึง app port จากอินเทอร์เน็ต เพื่อให้ forwarded headers และ IP throttle ถูกต้อง ไม่ต้องเปิด PostgreSQL port ออกภายนอก
+The course-required base file is `docker-compose.yml`. `compose.yaml` remains as a compatibility copy for commands in older phase notes; keep both base files equivalent. `compose.production.yaml` adds the public domain and secure-cookie settings.
 
-## ตรวจหลัง deploy
+## VPS preparation
 
-1. `/actuator/health` ตอบ UP ผ่าน HTTPS
-2. สมัครผู้แบ่งปันและผู้รับเป็นคนละบัญชี แล้วทดสอบโพสต์รูป + พิกัด → จอง → ยกเลิก → จองใหม่ → กรอกรหัสรับ
-3. เปิดบนโทรศัพท์จริง ตรวจ GPS permission และเส้นทาง
-4. Restart app แล้วรูป/โพสต์/ประวัติยังอยู่ (session login ใหม่ได้)
-5. หากเปิด Google/SMTP ให้ทดสอบ callback และอีเมลรีเซ็ตด้วยบัญชีจริง
-6. กำหนดแอดมิน ตรวจรายงาน และทดสอบการคืนจำนวนเมื่อปิดโพสต์
+Use a Linux VPS or a university server with Docker Compose, persistent disk, and enough memory for the app and PostgreSQL. The repository README suggests starting around 2 GB RAM for a small deployment. Before starting Caddy:
 
-## Backup
+1. Point the domain's DNS A/AAAA records to the server.
+2. Allow inbound TCP ports 80 and 443 in the provider firewall and server firewall.
+3. Clone the GitHub repository to a stable directory such as `/opt/kku-foodshare`.
+4. Run `bash scripts/setup-env.sh`, then edit `.env` on the server. Set `DOMAIN` to the hostname only (no `https://` or path). Keep `.env` off GitHub.
+5. For a fresh database, keep the generated `APP_SECRET`. For existing data, replace it with the exact source `APP_SECRET` before restoring. The target `DATABASE_PASSWORD` may be new because the backup does not contain database roles.
+6. Add Google OAuth and SMTP settings only if those features will be used. Update Google's authorized callback to `https://<DOMAIN>/login/oauth2/code/google`.
 
-เก็บฐานข้อมูล รูปอาหาร และ `.env`/APP_SECRET ที่เข้ารหัสหรืออยู่ใน secret manager ให้เป็นชุดเดียวกัน สำรองก่อนอัปเกรดทุกครั้ง:
+Fresh deployment with an empty database:
 
 ```bash
-mkdir -p backups
-docker compose exec -T db pg_dump -U foodshare -d foodshare -Fc > backups/foodshare.dump
-docker compose cp app:/app/uploads backups/uploads
+cd /opt/kku-foodshare
+bash scripts/setup-env.sh
+# Edit .env and set DOMAIN before continuing.
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml up --build -d
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml ps
 ```
 
-ทำช่วงบำรุงรักษา/หยุดการเขียนเพื่อให้ DB กับรูปตรงกัน และคัดลอก backup ไปพื้นที่อีกเครื่อง ทดสอบ restore ที่ staging เป็นระยะ
+Keep the project name `kku-foodshare-prod` for future updates. Compose uses it to name persistent volumes; changing it makes Docker create different, empty volumes. Do not run `docker compose down -v` when data must be kept.
 
-## Restore ไป environment ว่าง
+## Move the current Windows database and uploaded images
 
-ตั้ง `.env` ด้วย APP_SECRET ชุดเดิม เปิด DB อย่างเดียว แล้ว restore ก่อนเปิด app:
+The database inside Docker Desktop on the Windows laptop cannot be transferred by deploying the app alone. Export the database and image volume as a matching set. Run this during a quiet period when nobody is posting, uploading, or changing reservations. The export folder contains private user data; do not commit it or put it in the delivery ZIP.
+
+Extract the deployment ZIP, then copy the exact `.env` file used by the currently running local project into the extracted `kku-foodshare` folder. This lets Compose connect to the existing project safely. Keep this secret file only on your computer; it is not part of the ZIP.
+
+From PowerShell, in that `kku-foodshare` folder that contains `docker-compose.yml`, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\backup-local.ps1 -ProjectName kku-foodshare-phase1
+```
+
+The script writes a timestamped folder under `backups\` containing `foodshare.dump`, `uploads\`, and `BACKUP-INFO.txt`. It uses `docker compose cp` to copy the binary dump, so PowerShell does not re-encode it. It intentionally does not copy `.env` or secrets.
+
+Copy that folder to the VPS over SSH. Replace the example folder name with the one printed by the backup script:
+
+```powershell
+scp -r .\backups\foodshare-20261007-230000-000 user@YOUR_SERVER:/opt/kku-foodshare/backups/
+```
+
+On the VPS, first prepare `.env` as described above and ensure `DOMAIN` and the source `APP_SECRET` are correct. Do not start the app yet. Then run the guarded restore script:
 
 ```bash
-docker compose up -d db
-# รอ healthcheck ผ่านก่อน
-docker compose exec -T db pg_restore -U foodshare -d foodshare --no-owner < backups/foodshare.dump
-docker compose up -d app
-docker compose cp backups/uploads/. app:/app/uploads/
+cd /opt/kku-foodshare
+bash scripts/restore-vps.sh /opt/kku-foodshare/backups/foodshare-20261007-230000-000
 ```
 
-ตรวจสิทธิ์ไฟล์ใน volume ให้ UID/GID 10001 อ่าน/เขียนได้ เครื่องมือ restore ต้องใช้ database ว่างและ backup ที่ตรวจสอบแล้ว ไม่รัน `--clean` กับฐานข้อมูลที่ยังมีงานใช้งาน
+The script starts only PostgreSQL, verifies the target database has no application relations, validates the dump, restores it in one transaction without `--clean`, creates the image volume, restores image ownership to UID/GID 10001, and starts the app and Caddy proxy. It stops if the database or image volume is already populated. Do not bypass that guard to overwrite existing data; inspect the target and take a separate backup first.
 
-## อัปเกรด
+If the VPS should start with demo data only, skip the backup/restore steps and use the fresh deployment procedure instead. Flyway creates the schema on the first app start.
 
-สำรองข้อมูล → build image ใหม่ → `docker compose up --build -d` → ตรวจ health/log/journey. Flyway ตรวจ checksum และรัน migration ใหม่ตามลำดับ ไม่แก้ไฟล์ migration ที่ใช้ไปแล้ว หากอัปเกรดผิดให้หยุดและประเมิน restore ทั้ง DB/images จากชุดเดียวกัน; อย่า downgrade app บน schema ที่เข้ากันไม่ได้
+## Verify the public deployment
 
-## ปัญหาที่พบบ่อย
+After Caddy has obtained the HTTPS certificate, check:
 
-- Startup บอก APP_SECRET: ตั้ง secret อย่างน้อย 32 ตัวอักษร
-- Connection refused: ตรวจ DB health และ JDBC URL; host ใน Compose คือ `db`
-- Flyway existing schema: ฐานข้อมูลเก่าต้องวางแผนย้ายข้อมูล; ห้ามลบข้อมูลจริงเพื่อแก้ startup
-- Session หายเมื่อ restart: เป็นพฤติกรรม session ในหน่วยความจำ ข้อมูลสมาชิก/โพสต์อยู่ใน DB
-- GPS ไม่ขึ้น: ใช้ HTTPS/localhost ตรวจสิทธิ์เบราว์เซอร์ หรือกรอกพิกัดเอง
-- Map tile โหลดไม่ได้: ตรวจ network/provider; ใช้ปุ่มลองใหม่หรือเปิด Google Maps จากพิกัด
-- อีเมลไม่ส่ง: เปิด `mail` profile ตรวจ SMTP log และ sender ที่ provider อนุญาต
-- 403 หลังเปิดหน้าทิ้งไว้: session/CSRF หมดอายุ ให้เข้าสู่ระบบใหม่และโหลดหน้าฟอร์มใหม่
-- รหัสรับอ่านไม่ได้หลังเปลี่ยน secret: คืน APP_SECRET ชุดเดิมจาก backup แล้ว restart
+```bash
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml ps
+curl -fsS https://YOUR_DOMAIN/actuator/health
+```
 
-## ข้อจำกัดการตรวจในสภาพแวดล้อมพัฒนา
+The health endpoint should return `UP`. Then test signup/login, create a post with an image and location, reserve/cancel, QR/manual pickup, comments, and the map from a phone. Restart the app and confirm posts and images remain. If Google login is enabled, verify the OAuth callback using the public domain.
 
-ไม่ได้รัน Docker daemon หรือเผยแพร่ production จากสภาพแวดล้อมนี้ มี CI สำหรับ PostgreSQL 17 มาตรฐานและ Docker build ให้รันเมื่อ push repository ส่วนผลที่รันจริงระบุใน `test/verification.md` โดยแยก H2, PGlite และ browser ออกจากกัน
+Before submitting the course work, replace the Deployment URL placeholder in `README.md` with the live URL and verify `https://YOUR_DOMAIN/swagger-ui/index.html` opens publicly.
+
+## Ongoing backups
+
+Back up PostgreSQL and uploads together before upgrades. Store a copy on a different machine or private storage, separately preserve `APP_SECRET`, and test restore on an empty staging stack. Never upload database dumps, uploaded user images, or `.env` to GitHub.
+
+For PostgreSQL-only maintenance in a private environment:
+
+```bash
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml exec -T db pg_dump -U foodshare -d foodshare -Fc -f /tmp/foodshare.dump
+docker compose -p kku-foodshare-prod -f docker-compose.yml -f compose.production.yaml cp db:/tmp/foodshare.dump ./foodshare.dump
+```
+
+Do not edit Flyway migrations already applied to a database. Add a new migration for schema changes and test it against a restored copy before production.
+
+## Troubleshooting
+
+- Startup says `APP_SECRET`: set a random value of at least 32 characters in `.env`.
+- Caddy does not issue HTTPS: verify DNS points to the VPS and ports 80/443 are reachable.
+- Database connection fails: confirm the `db` service is healthy. Do not publish PostgreSQL port 5432.
+- Images are missing after migration: confirm the `uploads/` folder was copied and the restore script completed before opening the proxy.
+- Pickup codes cannot be read after migration: restore the exact source `APP_SECRET` and restart the app. Changing it can invalidate encrypted pickup data.
+- Session requires a new login after app restart: sessions are in memory; account, posts, and reservations remain in PostgreSQL.
+- Map tiles fail: verify outbound internet access and the configured tile provider. OpenStreetMap tiles require attribution and are best-effort for low-traffic demos.
+- Email/reset-password does not send: configure an SMTP provider and test its sender/domain on the production URL.

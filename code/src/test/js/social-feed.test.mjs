@@ -6,12 +6,14 @@ import { feedCard } from "../../main/resources/static/js/ui.js";
 const app = await readFile(new URL("../../main/resources/static/js/app.js", import.meta.url), "utf8");
 const ui = await readFile(new URL("../../main/resources/static/js/ui.js", import.meta.url), "utf8");
 const exploreTemplate = await readFile(new URL("../../main/resources/templates/explore.html", import.meta.url), "utf8");
+const fragments = await readFile(new URL("../../main/resources/templates/fragments.html", import.meta.url), "utf8");
 const css = await readFile(new URL("../../main/resources/static/css/app.css", import.meta.url), "utf8");
+const comments = await readFile(new URL("../../main/resources/static/js/comments.mjs", import.meta.url), "utf8");
 
 test("feed uses the multi-image gallery and comment API", () => {
   assert.match(ui, /export function gallery/);
   assert.match(ui, /data-report-post/);
-  assert.match(app, /food-posts\/\$\{postId\}\/comments/);
+  assert.match(comments, /food-posts\/\$\{postId\}\/comments/);
 });
 
 test("food feed presents title, image, and description together in that order", () => {
@@ -42,7 +44,7 @@ test("food post cards show road distance only when the route service provided it
 
 test("notifications have real preferences and unread API routes", () => {
   assert.match(app, /notification-preferences/);
-  assert.match(app, /data-report-comment/);
+  assert.match(comments, /data-report-comment/);
 });
 
 test("notification feed identifies each event type with its own color style", () => {
@@ -70,7 +72,8 @@ test("explore map pins open a food preview and expanded map has a control to res
   const explore = app.slice(app.indexOf("async function explore()"), app.indexOf("async function memberProfile()"));
   assert.match(explore, /markers\(map, d\.items, layer, p => showMapPost\(p\)\)/);
   assert.match(explore, /mapFullButton\.textContent = expanded \? "ดูข้อมูล" : "ขยายแผนที่"/);
-  assert.match(exploreTemplate, /id="explore-map-preview"/);
+  assert.match(exploreTemplate, /fragments :: sharingMap/);
+  assert.match(fragments, /id="explore-map-preview"/);
 });
 
 test("post detail groups title, food gallery, and description in one panel in that order", () => {

@@ -11,4 +11,4 @@ $content = Get-Content '.env.example' -Raw
 $content = $content -replace '(?m)^DATABASE_PASSWORD=\r?$', ('DATABASE_PASSWORD=' + (New-Secret))
 $content = $content -replace '(?m)^APP_SECRET=\r?$', ('APP_SECRET=' + (New-Secret))
 [IO.File]::WriteAllText((Join-Path (Get-Location) '.env'), $content, (New-Object Text.UTF8Encoding $false))
-Write-Host 'Created .env with random secrets. Run: docker compose up --build -d'
+Write-Host 'Created .env with random secrets. Run: docker compose -p kku-foodshare-phase1 -f docker-compose.yml up --build -d'

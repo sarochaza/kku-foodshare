@@ -59,7 +59,8 @@
 .welcome-page .section { padding-block: 48px; }
 .welcome-page .how-section { background: linear-gradient(160deg, #f0f9ff, #f0faf4); border-block: 1px solid #e1eee9; }
 .welcome-page .steps-grid article { background: #ffffffc9; border: 1px solid #deeceb; padding: 25px 20px; border-radius: 24px; box-shadow: 0 8px 24px #29526909; }
-.welcome-page .share-banner { border: 1px solid #dcebe3; border-radius: 30px; background: linear-gradient(120deg, #eaf7f1, #eef8ff); }
+.welcome-page .share-banner { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); align-items: center; border: 1px solid #dcebe3; border-radius: 30px; background: linear-gradient(120deg, #eaf7f1, #eef8ff); }
+.welcome-page .share-banner > img { width: 100%; height: clamp(220px, 25vw, 300px); object-fit: cover; object-position: 70% center; border-radius: 20px; mix-blend-mode: normal; box-shadow: 0 12px 28px #26516b18; }
 .welcome-faq { max-width: 860px; padding-top: 12px; padding-bottom: 58px; }
 .welcome-faq-list { display: grid; gap: 12px; }
 .welcome-faq details { border: 1px solid #deebe8; border-radius: 18px; background: white; box-shadow: 0 5px 20px #294f6506; overflow: hidden; }
@@ -132,10 +133,31 @@
   .welcome-page .guest-role-grid { gap: 14px; }
   .welcome-page .section { padding-block: 32px; }
   .welcome-page .home-discover { padding-top: 24px; }
-  .welcome-page .share-banner { border-radius: 22px; }
+  .welcome-page .share-banner { display: flex; flex-direction: column; align-items: stretch; min-height: 0; gap: 16px; border-radius: 22px; }
+  .welcome-page .share-banner > img { position: static; width: 100%; height: auto; aspect-ratio: 16 / 10; opacity: 1; object-position: 70% center; }
   .welcome-faq { padding-bottom: 36px; }
   .welcome-faq summary { padding-inline: 16px; font-size: 14px; }
   .welcome-faq details p { padding-inline: 16px; font-size: 13px; }
+}
+@media (max-width: 600px) {
+  body.welcome-page .landing-hero { min-height: 0; padding-block: 20px 22px; }
+  body.welcome-page .hero-layout { gap: 12px; }
+  body.welcome-page .hero-copy { max-width: none; }
+  body.welcome-page .hero-copy h1 { font-size: clamp(30px, 8.5vw, 38px); line-height: 1.3; margin: 13px 0 10px; letter-spacing: -.5px; }
+  body.welcome-page .hero-copy > p { margin-block: 8px; font-size: 13px; line-height: 1.65; }
+  body.welcome-page .hero-copy > .guest-hero-caption { margin-top: 5px; font-size: 11px; }
+  body.welcome-page .home-search { max-width: none; margin-top: 12px; }
+  body.welcome-page .hero-buttons { margin: 8px 0 0; gap: 0; }
+  body.welcome-page .hero-buttons .btn { display: none; }
+  body.welcome-page .welcome-share-link { flex-basis: auto; min-height: 40px; margin-left: auto; font-size: 12px; }
+  body.welcome-page .hero-reassurance { display: none; }
+  body.welcome-page .guest-account-entry { margin-top: 8px; gap: 8px; }
+  body.welcome-page .guest-account-entry .btn { flex: 1; min-height: 44px; }
+  body.welcome-page .guest-login { display: none; }
+  body.welcome-page .welcome-art { width: min(360px, 100%); margin: 0 auto; padding: 5px 0 0; }
+  body.welcome-page .welcome-illustration { aspect-ratio: 16 / 9; max-height: 190px; border-radius: 20px; border-width: 4px; }
+  body.welcome-page .floating-note, body.welcome-page .spark-two { display: none; }
+  body.welcome-page .guest-start { padding-top: 23px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

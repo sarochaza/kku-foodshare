@@ -14,9 +14,13 @@
     <link rel="stylesheet" href="/css/app.css" />
     <link rel="stylesheet" href="/css/welcome.css" />
     <link rel="stylesheet" href="/css/feed-polish.css" />
+    <link rel="stylesheet" href="/css/auth-polish.css" />
+    <link rel="stylesheet" href="/css/about.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
     <script src="/vendor/leaflet/leaflet.js" defer></script>
     <script src="/vendor/pickup-qr.js" defer></script>
+    <script src="/js/theme.mjs" type="module"></script>
     <script src="/js/app.js" type="module"></script>
   </head>
   <body>
@@ -109,6 +113,12 @@
         <symbol id="i-mail" viewBox="0 0 24 24">
           <path d="M3 5h18v14H3V5Z m0 0 9 7 9-7" />
         </symbol>
+        <symbol id="i-info" viewBox="0 0 24 24">
+          <path d="M12 11v5 M12 8h.01 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </symbol>
+        <symbol id="i-contrast" viewBox="0 0 24 24">
+          <path d="M12 3a9 9 0 1 0 0 18V3Z M12 3a9 9 0 0 1 0 18" />
+        </symbol>
       </svg>
       <div th:if="${demo}" class="demo-banner">
         ข้อมูลตัวอย่างสำหรับทดสอบระบบ • ยังไม่ใช่รายการอาหารที่เปิดรับจริง
@@ -125,13 +135,15 @@
           ></a
         >
         <nav class="desktop-nav" aria-label="เมนูหลัก">
-          <a href="/" data-nav="home" th:classappend="${active=='home'?'active':''}">หน้าแรก</a>
+          <a th:if="${viewer == null}" href="/" data-nav="home" th:classappend="${active=='home'?'active':''}">หน้าแรก</a>
           <a href="/explore" data-nav="explore" th:classappend="${active=='explore'?'active':''}"
             >ค้นหาอาหาร</a
-          ><a href="/explore?view=map" data-nav="map">แผนที่แบ่งปัน</a
-          ><a href="/#how" data-nav="how">วิธีใช้งาน</a>
+          ><a href="/explore?view=map" data-nav="map">แผนที่แบ่งปัน</a>
         </nav>
         <div class="header-actions">
+          <a class="header-about-link" href="/about" data-nav="about" th:classappend="${active=='about'?'active':''}" aria-label="เกี่ยวกับเรา">
+            <svg class="icon" aria-hidden="true"><use href="#i-info"></use></svg><span aria-hidden="true">เกี่ยวกับเรา</span>
+          </a>
           <a
             class="icon-button notification-bell"
             th:if="${viewer != null}"
@@ -150,6 +162,7 @@
               <a href="/account/posts" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>โพสต์ของฉัน</a>
               <a href="/notifications" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg>การแจ้งเตือน</a>
               <a href="/account" role="menuitem"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg>ตั้งค่าโปรไฟล์</a>
+              <div class="profile-menu-theme-wrap" role="none"><svg class="icon" aria-hidden="true"><use href="#i-contrast"></use></svg><span class="profile-menu-theme-label">ธีมพื้นหลัง</span><select class="profile-menu-theme-select" role="menuitem" data-theme-select aria-label="เลือกธีมพื้นหลัง"><option value="color">ฟ้า–เขียว</option><option value="monochrome">ขาว–ดำ</option><option value="dark">พื้นหลังดำ</option></select></div>
               <form th:action="@{/logout}" method="post"><button class="profile-menu-logout" type="submit"><svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>ออกจากระบบ</button></form>
             </div>
           </div>
@@ -165,19 +178,21 @@
       </div>
       <nav class="container owner-shortcut-nav" th:if="${viewer != null}" aria-label="ทางลัดผู้แบ่งปัน">
         <a class="owner-shortcut" href="/account/posts" th:attr="aria-current=${active=='my-posts'?'page':null}">
-          <svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg>
+          <svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg>
           <strong>โพสต์ของฉัน</strong><span>จัดการจำนวนและผู้จอง</span>
         </a>
       </nav>
-      <nav class="mobile-nav" aria-label="เมนูมือถือ">
-        <a href="/" data-nav="home" th:classappend="${active=='home'?'active':''}"
+      <nav class="mobile-nav" th:classappend="${viewer != null ? 'signed-in-nav' : ''}" aria-label="เมนูมือถือ">
+        <a th:if="${viewer == null}" href="/" data-nav="home" th:classappend="${active=='home'?'active':''}"
           ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
           ><span>หน้าแรก</span></a
         ><a href="/explore" data-nav="explore" th:classappend="${active=='explore'?'active':''}"
           ><svg class="icon" aria-hidden="true">
             <use href="#i-search"></use></svg
           ><span>ค้นหา</span></a
-        ><a href="/posts/new" data-nav="editor" class="mobile-post"
+        ><a th:if="${viewer != null}" class="mobile-my-posts" href="/account/posts" th:classappend="${active=='my-posts'?'active':''}" th:attr="aria-current=${active=='my-posts'?'page':null}" aria-label="โพสต์ของฉัน">
+          <svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg><span>โพสต์ของฉัน</span>
+        </a><a href="/posts/new" data-nav="editor" class="mobile-post"
           ><span
             ><svg class="icon" aria-hidden="true">
               <use href="#i-plus"></use></svg></span
@@ -223,6 +238,27 @@
           <div class="image-viewer-controls"><button type="button" data-viewer-previous>รูปก่อนหน้า</button><span>ปัดซ้าย–ขวาเพื่อดูรูป</span><button type="button" data-viewer-next>รูปถัดไป</button></div>
         </div>
       </dialog>
+      <dialog id="comments-dialog" class="comments-dialog" aria-labelledby="comments-title">
+        <div class="comments-surface">
+          <h2 id="comments-title" class="visually-hidden" data-comments-title>ความคิดเห็น</h2><small class="visually-hidden" data-comments-count aria-live="polite"></small>
+          <button type="button" class="comments-close" data-comments-close aria-label="ปิดความคิดเห็น" autofocus>×</button>
+          <div class="comments-scroll">
+            <section class="comments-post" data-comments-post></section>
+            <div data-comments-list class="comments-list"></div>
+            <p data-comments-status class="comments-status" role="status" hidden></p>
+            <button type="button" data-comments-more class="btn btn-soft comments-more" hidden>อ่านความคิดเห็นเพิ่มเติม</button>
+          </div>
+          <div class="comments-composer">
+            <p class="comment-feedback" data-comment-feedback role="status" hidden></p>
+            <p data-comments-login hidden><a class="btn btn-primary" href="/login">เข้าสู่ระบบเพื่อแสดงความคิดเห็น</a></p>
+            <form data-comments-form hidden>
+              <div class="comment-reply-chip" data-comment-reply hidden><span data-comment-reply-name></span><button type="button" data-comment-cancel-reply aria-label="ยกเลิกการตอบกลับ">×</button></div>
+              <div class="comment-composer-row"><textarea data-comment-input aria-label="ความคิดเห็น" placeholder="เขียนความคิดเห็นเกี่ยวกับอาหาร…" maxlength="800" rows="2" required></textarea><button type="submit" data-comment-send class="btn btn-primary">ส่ง</button></div>
+              <small>ถามรายละเอียดอาหารได้ · ไม่เกิน 800 ตัวอักษร</small>
+            </form>
+          </div>
+        </div>
+      </dialog>
       <dialog id="action-dialog">
         <form method="dialog">
           <button value="cancel" class="dialog-close" aria-label="ปิด">
@@ -251,5 +287,15 @@
         </form>
       </dialog>
     </footer>
+    <section th:fragment="sharingMap" id="explore-map-shell" class="map-shell map-shell-rich" hidden>
+      <div id="explore-map" class="map-canvas" role="region" aria-label="แผนที่แบ่งปันอาหาร"></div>
+      <button type="button" id="explore-map-full" class="btn btn-soft explore-map-full" aria-expanded="false" aria-controls="explore-map-aside">ขยายแผนที่</button>
+      <div id="explore-map-preview" class="home-map-preview explore-map-preview" hidden aria-live="polite"></div>
+      <aside id="explore-map-aside" class="explore-map-aside">
+        <span class="section-kicker">NEAR THE CAMPUS</span><h2>เลือกมื้อที่อยากแวะ</h2>
+        <p class="map-caption" id="map-status">เลือกหมุดเพื่อดูรายละเอียดอาหาร</p>
+        <div id="explore-map-list" class="explore-map-list"></div>
+      </aside>
+    </section>
   </body>
 </html>

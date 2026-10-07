@@ -4,12 +4,6 @@
   <body data-page="editor" th:attr="data-post-id=${postId}">
     <header th:replace="~{fragments :: header('post')}"></header>
     <main class="container page-main editor-main">
-      <a href="/account/posts" class="back-link">← โพสต์ของฉัน</a>
-      <div class="page-heading">
-        <span class="section-kicker">SHARE A MEAL, SHARE A SMILE</span>
-        <h1 th:text="${postId==0?'แบ่งปันอาหารดี ๆ':'แก้ไขโพสต์อาหาร'}"></h1>
-        <p>บอกรายละเอียดสักนิด แล้วส่งต่อมื้อดี ๆ ให้เพื่อนในชุมชน</p>
-      </div>
       <form id="post-form" class="editor-layout">
         <div>
           <section class="panel form-panel">

@@ -14,7 +14,6 @@ public class DashboardController {
   private final UserProfileService userProfileService;
 
   public DashboardController(UserProfileService userProfileService) {
-
     this.userProfileService = userProfileService;
   }
 
@@ -28,34 +27,24 @@ public class DashboardController {
     }
 
     String email = resolveEmail(authentication);
-
     String providerLabel = resolveProviderLabel(authentication);
-
     UserProfileResponse currentUser = userProfileService.getProfile(email, providerLabel);
-
     model.addAttribute("currentUser", currentUser);
-
     return "dashboard";
   }
 
   private String resolveEmail(Authentication authentication) {
-
     Object principal = authentication.getPrincipal();
-
     if (principal instanceof OAuth2User oauth2User) {
       return oauth2User.getAttribute("email");
     }
-
     return authentication.getName();
   }
 
   private String resolveProviderLabel(Authentication authentication) {
-
     if (authentication.getPrincipal() instanceof OAuth2User) {
-
       return "บัญชี Google";
     }
-
     return "บัญชีอีเมล";
   }
 }

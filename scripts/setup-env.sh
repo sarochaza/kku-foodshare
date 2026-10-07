@@ -7,4 +7,4 @@ umask 077
 cp .env.example .env
 sed -i.bak "s/^DATABASE_PASSWORD=$/DATABASE_PASSWORD=$(openssl rand -hex 24)/; s/^APP_SECRET=$/APP_SECRET=$(openssl rand -hex 32)/" .env
 rm -f .env.bak
-echo 'Created .env with random secrets. Run: docker compose up --build -d'
+echo 'Created .env with random secrets. Run: docker compose -p kku-foodshare-phase1 -f docker-compose.yml up --build -d'

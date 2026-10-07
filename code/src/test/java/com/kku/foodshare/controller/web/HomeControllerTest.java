@@ -6,14 +6,23 @@ import org.junit.jupiter.api.Test;
 
 class HomeControllerTest {
 
-  // ทดสอบว่าเปิดหน้า Landing Page ถูกต้อง
+  // Root stays on the public landing page regardless of authentication state.
   @Test
-  void homeShouldReturnHomeTemplate() {
+  void rootShouldReturnLandingPage() {
 
     HomeController controller = new HomeController();
 
     String viewName = controller.home();
 
     assertEquals("home", viewName);
+  }
+
+  @Test
+  void aboutShouldReturnAboutTemplate() {
+    HomeController controller = new HomeController();
+
+    String viewName = controller.about();
+
+    assertEquals("about", viewName);
   }
 }
