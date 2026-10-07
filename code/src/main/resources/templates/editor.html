@@ -132,11 +132,28 @@
         <aside>
           <section class="panel form-panel map-panel">
             <h2><span class="section-number">03</span> ปักหมุดจุดรับ</h2>
+            <div class="maps-link-import">
+              <label for="maps-link-input">วางลิงก์ตำแหน่งจาก Google Maps</label>
+              <div class="maps-link-row">
+                <input id="maps-link-input" type="text" inputmode="url" maxlength="2048" autocomplete="url" placeholder="https://www.google.com/maps/@ละติจูด,ลองจิจูด,ระดับซูม" />
+                <button type="button" id="apply-maps-link" class="btn btn-white">ใช้ลิงก์นี้</button>
+              </div>
+              <details class="maps-link-help">
+                <summary>วิธีคัดลอกลิงก์จาก Google Maps</summary>
+                <ol>
+                  <li>เปิด Google Maps แล้วค้นหาสถานที่ หรือแตะจุดรับที่ต้องการบนแผนที่</li>
+                  <li>คัดลอก URL แบบเต็มจากแถบที่อยู่ของเบราว์เซอร์ ลิงก์ย่ออย่าง <code>share.google</code> อาจอ่านพิกัดไม่ได้</li>
+                  <li>วางลิงก์แล้วกด “ใช้ลิงก์นี้” จากนั้นตรวจหมุดบนแผนที่ก่อนเผยแพร่</li>
+                </ol>
+                <p class="field-note">ลิงก์ที่มี <code>@ละติจูด,ลองจิจูด</code> อาจบอกเพียงจุดกึ่งกลางแผนที่ ไม่ใช่หมุดสถานที่ที่เลือก</p>
+              </details>
+              <p id="maps-link-status" class="field-note" role="status" aria-live="polite"></p>
+            </div>
             <div class="place-picker">
               <label for="place-search">ค้นหาอาคาร จุดรับ หรือชื่อสถานที่</label>
               <div class="place-search-row"><input id="place-search" type="search" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="place-results" aria-expanded="false" aria-describedby="place-search-status" placeholder="เช่น หอสมุด มข. หรือ Complex" /><button type="button" id="place-search-button" class="btn btn-primary">ค้นหาเพิ่ม</button></div>
               <div id="place-results" role="listbox" aria-label="สถานที่แนะนำ" hidden></div>
-              <p id="place-search-status" class="field-note" role="status">พิมพ์อย่างน้อย 3 ตัวอักษร · แนะนำ มข. และขอนแก่นทันที · กด “ค้นหาเพิ่ม” เมื่อต้องการค้นหานอกรายการ</p>
+              <p id="place-search-status" class="field-note" role="status">พิมพ์อย่างน้อย 3 ตัวอักษร · แสดงสถานที่ใกล้ มข. ก่อน · ค้นหาเพิ่มเติมอัตโนมัติหลังหยุดพิมพ์</p>
             </div>
             <input type="hidden" name="latitude" />
             <input type="hidden" name="longitude" />

@@ -12,6 +12,8 @@
     <meta name="tile-attribution" th:content="${tileAttribution}" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
     <link rel="stylesheet" href="/css/app.css" />
+    <link rel="stylesheet" href="/css/welcome.css" />
+    <link rel="stylesheet" href="/css/feed-polish.css" />
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
     <script src="/vendor/leaflet/leaflet.js" defer></script>
     <script src="/vendor/pickup-qr.js" defer></script>
@@ -123,10 +125,11 @@
           ></a
         >
         <nav class="desktop-nav" aria-label="เมนูหลัก">
-          <a href="/explore" th:classappend="${active=='explore'?'active':''}"
+          <a href="/" data-nav="home" th:classappend="${active=='home'?'active':''}">หน้าแรก</a>
+          <a href="/explore" data-nav="explore" th:classappend="${active=='explore'?'active':''}"
             >ค้นหาอาหาร</a
-          ><a href="/explore?view=map">แผนที่แบ่งปัน</a
-          ><a href="/#how">วิธีใช้งาน</a>
+          ><a href="/explore?view=map" data-nav="map">แผนที่แบ่งปัน</a
+          ><a href="/#how" data-nav="how">วิธีใช้งาน</a>
         </nav>
         <div class="header-actions">
           <a
@@ -150,7 +153,7 @@
               <form th:action="@{/logout}" method="post"><button class="profile-menu-logout" type="submit"><svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg>ออกจากระบบ</button></form>
             </div>
           </div>
-          ><a th:if="${viewer == null}" href="/login" class="login-link"
+          <a th:if="${viewer == null}" href="/login" class="login-link"
             >เข้าสู่ระบบ</a
           ><a class="btn btn-primary header-post" href="/posts/new"
             ><svg class="icon" aria-hidden="true">
@@ -164,28 +167,28 @@
         <a class="owner-shortcut" href="/account/posts" th:attr="aria-current=${active=='my-posts'?'page':null}">
           <svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg>
           <strong>โพสต์ของฉัน</strong><span>จัดการจำนวนและผู้จอง</span>
-          <svg class="icon shortcut-arrow" aria-hidden="true"><use href="#i-arrow"></use></svg>
         </a>
       </nav>
       <nav class="mobile-nav" aria-label="เมนูมือถือ">
-        <a href="/" th:classappend="${active=='home'?'active':''}"
+        <a href="/" data-nav="home" th:classappend="${active=='home'?'active':''}"
           ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
           ><span>หน้าแรก</span></a
-        ><a href="/explore" th:classappend="${active=='explore'?'active':''}"
+        ><a href="/explore" data-nav="explore" th:classappend="${active=='explore'?'active':''}"
           ><svg class="icon" aria-hidden="true">
             <use href="#i-search"></use></svg
           ><span>ค้นหา</span></a
-        ><a href="/posts/new" class="mobile-post"
+        ><a href="/posts/new" data-nav="editor" class="mobile-post"
           ><span
             ><svg class="icon" aria-hidden="true">
               <use href="#i-plus"></use></svg></span
           ><small>แบ่งปัน</small></a
         ><a
           href="/reservations"
+          data-nav="reservations"
           th:classappend="${active=='reservations'?'active':''}"
           ><svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg
           ><span>การจอง</span></a
-        ><a href="/account" th:classappend="${active=='account'?'active':''}"
+        ><a href="/account" data-nav="account" th:classappend="${active=='account'?'active':''}"
           ><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg
           ><span>โปรไฟล์</span></a
         >
@@ -207,6 +210,19 @@
         aria-live="polite"
         hidden
       ></div>
+      <dialog id="image-viewer" class="image-viewer" aria-labelledby="image-viewer-title">
+        <div class="image-viewer-surface">
+          <div class="image-viewer-heading">
+            <div><strong id="image-viewer-title" data-viewer-title>รูปอาหาร</strong><span data-viewer-count aria-live="polite"></span></div>
+            <button type="button" class="image-viewer-close" data-viewer-close aria-label="ปิดรูปภาพ" autofocus><span aria-hidden="true">×</span> ปิด</button>
+          </div>
+          <div class="image-viewer-stage" data-viewer-stage>
+            <img data-viewer-image alt="รูปอาหาร" />
+            <p data-viewer-error role="status" hidden>โหลดรูปนี้ไม่ได้ ลองดูรูปอื่นหรือปิดแล้วเปิดใหม่</p>
+          </div>
+          <div class="image-viewer-controls"><button type="button" data-viewer-previous>รูปก่อนหน้า</button><span>ปัดซ้าย–ขวาเพื่อดูรูป</span><button type="button" data-viewer-next>รูปถัดไป</button></div>
+        </div>
+      </dialog>
       <dialog id="action-dialog">
         <form method="dialog">
           <button value="cancel" class="dialog-close" aria-label="ปิด">
