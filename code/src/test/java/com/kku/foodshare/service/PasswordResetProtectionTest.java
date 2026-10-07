@@ -69,5 +69,48 @@ class PasswordResetProtectionTest {
             "https://example.org");
     assertDoesNotThrow(() -> service.requestReset("known@example.org"));
     assertDoesNotThrow(() -> service.requestReset("unknown@example.org"));
+    verify(tokens).delete(any(com.kku.foodshare.domain.entity.PasswordResetToken.class));
+  }
+
+  @Test
+  void deliveryFailureAllowsTheNextRequestToRetryWithoutLeakingToken() {
+    var users = mock(UserRepository.class);
+    var tokens = mock(PasswordResetTokenRepository.class);
+    var mail = mock(EmailService.class);
+    var member = new User(); member.setEmail("retry@test.local");
+    when(users.lockByEmail(member.getEmail())).thenReturn(Optional.of(member));
+    doThrow(new org.springframework.mail.MailSendException("outage"))
+        .when(mail).sendPasswordResetEmail(any(), any());
+    var service = new PasswordResetServiceImpl(users, tokens,
+        mock(org.springframework.security.crypto.password.PasswordEncoder.class),
+        mail, Clock.systemUTC(), "http://localhost:8081");
+    service.requestReset(member.getEmail());
+    service.requestReset(member.getEmail());
+    verify(mail, times(2)).sendPasswordResetEmail(eq(member.getEmail()), any());
+    verify(tokens, times(2)).delete(any(com.kku.foodshare.domain.entity.PasswordResetToken.class));
+  }
+
+  @Test
+  void expiredUsedOrSuspendedAccountTokensCannotResetPassword() {
+    var tokens = mock(PasswordResetTokenRepository.class);
+    var clock = Clock.fixed(Instant.parse("2026-10-07T08:00:00Z"), ZoneOffset.UTC);
+    var member = new User();
+    var token = new com.kku.foodshare.domain.entity.PasswordResetToken();
+    token.setUser(member); token.setExpiresAt(clock.instant().plusSeconds(900));
+    when(tokens.findByTokenHash(any())).thenReturn(Optional.of(token));
+    var service = new PasswordResetServiceImpl(mock(UserRepository.class), tokens,
+        mock(org.springframework.security.crypto.password.PasswordEncoder.class),
+        mock(EmailService.class), clock, "http://localhost:8081");
+    assertTrue(service.isTokenValid("raw-token"));
+    token.setExpiresAt(clock.instant());
+    assertFalse(service.isTokenValid("raw-token"));
+    assertThrows(IllegalArgumentException.class, () -> service.resetPassword("raw-token", "NewPassword123!"));
+    token.setExpiresAt(clock.instant().plusSeconds(900)); token.setUsedAt(clock.instant());
+    assertFalse(service.isTokenValid("raw-token"));
+    token.setUsedAt(null); member.setActive(false);
+    assertFalse(service.isTokenValid("raw-token"));
+    assertThrows(IllegalArgumentException.class, () -> service.resetPassword("raw-token", "NewPassword123!"));
+    assertFalse(service.isTokenValid(null));
+    verify(tokens, never()).save(any());
   }
 }

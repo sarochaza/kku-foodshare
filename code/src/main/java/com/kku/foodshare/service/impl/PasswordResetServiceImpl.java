@@ -91,12 +91,15 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         .findByTokenHash(hash(rawToken))
         .filter(token -> token.getUsedAt() == null)
         .filter(token -> token.getExpiresAt().isAfter(now))
+        .filter(token -> Boolean.TRUE.equals(token.getUser().getActive()))
         .isPresent();
   }
 
   @Override
   @Transactional
   public void resetPassword(String rawToken, String newPassword) {
+    if (rawToken == null || rawToken.isBlank())
+      throw new IllegalArgumentException("Reset token is invalid or expired");
 
     Instant now = clock.instant();
 
@@ -105,6 +108,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             .findByTokenHash(hash(rawToken))
             .filter(current -> current.getUsedAt() == null)
             .filter(current -> current.getExpiresAt().isAfter(now))
+            .filter(current -> Boolean.TRUE.equals(current.getUser().getActive()))
             .orElseThrow(() -> new IllegalArgumentException("Reset token is invalid or expired"));
 
     User user = token.getUser();
@@ -160,6 +164,8 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     try {
       emailService.sendPasswordResetEmail(user.getEmail(), resetUrl);
     } catch (org.springframework.mail.MailException failure) {
+      // An undelivered link must not block a retry for the next five minutes.
+      tokenRepository.delete(token);
       org.slf4j.LoggerFactory.getLogger(getClass())
           .warn("Password reset mail delivery failed; check SMTP configuration");
     }

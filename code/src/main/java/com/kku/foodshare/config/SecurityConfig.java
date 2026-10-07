@@ -30,6 +30,7 @@ public class SecurityConfig {
                     .authenticated()
                     .requestMatchers(
                         "/",
+                        "/home",
                         "/explore",
                         "/posts/{id}",
                         "/login",

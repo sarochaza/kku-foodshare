@@ -45,14 +45,25 @@ public class PasswordResetController {
   public String submitForgotPassword(
       @Valid @ModelAttribute ForgotPasswordRequest request,
       BindingResult bindingResult,
-      jakarta.servlet.http.HttpServletRequest http) {
+      jakarta.servlet.http.HttpServletRequest http,
+      jakarta.servlet.http.HttpServletResponse response,
+      Model model) {
 
     if (bindingResult.hasErrors()) {
       return "forgot-password";
     }
 
-    limiter.passwordReset(http.getRemoteAddr());
-    passwordResetService.requestReset(request.getEmail());
+    try {
+      limiter.passwordReset(http.getRemoteAddr());
+      passwordResetService.requestReset(request.getEmail());
+    } catch (com.kku.foodshare.exception.Problem failure) {
+      if (failure.status != 429 && failure.status != 503) throw failure;
+      response.setStatus(failure.status);
+      model.addAttribute("resetError", failure.status == 429
+          ? "ขอลิงก์บ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่"
+          : "ระบบส่งอีเมลยังไม่พร้อม กรุณาติดต่อผู้ดูแล");
+      return "forgot-password";
+    }
 
     /*
      * แสดงข้อความเดียวกันเสมอ
@@ -102,7 +113,12 @@ public class PasswordResetController {
       return "reset-password";
     }
 
-    passwordResetService.resetPassword(request.getToken(), request.getPassword());
+    try {
+      passwordResetService.resetPassword(request.getToken(), request.getPassword());
+    } catch (IllegalArgumentException | org.springframework.dao.OptimisticLockingFailureException failure) {
+      model.addAttribute("validToken", false);
+      return "reset-password";
+    }
 
     return "redirect:/login?resetSuccess";
   }
