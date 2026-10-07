@@ -1,19 +1,19 @@
 import {createMap,locate} from './maps.js';
 import {asDate} from './ui.js';
-import {originState,fetchRoute,straightDistance,formatMetres,directionsUrl} from './routes.mjs';
+import {originState,fetchRoute,straightDistance,formatMetres,directionsUrl,setDefaultOrigin} from './routes.mjs';
 let counter=0;
-export function mountTrip(root,post,{summaryTarget=null,onOriginConfirmed=()=>{}}={}) {
+export function mountTrip(root,post,{summaryTarget=null,onOriginChange=()=>{}}={}) {
   const id=`trip-map-${++counter}`;
   root.classList.add('trip-panel');
-  root.innerHTML=`<h3>ระยะทางและเวลาไปรับอาหาร</h3><p class="field-note">ตรวจจุดเริ่มต้นก่อนจอง หากหมุดไม่ตรง แตะแผนที่หรือลากหมุดสีน้ำเงินเพื่อแก้ไข</p><label>วิธีเดินทาง<select data-trip-mode><option value="driving">🚗 ขับรถ</option><option value="walking">🚶 เดินเท้า</option></select></label><div class="trip-actions"><button type="button" class="btn btn-soft" data-trip-locate>ใช้ตำแหน่งปัจจุบัน</button><button type="button" class="btn btn-primary" data-trip-confirm disabled>ยืนยันจุดเริ่มต้น</button></div><div id="${id}" class="trip-map" role="region" aria-label="แผนที่จุดเริ่มต้นและจุดรับอาหาร"></div><p class="trip-legend">🔵 จุดเริ่มต้นของคุณ · 🍱 จุดรับอาหาร</p><p data-trip-status role="status" class="field-note">ยังไม่ได้ระบุจุดเริ่มต้น</p><div data-trip-summary class="trip-summary" role="status">เลือกตำแหน่งและยืนยัน เพื่อดูระยะทางและเวลาโดยประมาณ</div><a data-trip-directions class="btn btn-soft full" target="_blank" rel="noopener noreferrer" hidden>เปิด Google Maps จากจุดนี้</a><button type="button" class="trip-skip" data-trip-skip>จองต่อโดยไม่ตรวจตำแหน่ง</button><p class="field-note trip-attribution">เส้นทาง © OpenStreetMap contributors / <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">FOSSGIS / OSRM</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">แจ้งแก้ไขแผนที่</a></p>`;
+  root.innerHTML=`<h3>ระยะทางและเวลาไปรับอาหาร</h3><p class="field-note">กำลังใช้ตำแหน่งปัจจุบันเป็นจุดเริ่มต้น แตะแผนที่หรือลากหมุดสีน้ำเงินเพื่อปรับได้</p><label>วิธีเดินทาง<select data-trip-mode><option value="driving">🚗 ขับรถ</option><option value="walking">🚶 เดินเท้า</option></select></label><div id="${id}" class="trip-map" role="region" aria-label="แผนที่จุดเริ่มต้นและจุดรับอาหาร"></div><p class="trip-legend">🔵 จุดเริ่มต้นของคุณ · 🍱 จุดรับอาหาร</p><p data-trip-status role="status" class="field-note">กำลังตรวจตำแหน่งปัจจุบัน…</p><button type="button" class="btn btn-soft trip-retry" data-trip-retry hidden>ลองระบุตำแหน่งอีกครั้ง</button><div data-trip-summary class="trip-summary" role="status">กำลังตรวจตำแหน่งเพื่อคำนวณระยะทางและเวลาโดยประมาณ</div><a data-trip-directions class="btn btn-soft full" target="_blank" rel="noopener noreferrer" hidden>เปิด Google Maps จากจุดนี้</a><button type="button" class="trip-skip" data-trip-skip>จองต่อโดยไม่ตรวจตำแหน่ง</button><p class="field-note trip-attribution">เส้นทาง © OpenStreetMap contributors / <a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener">FOSSGIS / OSRM</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">แจ้งแก้ไขแผนที่</a></p>`;
   const $=s=>root.querySelector(s),state=originState();
   let picker=null,userMarker=null,circle=null,line=null,controller=null,seq=0,gpsSeq=0,skipped=false;
-  const mode=$('[data-trip-mode]'),status=$('[data-trip-status]'),summary=$('[data-trip-summary]'),navigation=$('[data-trip-directions]'),confirm=$('[data-trip-confirm]');
+  const mode=$('[data-trip-mode]'),status=$('[data-trip-status]'),summary=$('[data-trip-summary]'),navigation=$('[data-trip-directions]'),retry=$('[data-trip-retry]');
   mode.value='driving';
   function setSummary(text) { summary.textContent=text; if(summaryTarget) summaryTarget.textContent=text; }
   function clearRoute() {seq++;controller?.abort();if(line){picker?.map.removeLayer(line);line=null;}navigation.hidden=true;setSummary('กำลังเตรียมคำนวณระยะทางจากจุดเริ่มต้น');}
   function update(p,source) {
-    gpsSeq++;state.set(p,source);skipped=false;clearRoute();confirm.disabled=false;
+    gpsSeq++;state.set(p,source,p.timestamp || Date.now());state.confirm();setDefaultOrigin(p);onOriginChange({...state.point},mode.value);skipped=false;clearRoute();
     if(picker) {
       if(!userMarker) {
         userMarker=L.marker([p.lat,p.lng],{draggable:true,icon:L.divIcon({className:'trip-origin-pin',html:'<span>●</span>',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(picker.map);
@@ -24,17 +24,16 @@ export function mountTrip(root,post,{summaryTarget=null,onOriginConfirmed=()=>{}
       picker.map.fitBounds([[p.lat,p.lng],[post.latitude,post.longitude]],{padding:[35,35],maxZoom:16});
     }
     calculate();
-    status.textContent=source==='manual'?'ใช้จุดเริ่มต้นที่เลือกเอง กรุณากดยืนยัน':`พบตำแหน่งอุปกรณ์${Number.isFinite(p.accuracy)?` · คลาดเคลื่อนประมาณ ${Math.round(p.accuracy)} เมตร`:''} กรุณาตรวจหมุดและกดยืนยัน`;
+    status.textContent=source==='manual'?'ใช้จุดเริ่มต้นที่เลือกบนแผนที่แล้ว':`ใช้ตำแหน่งปัจจุบัน${Number.isFinite(p.accuracy)?` · คลาดเคลื่อนประมาณ ${Math.round(p.accuracy)} เมตร`:''}`;
   }
   try {
     picker=createMap(id);picker.setPin(post.latitude,post.longitude);
     picker.map.on('click',e=>update({lat:e.latlng.lat,lng:e.latlng.lng},'manual'));
   } catch(e) {status.textContent=e.message+' · ยังตรวจตำแหน่งอุปกรณ์หรือข้ามการตรวจได้';}
-  async function refresh() {
-    const request=++gpsSeq;$('[data-trip-locate]').disabled=true;status.textContent='กำลังขอตำแหน่งปัจจุบัน…';
-    try {const p=await locate();if(request===gpsSeq)update(p,'gps');}
-    catch(e){if(request===gpsSeq){status.textContent=e.message+' · เลือกจุดเริ่มต้นบนแผนที่ หรือจองต่อโดยไม่ตรวจตำแหน่ง';setSummary('ยังไม่มีตำแหน่งของคุณ กรุณาอนุญาตตำแหน่งหรือเลือกจุดเริ่มต้นบนแผนที่');}}
-    finally {$('[data-trip-locate]').disabled=false;}
+  async function refresh(forceFresh=false) {
+    const request=++gpsSeq;status.textContent='กำลังขอตำแหน่งปัจจุบัน…';
+    try {const p=await locate({fresh:forceFresh});if(request===gpsSeq){retry.hidden=true;update(p,'gps');}}
+    catch(e){if(request===gpsSeq){retry.hidden=false;status.textContent=e.message+' · แตะแผนที่หรือลากหมุดสีน้ำเงินเพื่อเลือกจุดเริ่มต้น';setSummary('ยังไม่มีตำแหน่งของคุณ กรุณาอนุญาตตำแหน่งหรือเลือกจุดเริ่มต้นบนแผนที่');}}
   }
   async function calculate() {
     clearRoute();if(!state.point)return;
@@ -51,12 +50,11 @@ export function mountTrip(root,post,{summaryTarget=null,onOriginConfirmed=()=>{}
     } catch {if(request===seq)setSummary(`คำนวณเส้นทางไม่ได้ · ระยะทางเส้นตรง ${formatMetres(straightDistance(origin,post))} (ไม่ใช่ระยะเดิน/ขับรถ) · ยังไม่มีเวลาเดินทาง`);}
     finally{clearTimeout(timeout);}
   }
-  $('[data-trip-locate]').onclick=refresh;
-  confirm.onclick=()=>{state.confirm();status.textContent='ยืนยันจุดเริ่มต้นแล้ว';onOriginConfirmed({...state.point},mode.value);calculate();};
-  mode.onchange=()=>{if(state.point)calculate();else clearRoute();};
+  retry.onclick=()=>refresh(true);
+  mode.onchange=()=>{if(state.point){onOriginChange({...state.point},mode.value);calculate();}else clearRoute();};
   navigation.onclick=e=>{
-    if(!state.ready()) {e.preventDefault();clearRoute();status.textContent='ตำแหน่งอุปกรณ์เกิน 1 นาที กรุณาตรวจใหม่และยืนยันก่อนนำทาง';refresh();}
+    if(!state.ready()) {e.preventDefault();clearRoute();status.textContent='กำลังระบุตำแหน่งเริ่มต้นใหม่ ให้เปิด Google Maps อีกครั้งเมื่อตำแหน่งอัปเดตแล้ว';refresh(true);}
   };
   $('[data-trip-skip]').onclick=()=>{skipped=true;status.textContent='ข้ามการตรวจตำแหน่งแล้ว กดปุ่มจองอาหารเพื่อดำเนินต่อ';};
-  return {async beforeReserve(){if(skipped||state.ready())return true;root.scrollIntoView({behavior:'smooth',block:'center'});if(!state.point||state.stale())await refresh();confirm.focus();return false;},refresh,dispose(){gpsSeq++;seq++;controller?.abort();picker?.map.remove();}};
+  return {async beforeReserve(){if(skipped||state.ready())return true;if(!state.point||state.stale())await refresh(true);if(state.ready())return true;root.scrollIntoView({behavior:'smooth',block:'center'});return false;},refresh,dispose(){gpsSeq++;seq++;controller?.abort();picker?.map.remove();}};
 }

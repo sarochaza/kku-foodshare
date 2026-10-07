@@ -2,6 +2,8 @@
 const BASE = 'https://photon.komoot.io';
 const searchCache=new Map();
 const KKU_CENTER={lat:16.4745,lng:102.8237};
+const SEARCH_RADIUS_KM=8;
+const KKU_SEARCH_BBOX='102.748,16.402,102.900,16.547';
 const LOCAL_PLACES=Object.freeze([
   {name:'มหาวิทยาลัยขอนแก่น',label:'มหาวิทยาลัยขอนแก่น · ตำบลในเมือง · ขอนแก่น',lat:16.4745,lng:102.8237,aliases:['มข','มข.','มหาวิทยาลัยขอนแก่น','khon kaen university','kku']},
   {name:'หอสมุดกลาง มหาวิทยาลัยขอนแก่น',label:'หอสมุดกลาง · มหาวิทยาลัยขอนแก่น',lat:16.4768,lng:102.82325,aliases:['หอสมุด','หอสมุดกลาง','library','central library','kkulib']},
@@ -35,6 +37,25 @@ export function cachedPlaces(query) {
 export function validCoordinates(lat, lng) {
   return [lat,lng].every(v => v !== null && v !== undefined && String(v).trim() !== '' && Number.isFinite(Number(v))) && Math.abs(Number(lat)) <= 90 && Math.abs(Number(lng)) <= 180;
 }
+function coordinatePair(value) {
+  const match=String(value||'').match(/^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+  if(!match || !validCoordinates(match[1],match[2])) return null;
+  return {lat:Number(match[1]),lng:Number(match[2])};
+}
+export function parseGoogleMapsLocationUrl(value) {
+  let url;
+  try { url=new URL(String(value||'').trim()); } catch { return null; }
+  const host=url.hostname.toLowerCase();
+  const googleMapsHost=['google.com','www.google.com','maps.google.com','google.co.th','www.google.co.th','maps.google.co.th'].includes(host);
+  if(url.protocol!=='https:' || !googleMapsHost || !url.pathname.toLowerCase().includes('/maps') || /\/maps\/dir(?:\/|$)/i.test(url.pathname)) return null;
+  const query=coordinatePair(url.searchParams.get('query')||url.searchParams.get('q')||url.searchParams.get('ll'));
+  if(query) return {...query,source:'query'};
+  const place=url.href.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i);
+  if(place && validCoordinates(place[1],place[2])) return {lat:Number(place[1]),lng:Number(place[2]),source:'place-pin'};
+  const center=url.href.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)(?:,|$)/);
+  if(center && validCoordinates(center[1],center[2])) return {lat:Number(center[1]),lng:Number(center[2]),source:'map-center'};
+  return null;
+}
 function place(feature) {
   const [lng,lat] = feature.geometry?.coordinates || [];
   const p = feature.properties || {};
@@ -42,6 +63,24 @@ function place(feature) {
   const name = p.name || p.street || p.district || p.city || p.state;
   if (!name) return null;
   return {lat,lng,name,label:[...new Set([name,p.street,p.district,p.city,p.state].filter(Boolean))].join(' · '),country:p.countrycode};
+}
+function distanceKm(a,b) {
+  const rad=x=>x*Math.PI/180,lat1=rad(a.lat),lat2=rad(b.lat),dlat=lat2-lat1,dlng=rad(b.lng-a.lng);
+  const h=Math.sin(dlat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlng/2)**2;
+  return 6371*2*Math.atan2(Math.sqrt(h),Math.sqrt(Math.max(0,1-h)));
+}
+export function nearbyKkuPlaces(places) {
+  return places.filter(p=>distanceKm(KKU_CENTER,p)<=SEARCH_RADIUS_KM);
+}
+export function mergePlaceResults(local,remote) {
+  const merged=[];
+  for(const p of [...local,...remote]) {
+    const key=normalized(p.name);
+    if(merged.some(existing=>normalized(existing.name)===key || distanceKm(existing,p)<0.08)) continue;
+    merged.push(p);
+    if(merged.length===5) break;
+  }
+  return merged;
 }
 async function request(path, params, signal, fetcher) {
   const response = await fetcher(`${BASE}/${path}?${new URLSearchParams(params)}`, {signal,headers:{'Accept-Language':'th'}});
@@ -51,9 +90,9 @@ async function request(path, params, signal, fetcher) {
 export async function searchRemotePlaces(query, signal, fetcher = fetch) {
   if (query.trim().length < 3) return [];
   const cached=cachedPlaces(query);if(cached)return cached;
-  const features = await request('api/', {q:query.trim(),countrycode:'TH',lat:16.4745,lon:102.8237,zoom:12,limit:5}, signal, fetcher);
-  const places=features.map(place).filter(p=>p && p.country?.toUpperCase()==='TH')
-    .sort((a,b)=>((a.lat-16.4745)**2+(a.lng-102.8237)**2)-((b.lat-16.4745)**2+(b.lng-102.8237)**2)).slice(0,5);
+  const features = await request('api/', {q:query.trim(),countrycode:'TH',lat:KKU_CENTER.lat,lon:KKU_CENTER.lng,zoom:15,location_bias_scale:0.2,bbox:KKU_SEARCH_BBOX,lang:'th',limit:20}, signal, fetcher);
+  const places=nearbyKkuPlaces(features.map(place).filter(p=>p && p.country?.toUpperCase()==='TH'))
+    .sort((a,b)=>distanceKm(KKU_CENTER,a)-distanceKm(KKU_CENTER,b)).slice(0,5);
   if(searchCache.size>=50)searchCache.delete(searchCache.keys().next().value);
   searchCache.set(query.trim().toLocaleLowerCase('th'),{time:Date.now(),places});
   return places;
@@ -69,6 +108,9 @@ export function placePicker(form, map, locate) {
   const results = document.getElementById('place-results');
   const status = document.getElementById('place-search-status');
   const pinStatus = document.getElementById('pin-status');
+  const mapsLink = document.getElementById('maps-link-input');
+  const mapsLinkStatus = document.getElementById('maps-link-status');
+  const applyMapsLink = document.getElementById('apply-maps-link');
   const advanced = document.querySelector('.manual-coordinates');
   const name = form.elements.pickupLocationName;
   const manualLat = document.getElementById('manual-latitude');
@@ -85,8 +127,9 @@ export function placePicker(form, map, locate) {
     pinStatus.textContent=label ? `เลือกจุดรับแล้ว: ${label}` : 'เลือกจุดรับแล้ว · กำลังค้นหาชื่อพื้นที่โดยประมาณ…';
     return true;
   }
-  async function pick(lat,lng) {
+  async function pick(lat,lng,fromMapLink=false) {
     if (!pin(lat,lng)) return;
+    if(!fromMapLink && mapsLinkStatus) mapsLinkStatus.textContent='';
     const seq=revision, originalName=name.value;
     const controller=new AbortController();reverseController=controller;
     const timeout=setTimeout(()=>controller.abort(),8000);
@@ -99,7 +142,7 @@ export function placePicker(form, map, locate) {
     finally { clearTimeout(timeout); }
   }
   function render(places, source='local') {
-    close();status.textContent=places.length ? (source==='local'?'พบสถานที่ใกล้ มข. / ขอนแก่น เลือกแล้วปรับจุดนัดรับได้':'ผลค้นหาสถานที่ เลือกแล้วปรับจุดนัดรับได้') : 'ไม่พบสถานที่ ลองชื่ออื่น หรือเลือกบนแผนที่ / ตัวเลือกขั้นสูง';
+    close();status.textContent=places.length ? (source==='local'?'พบสถานที่ใกล้ มข. ภายใน 8 กม. เลือกแล้วปรับจุดนัดรับได้':'พบสถานที่ใกล้ มข. ภายใน 8 กม. เลือกแล้วปรับจุดนัดรับได้') : 'ไม่พบสถานที่ใกล้ มข. ลองชื่ออื่น หรือเลือกบนแผนที่ / ตัวเลือกขั้นสูง';
     for(const p of places) {
       const button=document.createElement('button');button.type='button';button.className='place-result';button.setAttribute('role','option');
       const title=document.createElement('strong');title.textContent=p.name;
@@ -110,7 +153,7 @@ export function placePicker(form, map, locate) {
     results.hidden=!places.length;input.setAttribute('aria-expanded',String(!!places.length));
     if(places.length && matchMedia('(max-width: 600px)').matches) input.scrollIntoView({block:'start',behavior:'smooth'});
   }
-  async function runRemoteSearch() {
+  async function runRemoteSearch(local=localPlaces(input.value.trim())) {
     const q=input.value.trim();if(q.length<3)return;
     const seq=++searchRevision;clearTimeout(timer);searchController?.abort();
     const controller=new AbortController();searchController=controller;
@@ -119,15 +162,18 @@ export function placePicker(form, map, locate) {
     try {
       const places=await searchRemotePlaces(q,controller.signal);
       if(seq!==searchRevision) return;
-      render(places,'remote');
-    } catch { if(seq===searchRevision) {status.textContent='ค้นหาเพิ่มเติมไม่ได้ กรุณาเลือกบนแผนที่หรือใช้ตัวเลือกขั้นสูง';advanced.open=true;} }
+      render(mergePlaceResults(local,places),'combined');
+    } catch { if(seq===searchRevision) {status.textContent=local.length?'ค้นหาเพิ่มไม่ได้ · แสดงสถานที่ใกล้ มข. ที่พบแล้ว':'ค้นหาเพิ่มไม่ได้ กรุณาเลือกบนแผนที่หรือใช้ตัวเลือกขั้นสูง';if(!local.length)advanced.open=true;} }
     finally {clearTimeout(timeout);}
   }
   input.addEventListener('input',()=>{
     cancelSearch();const q=input.value.trim();
     status.textContent=q.length<3 ? 'พิมพ์อย่างน้อย 3 ตัวอักษร' : 'กำลังค้นหา มข. และขอนแก่น…';
     if(q.length<3) return;
-    timer=setTimeout(()=>{const places=localPlaces(q);render(places);remoteSearch=runRemoteSearch;},250);
+    timer=setTimeout(()=>{
+      const places=localPlaces(q);render(places);remoteSearch=()=>runRemoteSearch(places);
+      timer=setTimeout(()=>runRemoteSearch(places),350);
+    },250);
   });
   input.addEventListener('keydown',e=>{
     if(e.key==='Escape') cancelSearch();
@@ -144,9 +190,27 @@ export function placePicker(form, map, locate) {
     if(!validCoordinates(manualLat.value,manualLng.value)) {pinStatus.textContent='กรุณากรอกพิกัดเป็นตัวเลขที่ถูกต้อง (ละติจูด -90 ถึง 90 ลองจิจูด -180 ถึง 180)';return;}
     map?.setPin(Number(manualLat.value),Number(manualLng.value));pick(manualLat.value,manualLng.value);
   };
+  applyMapsLink?.addEventListener('click',()=>{
+    const value=mapsLink.value.trim();
+    const point=parseGoogleMapsLocationUrl(value);
+    if(!point) {
+      mapsLinkStatus.textContent=/^https:\/\/(share\.google|maps\.app\.goo\.gl|goo\.gl)(\/|$)/i.test(value)
+        ? 'ลิงก์ Google Maps แบบย่อยังอ่านพิกัดไม่ได้โดยตรง · เปิดลิงก์ในเบราว์เซอร์แล้วคัดลอก URL แบบเต็มจากแถบที่อยู่ หรือเลือกจุดบนแผนที่'
+        : 'อ่านพิกัดจากลิงก์นี้ไม่ได้ · ใช้ URL เต็มของ Google Maps ที่มีพิกัด หรือเลือกจุดบนแผนที่';
+      mapsLink.focus();return;
+    }
+    map?.setPin(point.lat,point.lng);
+    void pick(point.lat,point.lng,true);
+    mapsLinkStatus.textContent=point.source==='map-center'
+      ? 'วางหมุดจากจุดกึ่งกลางแผนที่แล้ว ซึ่งอาจไม่ใช่หมุดสถานที่ที่แชร์ · ตรวจหมุดก่อนเผยแพร่ และแตะแผนที่หรือลากหมุดเพื่อแก้ได้'
+      : 'อ่านพิกัดจากลิงก์แล้ว · ตรวจหมุดบนแผนที่ก่อนเผยแพร่ และแตะแผนที่หรือลากหมุดเพื่อแก้ได้';
+  });
+  mapsLink?.addEventListener('keydown',event=>{
+    if(event.key==='Enter') {event.preventDefault();applyMapsLink?.click();}
+  });
   document.getElementById('use-location').onclick=async function() {
     this.disabled=true;pinStatus.textContent='กำลังหาตำแหน่งปัจจุบัน…';
-    try {const p=await locate();map?.setPin(p.lat,p.lng);await pick(p.lat,p.lng);}
+    try {const p=await locate({fresh:true});map?.setPin(p.lat,p.lng);await pick(p.lat,p.lng);}
     catch(e) {pinStatus.textContent=e.message;advanced.open=true;}
     finally {this.disabled=false;}
   };

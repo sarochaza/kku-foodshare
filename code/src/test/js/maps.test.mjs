@@ -13,9 +13,40 @@ test('Leaflet click and drag callbacks report the chosen coordinates',()=>{
  events.click({latlng:{lat:16.47,lng:102.82}});assert.deepEqual(selected,[16.47,102.82]);assert.deepEqual(Array.from(point),selected);
  markerEvents.dragend();assert.deepEqual(selected,[16.49,102.85]);picker.setPin(16.5,102.9);assert.deepEqual(Array.from(point),[16.5,102.9]);
 });
-test('geolocation explicitly requests a fresh high accuracy position',async()=>{
- let options;
- const sandbox={navigator:{geolocation:{getCurrentPosition(success,fail,o){options=o;success({coords:{latitude:16.5,longitude:102.9,accuracy:12}});}}}};
+test('location locks the best stable high-accuracy fix and reuses it for this session',async()=>{
+ let options,cleared=0,watchSuccess;
+ const saved=new Map();
+ const sandbox={Date,setTimeout,clearTimeout,sessionStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},navigator:{geolocation:{watchPosition(success,fail,o){watchSuccess=success;options=o;return 17;},clearWatch(id){assert.equal(id,17);cleared++;}}}};
  runInNewContext(source+'\nglobalThis.locate=locate;',sandbox);
- const p=await sandbox.locate();assert.equal(options.maximumAge,0);assert.equal(options.enableHighAccuracy,true);assert.equal(p.lat,16.5);assert.equal(p.accuracy,12);
+ const pending=sandbox.locate();
+ const position=(lat,lng,accuracy)=>({coords:{latitude:lat,longitude:lng,accuracy}});
+ watchSuccess(position(16.5,102.9,22));watchSuccess(position(16.50001,102.90001,14));
+ const p=await pending;
+ assert.equal(options.maximumAge,0);assert.equal(options.enableHighAccuracy,true);assert.equal(p.lat,16.50001);assert.equal(p.accuracy,14);assert.equal(cleared,1);
+ sandbox.navigator.geolocation.watchPosition=()=>{throw Error('should reuse the locked session fix');};
+ assert.deepEqual({...await sandbox.locate()},{...p});
+});
+test('location keeps one coordinate lock for the browser tab until explicitly refreshed',async()=>{
+ const fixed={lat:16.4928,lng:102.8241,accuracy:12,timestamp:1};
+ const saved=new Map([['kku-foodshare-location-v1',JSON.stringify(fixed)]]);
+ const sandbox={Date,sessionStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},navigator:{geolocation:{watchPosition(){throw Error('must keep the session origin');}}}};
+ runInNewContext(source+'\nglobalThis.locate=locate;',sandbox);
+ assert.deepEqual({...await sandbox.locate()},{...fixed});
+});
+test('explicit location refresh bypasses the locked session fix',async()=>{
+ const saved=new Map([['kku-foodshare-location-v1',JSON.stringify({lat:16.4,lng:102.8,accuracy:10,timestamp:Date.now()})]]);let watchSuccess;
+ const sandbox={Date,setTimeout,clearTimeout,sessionStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},navigator:{geolocation:{watchPosition(success,fail){watchSuccess=success;return 3;},clearWatch(){}}}};
+ runInNewContext(source+'\nglobalThis.locate=locate;',sandbox);
+ const pending=sandbox.locate({fresh:true});watchSuccess({coords:{latitude:16.41,longitude:102.81,accuracy:12}});watchSuccess({coords:{latitude:16.41001,longitude:102.81001,accuracy:9}});
+ const p=await pending;assert.equal(p.lat,16.41001);
+});
+test('a late older location request cannot replace a newer confirmed location',async()=>{
+ const saved=new Map(),callbacks=[];let id=0;
+ const sandbox={Date,setTimeout,clearTimeout,sessionStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)},navigator:{geolocation:{watchPosition(success){callbacks.push(success);return ++id;},clearWatch(){}}}};
+ runInNewContext(source+'\nglobalThis.locate=locate;',sandbox);
+ const older=sandbox.locate({fresh:true}),newer=sandbox.locate({fresh:true});
+ const position=(lat,lng,accuracy)=>({coords:{latitude:lat,longitude:lng,accuracy}});
+ callbacks[1](position(16.6,102.9,20));callbacks[1](position(16.60001,102.90001,10));await newer;
+ callbacks[0](position(16.5,102.8,20));callbacks[0](position(16.50001,102.80001,10));await older;
+ assert.equal(JSON.parse(saved.get('kku-foodshare-location-v1')).lat,16.60001);
 });

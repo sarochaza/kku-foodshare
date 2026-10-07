@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import * as placeModule from '../../main/resources/static/js/places.mjs';
 import { localPlaces, placePicker, searchRemotePlaces } from '../../main/resources/static/js/places.mjs';
 // Minimal DOM adapter: execute real picker handlers; mock only browser/remote boundaries.
 class Element {
@@ -14,7 +15,7 @@ class Element {
   get firstElementChild(){return this.children[0];}
 }
 function setup() {
-  const nodes=Object.fromEntries(['place-search','place-search-button','place-results','place-search-status','pin-status','manual-latitude','manual-longitude','apply-coordinates','use-location','advanced','panel'].map(k=>[k,new Element()]));
+  const nodes=Object.fromEntries(['place-search','place-search-button','place-results','place-search-status','pin-status','manual-latitude','manual-longitude','apply-coordinates','use-location','maps-link-input','apply-maps-link','maps-link-status','advanced','panel'].map(k=>[k,new Element()]));
   globalThis.document={getElementById:id=>nodes[id],querySelector:s=>nodes[s==='.manual-coordinates'?'advanced':'panel'],createElement:()=>new Element(),addEventListener(){}};
   globalThis.matchMedia=()=>({matches:false});
   const form={elements:{latitude:new Element(),longitude:new Element(),pickupLocationName:new Element()}};
@@ -31,7 +32,7 @@ test('local KKU aliases return instant KKU-first suggestions without a network r
   }
   assert.deepEqual(localPlaces('ตลาดที่ไม่มีอยู่จริง'),[]);
 });
-test('remote fallback is explicit, Thailand-limited, KKU-biased, and cached',async()=>{
+test('remote search is Thailand-limited, restricted to nearby KKU, and cached',async()=>{
   let calls=0, url='';
   const fetcher=async requested=>{calls++;url=requested;return answer('สถานที่ขอนแก่น',16.47,102.82);};
   const first=await searchRemotePlaces('สถานที่ทดสอบ',undefined,fetcher);
@@ -41,12 +42,20 @@ test('remote fallback is explicit, Thailand-limited, KKU-biased, and cached',asy
   assert.equal(first[0].name,'สถานที่ขอนแก่น');
   assert.deepEqual(second,first);
 });
+test('remote suggestions automatically join local matches after the search debounce',async()=>{
+  const s=setup();let calls=0;globalThis.fetch=async()=>{calls++;return answer('Library Annex',16.475,102.824);};
+  s.nodes['place-search'].value='library';s.nodes['place-search'].listeners.input();
+  await new Promise(r=>setTimeout(r,750));
+  assert.equal(calls,1);assert.equal(s.nodes['place-results'].children.length,2);
+  assert.equal(s.nodes['place-results'].children[0].children[0].textContent,'หอสมุดกลาง มหาวิทยาลัยขอนแก่น');
+  assert.equal(s.nodes['place-results'].children[1].children[0].textContent,'Library Annex');
+});
 test('picker interactions preserve the submitted pin, allow adjustment, and load existing posts',async()=>{
   const s=setup();globalThis.fetch=async()=>answer();
   assert.equal(s.picker.validate(),false);assert.equal(s.nodes.panel.scrolled,true);
   s.nodes['place-search'].value='หอสมุด';s.nodes['place-search'].listeners.input();
   await new Promise(r=>setTimeout(r,700));
-  assert.equal(s.nodes['place-results'].children.length,1);
+  assert.ok(s.nodes['place-results'].children.length>=1);
   s.nodes['place-results'].firstElementChild.onclick();
   assert.deepEqual(s.point,[16.4768,102.82325]);
   assert.equal(s.form.elements.latitude.value,'16.4768000');assert.equal(s.form.elements.longitude.value,'102.8232500');
@@ -76,4 +85,36 @@ test('offline search exposes advanced coordinates without clearing an existing s
   s.nodes['place-search'].value='ทดสอบ';s.nodes['place-search'].listeners.input();await new Promise(r=>setTimeout(r,300));
   s.nodes['place-search-button'].listeners.click();await new Promise(r=>setTimeout(r,0));
   assert.equal(s.nodes.advanced.open,true);assert.equal(s.picker.validate(),true);
+});
+test('Google Maps URL map-center coordinates are recognized and marked approximate',()=>{
+  const parsed=placeModule.parseGoogleMapsLocationUrl('https://www.google.com/maps/@16.4796266,102.8140024,16z?entry=ttu');
+  assert.deepEqual(parsed,{lat:16.4796266,lng:102.8140024,source:'map-center'});
+});
+test('Google Maps query and place-pin coordinates are recognized as selected locations',()=>{
+  assert.deepEqual(placeModule.parseGoogleMapsLocationUrl('https://www.google.com/maps/search/?api=1&query=16.4796266%2C102.8140024'),{lat:16.4796266,lng:102.8140024,source:'query'});
+  assert.deepEqual(placeModule.parseGoogleMapsLocationUrl('https://www.google.com/maps/place/Library/data=!3m1!4b1!4m6!3m5!1s0x0!8m2!3d16.4768!4d102.82325'),{lat:16.4768,lng:102.82325,source:'place-pin'});
+});
+test('unsupported, off-site, and out-of-range map links are rejected',()=>{
+  assert.equal(placeModule.parseGoogleMapsLocationUrl('https://example.com/maps/@16.47,102.82,16z'),null);
+  assert.equal(placeModule.parseGoogleMapsLocationUrl('https://www.google.com/maps/@91,102.82,16z'),null);
+  assert.equal(placeModule.parseGoogleMapsLocationUrl('https://share.google/njsA4kRwpDSkAH5Kq'),null);
+  assert.equal(placeModule.parseGoogleMapsLocationUrl('not a URL'),null);
+});
+test('applying a Google Maps center URL moves the saved pin and warns that it may be approximate',async()=>{
+  const s=setup();globalThis.fetch=async()=>answer();
+  s.nodes['maps-link-input'].value='https://www.google.com/maps/@16.4796266,102.8140024,16z?entry=ttu';
+  s.nodes['apply-maps-link'].listeners.click();
+  await new Promise(r=>setTimeout(r,0));
+  assert.deepEqual(s.point,[16.4796266,102.8140024]);
+  assert.equal(s.form.elements.latitude.value,'16.4796266');
+  assert.equal(s.form.elements.longitude.value,'102.8140024');
+  assert.match(s.nodes['maps-link-status'].textContent,/จุดกึ่งกลางแผนที่.*ตรวจหมุด/);
+});
+test('an unreadable or short Google Maps link warns without changing the selected point',()=>{
+  const s=setup();s.picker.load({latitude:16.48,longitude:102.82,pickupLocationName:'จุดเดิม'});
+  s.nodes['maps-link-input'].value='https://share.google/njsA4kRwpDSkAH5Kq';
+  s.nodes['apply-maps-link'].listeners.click();
+  assert.deepEqual(s.point,[16.48,102.82]);
+  assert.equal(s.form.elements.latitude.value,'16.4800000');
+  assert.match(s.nodes['maps-link-status'].textContent,/แบบย่อ.*URL แบบเต็ม/);
 });

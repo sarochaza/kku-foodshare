@@ -62,23 +62,24 @@
       </div>
       <section id="explore-map-shell" class="map-shell map-shell-rich" hidden>
         <div id="explore-map" class="map-canvas"></div>
-        <aside class="explore-map-aside">
+        <button type="button" id="explore-map-full" class="btn btn-soft explore-map-full" aria-expanded="false" aria-controls="explore-map-aside">ขยายแผนที่</button>
+        <div id="explore-map-preview" class="home-map-preview explore-map-preview" hidden aria-live="polite"></div>
+        <aside id="explore-map-aside" class="explore-map-aside">
           <span class="section-kicker">NEAR THE CAMPUS</span><h2>เลือกมื้อที่อยากแวะ</h2>
           <p class="map-caption" id="map-status">เลือกหมุดเพื่อดูรายละเอียดอาหาร</p>
           <div id="explore-map-list" class="explore-map-list"></div>
-          <button type="button" id="explore-map-full" class="btn btn-soft full">ขยายแผนที่</button>
         </aside>
       </section>
       <div class="results-heading">
         <h2 id="result-count">อาหารที่พร้อมแบ่งปัน</h2>
-        <label
+        <div class="feed-display-controls"><label
           >เรียงตาม
           <select id="sort">
             <option value="expiry">หมดเวลารับก่อน</option>
             <option value="latest">โพสต์ล่าสุด</option>
             <option value="nearby">ใกล้ฉัน</option>
           </select></label
-        >
+        ><label>แสดงต่อหน้า<select id="page-size" aria-label="จำนวนโพสต์ต่อหน้า"><option value="6">6 โพสต์</option><option value="12" selected>12 โพสต์</option><option value="24">24 โพสต์</option></select></label></div>
       </div>
       <div id="food-results" class="food-grid" aria-live="polite">
         <div class="loading-box">กำลังโหลดรายการอาหาร…</div>

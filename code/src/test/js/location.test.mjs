@@ -9,9 +9,14 @@ test('coordinates reject blank, nonfinite, and out of range values', () => {
 });
 test('search ignores short queries, limits Thailand results and prioritizes KKU', async () => {
   let calls=0;
-  const fetcher=async url=>{calls++; const u=new URL(url); assert.equal(u.searchParams.get('countrycode'),'TH');assert.equal(u.searchParams.get('lat'),'16.4745');return {ok:true,json:async()=>({features:[feature('กรุงเทพ',13.75,100.5),feature('หอสมุด มข.'),feature('foreign',16,102,'LA')]})};};
+  const fetcher=async url=>{calls++; const u=new URL(url); assert.equal(u.searchParams.get('countrycode'),'TH');assert.equal(u.searchParams.get('lat'),'16.4745');assert.ok(u.searchParams.get('bbox'));assert.equal(u.searchParams.get('limit'),'20');return {ok:true,json:async()=>({features:[feature('กรุงเทพ',13.75,100.5),feature('หอสมุด มข.'),feature('foreign',16,102,'LA')]})};};
   assert.deepEqual(await searchPlaces('ab',undefined,fetcher),[]);assert.equal(calls,0);
-  const result=await searchPlaces('หอสมุด',undefined,fetcher);assert.equal(result.length,2);assert.equal(result[0].name,'หอสมุด มข.');assert.equal(result[0].lat,16.47);
+  const result=await searchPlaces('หอสมุด',undefined,fetcher);assert.equal(result.length,1);assert.equal(result[0].name,'หอสมุด มข.');assert.equal(result[0].lat,16.47);
+});
+test('remote search filters to the nearby KKU area even if the geocoder returns distant Thai matches',async()=>{
+ const fetcher=async()=>({ok:true,json:async()=>({features:[feature('อาคารใกล้ มข.',16.48,102.83),feature('กรุงเทพ',13.75,100.5),feature('ไกลเกินขอนแก่น',17.1,102.8)]})});
+ const places=await searchPlaces('สถานที่จำกัดพื้นที่',undefined,fetcher);
+ assert.deepEqual(places.map(p=>p.name),['อาคารใกล้ มข.']);
 });
 test('reverse returns local area and handles empty results', async()=>{
   assert.equal((await reversePlace(16.47,102.82,undefined,async()=>({ok:true,json:async()=>({features:[feature('หอสมุด')]})}))).name,'หอสมุด');
