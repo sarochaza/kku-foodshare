@@ -31,6 +31,42 @@ class WebPagesTest {
   }
 
   @Test
+  void guestRootShowsTheFoodShareLandingPage() throws Exception {
+    mvc.perform(get("/"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("สร้างสังคมที่ยั่งยืน")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("/images/welcome-community.webp")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("data-nav=\"map\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"home-page-size\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"image-viewer\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"guest-start\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("สร้างบัญชีฟรี")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("QR หรือรหัสรับอาหาร 6 หลัก")))
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("auth-form-panel"))));
+  }
+
+  @Test
+  void guestOpeningDashboardUrlReturnsToPublicHomeInsteadOfLogin() throws Exception {
+    mvc.perform(get("/home"))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/"));
+  }
+
+  @Test
+  @Transactional
+  void loggingOutReturnsToPublicHome() throws Exception {
+    User user = new User();
+    user.setEmail("logout-page@test.local");
+    user.setPassword("unused");
+    user.setDisplayName("Logout Tester");
+    users.saveAndFlush(user);
+
+    mvc.perform(post("/logout").with(user(user.getEmail()).roles("USER")).with(csrf()))
+        .andExpect(status().is3xxRedirection())
+        .andExpect(redirectedUrl("/"));
+  }
+
+  @Test
   void csrfIsRequiredForMutations() throws Exception {
     mvc.perform(
             post("/register")
@@ -78,6 +114,8 @@ class WebPagesTest {
         .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/account/posts\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/notifications\"")))
         .andExpect(content().string(org.hamcrest.Matchers.containsString("action=\"/logout\"")));
+    mvc.perform(get("/").with(user(user.getEmail()).roles("USER")))
+        .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("id=\"guest-start\""))));
   }
 
   @Test

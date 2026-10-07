@@ -18,7 +18,6 @@ import {
   card,
   feedCard,
   gallery,
-  googleMapsUrl,
   paginate,
   ask,
 } from "./ui.js";
@@ -32,13 +31,35 @@ import { mountTrip } from "./trip.js";
 import { mountReservation, mountOwnerStock, mountPostExtension } from "./quick-actions.js";
 import { placePicker } from "./places.mjs";
 import { initProfileMenu } from "./profile-menu.mjs";
+import { initNavigation } from "./navigation.mjs";
+import { initImageViewer } from "./image-viewer.mjs";
+import { postPageSize } from "./feed-options.mjs";
 import { drawPass, parsePass } from "./pickup.mjs";
+import { setDefaultOrigin, fetchRoadDistances, formatMetres } from "./routes.mjs";
 const page = document.body.dataset.page;
+async function hydrateRoadDistances(posts, origin, isCurrent = () => true) {
+  const unique = [...new Map(posts.filter(p => p?.latitude != null && p?.longitude != null).map(p => [p.id, p])).values()].slice(0, 50);
+  if (!origin?.lat || !unique.length) return;
+  try {
+    const distances = await fetchRoadDistances(origin, unique);
+    if (!isCurrent()) return;
+    unique.forEach((post, index) => {
+      post.roadDistanceKm = distances[index] / 1000;
+      const label = `ขับรถ ${formatMetres(distances[index])} จากคุณ`;
+      $$(`[data-road-distance="${post.id}"]`).forEach(node => { node.textContent = label; });
+      $$(`[data-road-distance-preview="${post.id}"]`).forEach(node => { node.textContent = `ระยะทางถนน ${formatMetres(distances[index])}`; });
+    });
+  } catch {
+    if (!isCurrent()) return;
+    unique.forEach(post => $$(`[data-road-distance="${post.id}"]`).forEach(node => { node.textContent = "ระยะทางถนนไม่พร้อม"; }));
+  }
+}
 function homeGuide() {
   const shell = $("#home-guide");
   if (!shell) return;
   const key = "foodshare-guide-v2";
   const replay = new URLSearchParams(location.search).has("guide");
+  if (!signedIn() && !replay) return;
   try { if (!replay && localStorage.getItem(key)) return; } catch { /* private browsing */ }
   const steps = [
     ["#home-search", "ค้นหามื้อที่ถูกใจ", "พิมพ์ชื่ออาหารหรือจุดรับ แล้วดูรายการที่เพื่อน ๆ แบ่งปัน"],
@@ -78,20 +99,21 @@ function homeGuide() {
 async function home() {
   const el = $("#home-food"),
     mapList = $("#home-map-list"),
-    state = { category: "", sort: "expiry", now: false },
+    state = { category: "", sort: "expiry", now: false, page: 0, size: postPageSize(new URLSearchParams(location.search).get("size"), 6) },
     coords = {};
   let map = null,
     layer = null,
     locationMarker = null,
     mapPosts = [],
-    requestSeq = 0;
+    requestSeq = 0,
+    locationSeq = 0;
 
-  const query = (size) =>
+  const query = (size, page = state.page) =>
     new URLSearchParams({
       category: state.category,
       sort: state.sort,
       now: state.now,
-      page: 0,
+      page,
       size,
       ...(coords.lat != null ? {lat: coords.lat, lng: coords.lng} : {}),
     });
@@ -101,12 +123,12 @@ async function home() {
   };
   const showPreview = (p) => {
     const preview = $("#home-map-preview");
-    preview.innerHTML = `<button type="button" class="map-preview-close" aria-label="ปิดการ์ดอาหาร">×</button><a class="map-preview-photo" href="/posts/${p.id}">${photo(p)}</a><div class="map-preview-copy"><span>${escape(categories[p.category] || "อาหารแบ่งปัน")}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p><div><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong><a href="/posts/${p.id}">ดูรายละเอียด ${icon("arrow")}</a></div></div>`;
+    preview.innerHTML = `<button type="button" class="map-preview-close" aria-label="ปิดการ์ดอาหาร">×</button><a class="map-preview-photo" href="/posts/${p.id}">${photo(p)}</a><div class="map-preview-copy"><span>${escape(categories[p.category] || "อาหารแบ่งปัน")}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p><small data-road-distance-preview="${p.id}">${p.roadDistanceKm != null ? `ระยะทางถนน ${formatMetres(p.roadDistanceKm*1000)}` : "กำลังคำนวณระยะถนน…"}</small><div><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong><a href="/posts/${p.id}">ดูรายละเอียด ${icon("arrow")}</a></div></div>`;
     preview.hidden = false;
     $(".map-preview-close", preview).onclick = () => (preview.hidden = true);
   };
   const miniCard = (p) =>
-    `<button type="button" class="home-map-item" data-home-post="${p.id}"><span class="home-map-thumb">${photo(p)}</span><span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b>${p.distanceKm != null ? `${p.distanceKm.toFixed(1)} กม.` : `เหลือ ${p.availableQuantity} ${escape(p.unit)}`}</b></span><svg class="icon" aria-hidden="true"><use href="#i-chevron"></use></svg></button>`;
+    `<button type="button" class="home-map-item" data-home-post="${p.id}"><span class="home-map-thumb">${photo(p)}</span><span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b data-road-distance="${p.id}">${p.distanceKm != null ? "กำลังคำนวณระยะถนน…" : `เหลือ ${p.availableQuantity} ${escape(p.unit)}`}</b></span></button>`;
 
   const load = async () => {
     const seq = ++requestSeq;
@@ -114,8 +136,8 @@ async function home() {
     el.innerHTML = '<div class="loading-box">กำลังค้นหาอาหารที่แบ่งปัน…</div>';
     mapList.innerHTML = '<div class="loading-box">กำลังโหลดจุดแบ่งปัน…</div>';
     const [listResult, mapResult] = await Promise.allSettled([
-        api("/api/v1/food-posts?" + query(6)),
-        api("/api/v1/food-posts?" + query(200)),
+        api("/api/v1/food-posts?" + query(state.size)),
+        api("/api/v1/food-posts?" + query(200, 0)),
     ]);
     if (seq !== requestSeq) return;
     if (listResult.status === "fulfilled") {
@@ -134,6 +156,7 @@ async function home() {
           );
       hydrateFeedComments(el);
       wireFeedMenus(el);
+      paginate(data, n => { state.page = n; return load(); });
     } else errorBox(el, listResult.reason, load);
 
     if (mapResult.status === "fulfilled") {
@@ -147,7 +170,9 @@ async function home() {
         layer = markers(ensureMap(), mapPosts, layer, showPreview);
         if (coords.lat != null) {
           locationMarker = currentLocationMarker(map, coords, locationMarker);
-          if (state.sort === "nearby") map.setView([coords.lat, coords.lng], 15);
+          const bounds=[...mapPosts.map(p=>[p.latitude,p.longitude]),[coords.lat,coords.lng]];
+          if(mapPosts.length) map.fitBounds(bounds,{padding:[40,40],maxZoom:15});
+          else map.setView([coords.lat,coords.lng],15);
         }
         map.invalidateSize();
       } catch (e) {
@@ -165,20 +190,30 @@ async function home() {
       errorBox(mapList, mapResult.reason, load);
       $("#home-map-count").textContent = "โหลดไม่สำเร็จ";
     }
+    if (seq === requestSeq && coords.lat != null) {
+      const posts = [...(listResult.status === "fulfilled" ? listResult.value.items : []), ...(mapResult.status === "fulfilled" ? mapPosts.slice(0, 4) : [])];
+      void hydrateRoadDistances(posts, coords, () => seq === requestSeq);
+    }
   };
 
-  const useLocation = async () => {
+  const useLocation = async ({fresh=false,silent=false}={}) => {
+    const request=++locationSeq;
     try {
-      Object.assign(coords, await locate());
+      const position=await locate({fresh});
+      if(request!==locationSeq) return false;
+      Object.assign(coords, position);
+      setDefaultOrigin(position);
       state.sort = "nearby";
+      state.page = 0;
       $("#home-sort").value = "nearby";
-      $("#home-location-status").innerHTML = `${icon("locate")} พบตำแหน่งแล้ว กำลังเรียงมื้อที่ใกล้คุณที่สุด`;
+      $("#home-location-status").innerHTML = `${icon("locate")} ระบุตำแหน่งแล้ว${Number.isFinite(coords.accuracy)?` · คลาดเคลื่อนประมาณ ${Math.round(coords.accuracy)} เมตร`:""} · ยึดตำแหน่งนี้ไว้ในแท็บนี้`;
       await load();
-      toast("แสดงตำแหน่งของคุณและเรียงอาหารใกล้สุดแล้ว");
+      if(!silent) toast("แสดงตำแหน่งของคุณและเรียงอาหารใกล้สุดแล้ว");
       return true;
     } catch (e) {
+      if(request!==locationSeq) return false;
       $("#home-location-status").innerHTML = `${icon("pin")} ${escape(e.message)} • ยังดูหมุดอาหารรอบ มข. ได้ตามปกติ`;
-      toast(e.message, true);
+      if(!silent) toast(e.message, true);
       return false;
     }
   };
@@ -191,25 +226,41 @@ async function home() {
         item.setAttribute("aria-pressed", selected);
       });
       state.category = button.dataset.homeCategory;
+      state.page = 0;
       load();
     };
   });
   $("#home-available-now").onchange = (event) => {
     state.now = event.target.checked;
+    state.page = 0;
     event.target.closest(".home-category, .home-now-compact")?.classList.toggle("active", state.now);
     load();
   };
   $("#home-sort").onchange = async (event) => {
     state.sort = event.target.value;
+    state.page = 0;
     if (state.sort === "nearby" && !coords.lat) {
-      const found = await busy($("#home-locate"), useLocation);
+      const found = await busy($("#home-locate"), () => useLocation({fresh:true}));
       if (!found) {
         state.sort = "expiry";
         event.target.value = "expiry";
       }
     } else load();
   };
-  $("#home-locate").onclick = () => busy($("#home-locate"), useLocation);
+  $("#home-locate").onclick = () => busy($("#home-locate"), () => useLocation({fresh:true}));
+  const homeSizeSelect = $("#home-page-size");
+  if (homeSizeSelect) {
+    homeSizeSelect.value = String(state.size);
+    homeSizeSelect.onchange = event => {
+      state.size = postPageSize(event.target.value, 6);
+      state.page = 0;
+      const url = new URL(location.href);
+      url.searchParams.set("size", state.size);
+      history.replaceState(history.state, "", url);
+      return load();
+    };
+  }
+  if (signedIn()) void useLocation({silent:true});
   await load();
   homeGuide();
 }
@@ -219,6 +270,9 @@ function reportPost(postId, commentId = null) {
   });
 }
 async function hydrateFeedComments(root) {
+  // This preview endpoint is protected in the current backend. A public page
+  // must not auto-navigate to login just to load optional comment previews.
+  if (!signedIn()) return;
   await Promise.all($$("[data-comment-preview]", root).map(async (slot) => { try { const d=await api(`/api/v1/food-posts/${slot.dataset.commentPreview}/comments?size=1`); const c=d.items?.[0]; slot.innerHTML=c ? `<img src="/api/v1/members/${c.authorId}/photo" alt=""><span><strong>${escape(c.authorName)}</strong> ${escape(c.body)}</span>` : "ถามรายละเอียดหรือดูความคิดเห็น"; } catch { /* the post is still usable without the preview */ } }));
 }
 function wireFeedMenus(root) {
@@ -241,8 +295,9 @@ async function explore() {
       q: params.get("q") || "",
       category: params.get("category") || "",
       sort: params.get("sort") || "expiry",
-      ownership: params.get("ownership") || "",
+    ownership: params.get("ownership") || "",
       page: 0,
+      size: postPageSize(params.get("size")),
       now: params.get("now") === "true",
     },
     coords = {},
@@ -250,14 +305,34 @@ async function explore() {
     layer = null,
     locationMarker = null,
     mapVisible = params.get("view") === "map",
-    requestSeq = 0;
+    requestSeq = 0,
+    locationSeq = 0;
   $("#search").value = state.q;
   if ($("#sort")) $("#sort").value = state.sort;
   if ($("#available-now")) $("#available-now").checked = state.now;
+  const sizeSelect = $("#page-size");
+  if (sizeSelect) {
+    sizeSelect.value = String(state.size);
+    sizeSelect.onchange = event => {
+      state.size = postPageSize(event.target.value);
+      state.page = 0;
+      const url = new URL(location.href);
+      url.searchParams.set("size", state.size);
+      history.replaceState(history.state, "", url);
+      return load();
+    };
+  }
   const mapShell = $("#explore-map-shell");
   const mapList = $("#explore-map-list");
   const mapStatus = $("#map-status");
   const mapFullButton = $("#explore-map-full");
+  const showMapPost = p => {
+    const preview = $("#explore-map-preview");
+    if (!preview || !p) return;
+    preview.innerHTML = `<button type="button" class="map-preview-close" aria-label="ปิดการ์ดอาหาร">×</button><a class="map-preview-photo" href="/posts/${p.id}">${photo(p)}</a><div class="map-preview-copy"><span>${escape(categories[p.category] || "อาหารแบ่งปัน")}</span><h3><a href="/posts/${p.id}">${escape(p.title)}</a></h3><p>${icon("pin")} ${escape(p.pickupLocationName)}</p><small data-road-distance-preview="${p.id}">${p.roadDistanceKm != null ? `ระยะทางถนน ${formatMetres(p.roadDistanceKm*1000)}` : "กำลังคำนวณระยะถนน…"}</small><div><strong>เหลือ ${p.availableQuantity} ${escape(p.unit)}</strong><a href="/posts/${p.id}">ดูรายละเอียด ${icon("arrow")}</a></div></div>`;
+    preview.hidden = false;
+    $(".map-preview-close", preview).onclick = () => { preview.hidden = true; };
+  };
   $$("#category-filters [data-category]").forEach(b => b.classList.toggle("active", b.dataset.category === state.category));
   const loadMap = async () => {
     if (!mapVisible) return;
@@ -272,11 +347,20 @@ async function explore() {
             ownership: state.ownership,
           }),
       );
-      layer = markers(map, d.items, layer);
-      if (mapList) mapList.innerHTML = d.items.slice(0, 5).map(p => `<a class="explore-map-item" href="/posts/${p.id}">${p.imageUrl ? `<img src="${escape(p.imageUrl)}" alt="">` : `<span class="map-item-placeholder">${icon("food")}</span>`}<span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b>เหลือ ${p.availableQuantity} ${escape(p.unit)}</b></span></a>`).join("") || "<p class=field-note>ยังไม่มีรายการตามตัวกรองนี้</p>";
+      layer = markers(map, d.items, layer, p => showMapPost(p));
+      if (mapList) mapList.innerHTML = d.items.slice(0, 5).map(p => `<button type="button" class="explore-map-item" data-explore-post="${p.id}">${p.imageUrl ? `<img src="${escape(p.imageUrl)}" alt="">` : `<span class="map-item-placeholder">${icon("food")}</span>`}<span><strong>${escape(p.title)}</strong><small>${icon("pin")} ${escape(p.pickupLocationName)}</small><b>เหลือ ${p.availableQuantity} ${escape(p.unit)}</b></span></button>`).join("") || "<p class=field-note>ยังไม่มีรายการตามตัวกรองนี้</p>";
+      $$('[data-explore-post]', mapList).forEach(button => button.onclick = () => {
+        const p = d.items.find(item => String(item.id) === button.dataset.explorePost);
+        if (!p) return;
+        map.setView([p.latitude, p.longitude], 17);
+        showMapPost(p);
+      });
+      if (coords.lat != null) void hydrateRoadDistances(d.items.slice(0, 5), coords, () => mapVisible);
       if (coords.lat != null) {
         locationMarker = currentLocationMarker(map, coords, locationMarker);
-        map.setView([coords.lat, coords.lng], 15);
+        const bounds=[...d.items.map(p=>[p.latitude,p.longitude]),[coords.lat,coords.lng]];
+        if(d.items.length) map.fitBounds(bounds,{padding:[40,40],maxZoom:15});
+        else map.setView([coords.lat,coords.lng],15);
       }
       if (mapStatus) mapStatus.textContent =
         `พบ ${d.items.length} จุดแบ่งปัน • เลือกหมุดเพื่อดูรายละเอียด${d.totalElements > 200 ? " • แสดง 200 จุดแรก ลองค้นหาให้เจาะจงขึ้น" : ""}`;
@@ -309,6 +393,7 @@ async function explore() {
       });
       hydrateFeedComments($("#food-results"));
       wireFeedMenus($("#food-results"));
+      if (coords.lat != null) void hydrateRoadDistances(d.items, coords, () => seq === requestSeq);
       await loadMap();
     } catch (e) {
       if (seq === requestSeq) errorBox($("#food-results"), e, load);
@@ -343,15 +428,20 @@ async function explore() {
     state.page = 0; load();
   });
   $$('[data-owner]').forEach(item => item.classList.toggle("active", item.dataset.owner === state.ownership));
-  const nearby = async () => {
+  const nearby = async ({fresh=true}={}) => {
+    const request=++locationSeq;
     try {
-      coords = await locate();
+      const position=await locate({fresh});
+      if(request!==locationSeq) return false;
+      coords = position;
+      setDefaultOrigin(position);
       toggle(true);
       state.sort = "nearby";
       $("#sort").value = "nearby";
       state.page = 0;
       await load();
     } catch (e) {
+      if(request!==locationSeq) return false;
       toast(e.message, true);
       if (state.sort === "nearby") {
         state.sort = "expiry";
@@ -359,11 +449,11 @@ async function explore() {
       }
     }
   };
-  $("#nearby-button").onclick = () => busy($("#nearby-button"), nearby);
+  $("#nearby-button").onclick = () => busy($("#nearby-button"), () => nearby({fresh:false}));
   $("#sort").onchange = (e) => {
     state.sort = e.target.value;
     state.page = 0;
-    if (state.sort === "nearby" && !coords.lat) nearby();
+      if (state.sort === "nearby" && !coords.lat) nearby({fresh:false});
     else load();
   };
   function toggle(show) {
@@ -371,15 +461,26 @@ async function explore() {
     if (mapShell) mapShell.hidden = !show;
     $("#map-view")?.classList.toggle("active", show);
     $("#list-view")?.classList.toggle("active", !show);
+    const url = new URL(location.href);
+    if (show) url.searchParams.set("view", "map");
+    else url.searchParams.delete("view");
+    history.replaceState(history.state, "", url);
+    window.dispatchEvent(new CustomEvent("foodshare:viewchange", { detail: { map: show } }));
     if (show) loadMap();
   }
   $("#map-view")?.addEventListener("click", () => toggle(true));
   $("#list-view")?.addEventListener("click", () => toggle(false));
-  mapFullButton?.addEventListener("click", () => { mapShell?.classList.toggle("map-expanded"); map?.invalidateSize(); });
+  mapFullButton?.addEventListener("click", () => {
+    const expanded = mapShell?.classList.toggle("map-expanded");
+    if (mapFullButton) { mapFullButton.textContent = expanded ? "ดูข้อมูล" : "ขยายแผนที่"; mapFullButton.setAttribute("aria-expanded", String(Boolean(expanded))); }
+    requestAnimationFrame(() => map?.invalidateSize());
+  });
   if (mapShell) mapShell.hidden = !mapVisible;
   $("#map-view")?.classList.toggle("active", mapVisible);
   $("#list-view")?.classList.toggle("active", !mapVisible);
   await load();
+  const initialLocationRequest=++locationSeq;
+  void locate().then(async p=>{if(initialLocationRequest===locationSeq){coords=p;setDefaultOrigin(p);await load();}}).catch(()=>{});
 }
 async function memberProfile() {
   const id = Number(document.body.dataset.memberId), profile = $("#member-profile"), posts = $("#member-posts");
@@ -399,15 +500,13 @@ async function detail() {
   try {
     const p = await api("/api/v1/food-posts/" + id);
     const closed = ["CANCELLED", "EXPIRED", "CLAIMED"].includes(p.status);
-    el.innerHTML = `<div class="detail-layout"><section><div class="detail-photo">${photo(p)}</div><div class="detail-panel panel"><span class="section-kicker">${escape(categories[p.category])} · FROM OUR COMMUNITY</span><h1 class="detail-title">${escape(p.title)}</h1><div class="detail-meta"><span data-detail-state>${badge(p.status)}</span><span>${icon("pin")} ${escape(p.pickupLocationName)}</span></div><h2>รายละเอียดอาหาร</h2><p>${escape(p.description)}</p>${p.allergens ? `<div class="allergen-note"><strong>ส่วนผสมที่อาจทำให้แพ้</strong><br>${escape(p.allergens)}</div>` : ""}</div><section class="detail-panel panel"><h2>${icon("pin")} จุดนัดรับอาหาร</h2><p>${escape(p.pickupLocationName)}</p><a data-detail-directions class="btn btn-soft" href="${googleMapsUrl(p)}" target="_blank" rel="noopener noreferrer">${icon("map")} เปิดใน Google Maps</a><div id="detail-trip"></div></section></section><aside class="booking-panel panel"><span class="section-kicker">A MEAL MADE FOR SHARING</span><div class="booking-price">แบ่งปันฟรี ♡</div><p>มื้อดี ๆ จากเพื่อนในชุมชน</p><div class="booking-stock"><span>จำนวนที่ยังจองได้</span><span><strong data-detail-stock>${p.availableQuantity}</strong> ${escape(p.unit)}</span></div><div class="pickup-time">${icon("clock")}<div><strong>เวลานัดรับ</strong><span>${escape(pickupWindow(p))}</span></div></div><p id="detail-trip-quick" class="trip-quick" role="status">กำลังตรวจตำแหน่งเพื่อแสดงระยะทางขับรถ…</p>${p.mine ? `<a class="btn btn-primary full" href="/account/posts">จัดการโพสต์และผู้จอง ${icon("arrow")}</a>${!closed ? `<a class="btn btn-soft full" style="margin-top:10px" href="/posts/${p.id}/edit">${icon("edit")} แก้ไขโพสต์</a>` : ""}` : signedIn() ? '<div id="detail-booking" class="quick-booking"></div>' : `<a class="btn btn-primary full" href="/login">เข้าสู่ระบบเพื่อจองอาหาร ${icon("arrow")}</a>`}<div class="owner-label"><span>${icon("user")}</span><div><small>แบ่งปันโดย</small><strong>${escape(p.ownerName)}</strong></div></div>${signedIn() && !p.mine ? '<button class="report-button" id="report-post">รายงานปัญหาของโพสต์นี้</button>' : ""}</aside></div>`;
-    const legacyPhoto = $(".detail-photo", el);
-    if (legacyPhoto) legacyPhoto.outerHTML = gallery(p, "detail-gallery");
-    const trip = mountTrip($("#detail-trip"), p, {summaryTarget: $("#detail-trip-quick"), onOriginConfirmed: (origin, mode) => { $("[data-detail-directions]", el).href = googleMapsUrl(p, origin, mode); }});
+    el.innerHTML = `<div class="detail-layout"><section class="detail-main"><div class="detail-panel panel detail-food-content"><span class="section-kicker">${escape(categories[p.category])} · FROM OUR COMMUNITY</span><h1 class="detail-title">${escape(p.title)}</h1><div class="detail-meta"><span data-detail-state>${badge(p.status)}</span></div>${gallery(p, "detail-gallery")}<div class="detail-description"><h2>รายละเอียดอาหาร</h2><p>${escape(p.description)}</p><div class="detail-pickup-name"><strong>จุดนัดรับ</strong><span>${icon("pin")} ${escape(p.pickupLocationName)}</span></div>${p.allergens ? `<div class="allergen-note"><strong>ส่วนผสมที่อาจทำให้แพ้</strong><br>${escape(p.allergens)}</div>` : ""}</div></div><div id="detail-trip" class="detail-route-panel"></div></section><aside class="booking-panel panel"><span class="section-kicker">A MEAL MADE FOR SHARING</span><div class="booking-price">แบ่งปันฟรี ♡</div><p>มื้อดี ๆ จากเพื่อนในชุมชน</p><div class="booking-stock"><span>จำนวนที่ยังจองได้</span><span><strong data-detail-stock>${p.availableQuantity}</strong> ${escape(p.unit)}</span></div><div class="pickup-time">${icon("clock")}<div><strong>เวลานัดรับ</strong><span>${escape(pickupWindow(p))}</span></div></div>${p.mine ? `<a class="btn btn-primary full" href="/account/posts">จัดการโพสต์และผู้จอง ${icon("arrow")}</a>${!closed ? `<a class="btn btn-soft full" style="margin-top:10px" href="/posts/${p.id}/edit">${icon("edit")} แก้ไขโพสต์</a>` : ""}` : signedIn() ? '<div id="detail-booking" class="quick-booking"></div>' : `<a class="btn btn-primary full" href="/login">เข้าสู่ระบบเพื่อจองอาหาร ${icon("arrow")}</a>`}<div class="owner-label"><span>${icon("user")}</span><div><small>แบ่งปันโดย</small><strong>${escape(p.ownerName)}</strong></div></div>${signedIn() && !p.mine ? '<button class="report-button" id="report-post">รายงานปัญหาของโพสต์นี้</button>' : ""}</aside></div>`;
+    const trip = mountTrip($("#detail-trip"), p);
     trip.refresh();
     const commentsPanel = document.createElement("section");
     commentsPanel.className = "detail-panel panel comments-panel";
     commentsPanel.innerHTML = `<h2>ความคิดเห็น <span id="comments-count">${p.commentCount || 0}</span></h2><div id="post-comments"></div>`;
-    $(".detail-gallery", el).after(commentsPanel);
+    $(".detail-route-panel", el).after(commentsPanel);
     mountComments(Number(id));
     if (signedIn() && !p.mine) mountReservation($("#detail-booking"), p, trip, (fresh) => {
       $('[data-detail-stock]').textContent = fresh.availableQuantity;
@@ -435,6 +534,10 @@ async function detail() {
 }
 async function mountComments(postId) {
   const el = $("#post-comments"); if (!el) return;
+  if (!signedIn()) {
+    el.innerHTML = '<a class="btn btn-soft" href="/login">เข้าสู่ระบบเพื่อดูและแสดงความคิดเห็น</a>';
+    return;
+  }
   const load = async () => {
     const d = await api(`/api/v1/food-posts/${postId}/comments`);
     el.innerHTML = `<div class="comment-list">${d.items.map(c => `<article class="comment"><img src="/api/v1/members/${c.authorId}/photo" alt=""><div><strong>${escape(c.authorName)}</strong><time>${escape(dateTime(c.createdAt))}</time><p>${escape(c.body)}</p></div>${c.canDelete ? `<button type="button" data-delete-comment="${c.id}">ลบ</button>` : ""}${signedIn() ? `<button type="button" data-report-comment="${c.id}">รายงาน</button>` : ""}</article>`).join("") || "<p class=field-note>ยังไม่มีความคิดเห็น</p>"}</div>${signedIn() ? `<form id="comment-form" class="comment-form"><img src="/account/photo" alt=""><textarea name="body" maxlength="800" required placeholder="เขียนความคิดเห็นอย่างสุภาพ"></textarea><button class="btn btn-primary" type="submit">ส่ง</button></form>` : `<a class="btn btn-soft" href="/login">เข้าสู่ระบบเพื่อแสดงความคิดเห็น</a>`}`;
@@ -565,7 +668,7 @@ function reservationCard(r) {
   const p = r.post,
     active = r.status === "RESERVED";
   const maximum = Math.min(p.availableQuantity + r.quantity, p.maxPerPerson || 10000);
-  return `<article class="reservation-card panel pickup-pass" data-reservation-status="${r.status}"><div class="pass-heading"><span>KKU FOODSHARE · PICKUP PASS</span><span>FS-${r.id}</span></div><div class="reservation-main"><a href="/posts/${p.id}" class="reservation-thumb">${photo(p)}</a><div class="reservation-summary">${badge(r.status)}<h2>${escape(p.title)}</h2><p>${icon("pin")}${escape(p.pickupLocationName)}</p><p>${icon("clock")}${escape(pickupWindow(p))}</p><p>ผู้แบ่งปัน: ${escape(p.ownerName)}</p></div><div class="reservation-quantity"><strong>${r.quantity}</strong>${escape(p.unit)}</div></div>${active && r.pickupCode ? `<div class="pass-ticket"><div class="pass-qr-wrap"><svg class="pass-qr" data-pass-id="${r.id}" data-pass-code="${escape(r.pickupCode)}"></svg><span>ให้เจ้าของโพสต์สแกน QR</span></div><div class="pass-code-wrap"><span class="section-kicker">SCAN & SHARE</span><h3>บัตรรับอาหารของคุณ</h3><p>แสดง QR นี้ให้เจ้าของโพสต์สแกนเมื่อมาถึงจุดรับ หรือแจ้งรหัส 6 หลักแทน</p><div class="pickup-code">รหัสสำรอง<strong>${escape(r.pickupCode)}</strong></div></div></div>` : ""}<div class="reservation-bottom">${!active ? `<span class="field-note">เลขอ้างอิง FS-${r.id}</span>` : `<span class="field-note">ใช้ได้เฉพาะการจองนี้ • อย่าแชร์ให้คนอื่น</span>`}<div class="row-actions">${active ? `<button type="button" class="btn btn-primary btn-sm" data-trip-reservation="${r.id}">${icon("map")} เส้นทาง / เวลาเดินทาง</button><a class="btn btn-white btn-sm" href="${googleMapsUrl(p)}" target="_blank" rel="noopener noreferrer">${icon("map")} Google Maps</a><button class="btn btn-white btn-sm" data-change="${r.id}" data-quantity="${r.quantity}" data-max="${maximum}">แก้จำนวน</button><button class="btn btn-white btn-sm" data-cancel="${r.id}">ยกเลิก</button>` : ""}</div></div></article>`;
+  return `<article class="reservation-card panel pickup-pass" data-reservation-status="${r.status}"><div class="pass-heading"><span>KKU FOODSHARE · PICKUP PASS</span><span>FS-${r.id}</span></div><div class="reservation-main"><a href="/posts/${p.id}" class="reservation-thumb">${photo(p)}</a><div class="reservation-summary">${badge(r.status)}<h2>${escape(p.title)}</h2><p>${icon("pin")}${escape(p.pickupLocationName)}</p><p>${icon("clock")}${escape(pickupWindow(p))}</p><p>ผู้แบ่งปัน: ${escape(p.ownerName)}</p></div><div class="reservation-quantity"><strong>${r.quantity}</strong>${escape(p.unit)}</div></div>${active && r.pickupCode ? `<div class="pass-ticket"><div class="pass-qr-wrap"><svg class="pass-qr" data-pass-id="${r.id}" data-pass-code="${escape(r.pickupCode)}"></svg><span>ให้เจ้าของโพสต์สแกน QR</span></div><div class="pass-code-wrap"><span class="section-kicker">SCAN & SHARE</span><h3>บัตรรับอาหารของคุณ</h3><p>แสดง QR นี้ให้เจ้าของโพสต์สแกนเมื่อมาถึงจุดรับ หรือแจ้งรหัส 6 หลักแทน</p><div class="pickup-code">รหัสสำรอง<strong>${escape(r.pickupCode)}</strong></div></div></div>` : ""}<div class="reservation-bottom">${!active ? `<span class="field-note">เลขอ้างอิง FS-${r.id}</span>` : `<span class="field-note">ใช้ได้เฉพาะการจองนี้ • อย่าแชร์ให้คนอื่น</span>`}<div class="row-actions">${active ? `<a class="btn btn-primary btn-sm" href="/posts/${p.id}">${icon("map")} เส้นทาง / เวลาเดินทาง</a><button class="btn btn-white btn-sm" data-change="${r.id}" data-quantity="${r.quantity}" data-max="${maximum}">แก้จำนวน</button><button class="btn btn-white btn-sm" data-cancel="${r.id}">ยกเลิก</button>` : ""}</div></div></article>`;
 }
 async function reservations(page = 0) {
   const el = $("#reservation-list");
@@ -1074,6 +1177,7 @@ async function myPosts(page = 0) {
 }
 async function notifications(page = 0) {
   const el = $("#notification-list");
+  const notificationLabels = {RESERVATION:"การจอง", COMMENT:"คอมเมนต์", INTEREST:"อาหารที่สนใจ", UPDATE:"อัปเดต"};
   let selectedType = "ALL";
   try {
     const preferences = await api("/api/v1/me/notification-preferences");
@@ -1090,7 +1194,7 @@ async function notifications(page = 0) {
       ? items
           .map(
             (n) =>
-              `<article class="notification-card ${n.read ? "" : "unread"}"><img class="notification-avatar" src="${n.actorId ? `/api/v1/members/${n.actorId}/photo` : "/images/default-profile.png"}" alt=""><div><h3>${escape(n.actorName || n.title)}</h3><p>${escape(n.actorName ? n.message : n.title + " · " + n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}" aria-label="เปิดการแจ้งเตือน">เปิด</a></article>`,
+              `<article class="notification-card ${n.read ? "" : "unread"}" data-type="${escape(n.type || "UPDATE")}"><img class="notification-avatar" src="${n.actorId ? `/api/v1/members/${n.actorId}/photo` : "/images/default-profile.png"}" alt=""><div class="notification-copy"><div class="notification-heading"><h3>${escape(n.actorName || n.title)}</h3><span class="notification-type-label">${escape(notificationLabels[n.type] || notificationLabels.UPDATE)}</span></div><p>${escape(n.actorName ? n.message : n.title + " · " + n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}" aria-label="เปิดการแจ้งเตือน">เปิด</a></article>`,
           ).join("")
       : empty(
           selectedType === "ALL" ? "ยังไม่มีการแจ้งเตือน" : "ยังไม่มีรายการประเภทนี้",
@@ -1230,5 +1334,7 @@ const boot = {
   admin,
 };
 initProfileMenu();
+initNavigation();
+initImageViewer();
 if (boot[page])
   Promise.resolve(boot[page]()).catch((e) => toast(e.message, true));

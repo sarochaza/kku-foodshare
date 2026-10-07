@@ -108,6 +108,26 @@ class FoodJourneyTest {
         .getContentAsString();
   }
 
+  @Test
+  void ownerBookingNotificationNamesTheBookerAndTheFoodPost() throws Exception {
+    User receiver = users.findByEmailIgnoreCase("receiver@test.local").orElseThrow();
+    receiver.setDisplayName("ผู้จองทดสอบ");
+    users.saveAndFlush(receiver);
+    long postId = createPost();
+    reserve(postId, "receiver@test.local", 2, java.util.UUID.randomUUID().toString());
+
+    String notifications =
+        mvc.perform(get("/api/v1/me/notifications?page=0").with(user("owner@test.local")))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    org.junit.jupiter.api.Assertions.assertTrue(notifications.contains("ผู้จองทดสอบ"));
+    org.junit.jupiter.api.Assertions.assertTrue(notifications.contains("ข้าวกล่องแบ่งปัน"));
+    org.junit.jupiter.api.Assertions.assertTrue(notifications.contains("RESERVATION"));
+  }
+
   String cappedPost(int maximum) {
     return validPost().replace("\"allergens\":\"ไข่\"", "\"allergens\":\"ไข่\",\"maxPerPerson\":" + maximum);
   }

@@ -111,6 +111,7 @@ cd code
 - `doc/architecture.md` — สถาปัตยกรรม, SOLID/GoF, schema และ UML/Mermaid
 - `doc/deployment.md` — deploy, สำรอง/กู้คืน และ troubleshooting
 - `doc/api.md` — API/session/CSRF contract
+- `doc/google-maps-link.md` — วิธีใช้ลิงก์ Google Maps เพื่อกำหนดจุดรับและตรวจหมุด
 - `doc/demo-script.md` — ลำดับนำเสนอและ slide outline
 - `img/` — ภาพหน้าจอจากการตรวจ UI เวอร์ชันก่อนปรับ Home/QR รอบนี้ (ใช้เทียบก่อน–หลัง ไม่ใช่ภาพล่าสุด)
 - `docs/superpowers/` — design ที่อนุมัติ แผน และบันทึกงาน
