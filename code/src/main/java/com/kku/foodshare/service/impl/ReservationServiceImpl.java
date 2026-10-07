@@ -97,6 +97,11 @@ public class ReservationServiceImpl implements ReservationService {
     events.publishEvent(new ActivityNotice(u, title, message, href));
   }
 
+  private void notice(User recipient, User actor, String title, String message, String href) {
+    User visibleActor = actor != null && !actor.getId().equals(recipient.getId()) ? actor : null;
+    events.publishEvent(new ActivityNotice(recipient, visibleActor, title, message, href));
+  }
+
   public ReservationView reserve(String email, long postId, int quantity, String key) {
     User u = members.require(email);
     quantity(quantity);
@@ -131,10 +136,9 @@ public class ReservationServiceImpl implements ReservationService {
     p.setReservedQuantity(p.getReservedQuantity() + quantity);
     repo.saveAndFlush(r);
     notice(
-        p.getOwner(),
-        "มีเพื่อนจองอาหารแล้ว",
-        u.getDisplayName() + " จอง " + quantity + " " + p.getUnit(),
-        "/account/posts");
+        p.getOwner(), u, "มีเพื่อนจองอาหารแล้ว",
+        "จองโพสต์ “" + p.getTitle() + "” · " + quantity + " " + p.getUnit(),
+        "/posts/" + p.getId());
     notice(
         u, "จองอาหารสำเร็จ", p.getTitle() + " • " + quantity + " " + p.getUnit(), "/reservations");
     return view(r, u);
@@ -169,10 +173,9 @@ public class ReservationServiceImpl implements ReservationService {
     r.quantity = quantity;
     r.updatedAt = now();
     notice(
-        r.post.getOwner(),
-        "มีการแก้ไขจำนวนจอง",
-        r.post.getTitle() + " • " + quantity + " " + r.post.getUnit(),
-        "/account/posts");
+        r.post.getOwner(), u, "มีการแก้ไขจำนวนจอง",
+        "แก้ไขจำนวนจองโพสต์ “" + r.post.getTitle() + "” · " + quantity + " " + r.post.getUnit(),
+        "/posts/" + r.post.getId());
     return view(r, u);
   }
 
@@ -187,16 +190,16 @@ public class ReservationServiceImpl implements ReservationService {
         r.post.getAvailableUntil().isAfter(now())
             ? ReservationStatus.CANCELLED
             : ReservationStatus.EXPIRED,
-        "การจองถูกยกเลิก");
+        "การจองถูกยกเลิก", u);
   }
 
-  private void finish(Reservation r, ReservationStatus target, String reason) {
+  private void finish(Reservation r, ReservationStatus target, String reason, User actor) {
     if (r.status != ReservationStatus.RESERVED) return;
     r.post.setReservedQuantity(r.post.getReservedQuantity() - r.quantity);
     r.status = target;
     r.updatedAt = now();
-    notice(r.member, reason, r.post.getTitle(), "/reservations");
-    notice(r.post.getOwner(), reason, r.post.getTitle(), "/account/posts");
+    notice(r.member, actor, reason, r.post.getTitle(), "/reservations");
+    notice(r.post.getOwner(), actor, reason, r.post.getTitle(), "/posts/" + r.post.getId());
   }
 
   @Transactional(noRollbackFor = InvalidPickupCode.class)
@@ -226,7 +229,7 @@ public class ReservationServiceImpl implements ReservationService {
     r.status = ReservationStatus.COLLECTED;
     r.updatedAt = now();
     notice(
-        r.member,
+        r.member, u,
         "รับอาหารเรียบร้อยแล้ว",
         "ขอบคุณที่เป็นส่วนหนึ่งของการแบ่งปัน • " + r.post.getTitle(),
         "/reservations");
@@ -253,7 +256,7 @@ public class ReservationServiceImpl implements ReservationService {
   public void closed(PostClosed event) {
     for (Reservation r :
         repo.findByPostIdAndStatus(event.post().getId(), ReservationStatus.RESERVED))
-      finish(r, ReservationStatus.CANCELLED, event.reason());
+      finish(r, ReservationStatus.CANCELLED, event.reason(), null);
   }
 
   public void expire(long postId) {
@@ -262,7 +265,7 @@ public class ReservationServiceImpl implements ReservationService {
         || p.getStatus() == FoodPostStatus.CANCELLED
         || p.getStatus() == FoodPostStatus.CLAIMED) return;
     for (Reservation r : repo.findByPostIdAndStatus(postId, ReservationStatus.RESERVED))
-      finish(r, ReservationStatus.EXPIRED, "หมดเวลารับอาหารแล้ว");
+      finish(r, ReservationStatus.EXPIRED, "หมดเวลารับอาหารแล้ว", null);
     p.setStatus(FoodPostStatus.EXPIRED);
   }
 }

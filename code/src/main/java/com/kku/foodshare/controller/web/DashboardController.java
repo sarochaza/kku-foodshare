@@ -21,6 +21,12 @@ public class DashboardController {
   @GetMapping("/home")
   public String dashboard(Authentication authentication, Model model) {
 
+    if (authentication == null
+        || !authentication.isAuthenticated()
+        || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+      return "redirect:/";
+    }
+
     String email = resolveEmail(authentication);
 
     String providerLabel = resolveProviderLabel(authentication);

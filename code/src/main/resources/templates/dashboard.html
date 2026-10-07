@@ -67,14 +67,14 @@
       </section>
       <div class="results-heading">
         <h2 id="result-count">อาหารที่พร้อมแบ่งปัน</h2>
-        <label
+        <div class="feed-display-controls"><label
           >เรียงตาม
           <select id="sort">
             <option value="expiry">หมดเวลารับก่อน</option>
             <option value="latest">โพสต์ล่าสุด</option>
             <option value="nearby">ใกล้ฉัน</option>
           </select></label
-        >
+        ><label>แสดงต่อหน้า<select id="page-size" aria-label="จำนวนโพสต์ต่อหน้า"><option value="6">6 โพสต์</option><option value="12" selected>12 โพสต์</option><option value="24">24 โพสต์</option></select></label></div>
       </div>
       <div id="food-results" class="food-grid" aria-live="polite">
         <div class="loading-box">กำลังโหลดรายการอาหาร…</div>

@@ -22,6 +22,12 @@ import org.springframework.ui.Model;
 
 class DashboardControllerTest {
 
+  @Test
+  void anonymousDashboardRequestReturnsToPublicHome() {
+    DashboardController controller = new DashboardController(mock(UserProfileService.class));
+    assertEquals("redirect:/", controller.dashboard(null, new ExtendedModelMap()));
+  }
+
   // ทดสอบว่าเปิดหน้า Dashboard ถูกต้อง
   @Test
   void dashboardShouldAddEmailAccountProfileToModel() {
@@ -36,7 +42,7 @@ class DashboardControllerTest {
     DashboardController controller = new DashboardController(userProfileService);
 
     Authentication authentication =
-        new UsernamePasswordAuthenticationToken("sarocha@kku.ac.th", "password");
+        new UsernamePasswordAuthenticationToken("sarocha@kku.ac.th", "password", List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
     Model model = new ExtendedModelMap();
 
