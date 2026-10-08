@@ -12,7 +12,7 @@
 
 ## Deployment URL
 
-| รายการ | URL ที่เอกสารเดิมระบุ |
+| รายการ | URL |
 |---|---|
 | เว็บไซต์ | [https://kku-foodshare.onrender.com](https://kku-foodshare.onrender.com) |
 | Swagger UI | [https://kku-foodshare.onrender.com/swagger-ui/index.html](https://kku-foodshare.onrender.com/swagger-ui/index.html) |
