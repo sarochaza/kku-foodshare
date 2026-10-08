@@ -1,0 +1,28 @@
+classDiagram
+  class User
+  class FoodPost
+  class FoodPostImage
+  class Reservation
+  class PostComment
+  class Notification
+  class NotificationPreference
+  class UserProfileImage
+  class SavedPost
+  class Report
+  class PasswordResetToken
+  class AuditEvent
+  User "1" --> "0..*" FoodPost : shares
+  User "1" --> "0..*" Reservation : books
+  FoodPost "1" --> "0..*" Reservation : contains
+  FoodPost "1" --> "0..*" FoodPostImage : gallery
+  FoodPost "1" --> "0..*" PostComment : discussions
+  User "1" --> "0..*" PostComment : writes
+  User "1" --> "0..*" Notification : receives
+  User "1" --> "0..1" NotificationPreference : configures
+  User "1" --> "0..1" UserProfileImage : avatar
+  User "1" --> "0..*" SavedPost : saves
+  FoodPost "1" --> "0..*" SavedPost : saved
+  FoodPost "1" --> "0..*" Report : reported
+  User "1" --> "0..*" Report : reports
+  User "1" --> "0..*" PasswordResetToken : resets
+  User "1" --> "0..*" AuditEvent : acts

@@ -1,0 +1,12 @@
+flowchart TD
+  UI["Thymeleaf and JavaScript"] --> HTTP["Web and REST Controllers"]
+  HTTP --> Contracts["Service Interfaces"]
+  Contracts --> Services["Service Implementations"]
+  Services --> Repositories["JPA Repositories"]
+  Repositories --> Database["PostgreSQL"]
+  Services --> Mapping["DTO and Mapper"]
+  Mapping --> HTTP
+  Services --> Events["Application Events"]
+  Events --> Notice["Notification Listener"]
+  Services --> Storage["ImageStorage Interface"]
+  Storage --> Providers["Local or Cloudinary"]

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('โพสต์ของฉัน')}"></head>
+  <body data-page="my-posts">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main">
+      <div class="page-heading heading-with-action">
+        <div>
+          <span class="section-kicker">YOUR LITTLE ACTS OF KINDNESS</span>
+          <h1>โพสต์อาหารของฉัน</h1>
+          <p>จัดการอาหารที่แบ่งปัน และยืนยันการส่งมอบให้เพื่อน</p>
+        </div>
+        <a class="btn btn-primary" href="/posts/new"
+          ><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg>
+          แบ่งปันเพิ่ม</a
+        >
+      </div>
+      <section class="owner-command panel" aria-labelledby="owner-command-title">
+        <div class="owner-command-copy">
+          <span class="section-kicker">OWNER SHORTCUTS</span>
+          <h2 id="owner-command-title">ศูนย์จัดการการส่งมอบ</h2>
+          <p>ดูงานที่ต้องจัดการ แล้วสแกนบัตรรับอาหารได้ทันทีโดยไม่ต้องเปิดทีละโพสต์</p>
+        </div>
+        <div class="owner-command-actions">
+          <button type="button" class="btn btn-primary" id="owner-scan-any">
+            <svg class="icon" aria-hidden="true"><use href="#i-camera"></use></svg>
+            สแกน QR เพื่อส่งมอบ
+          </button>
+          <button type="button" class="btn btn-white" id="owner-show-waiting">
+            <svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg>
+            ดูคิวรอมารับ
+          </button>
+        </div>
+        <div class="owner-stats" aria-live="polite">
+          <div><span>โพสต์ทั้งหมด</span><strong id="owner-total-posts">–</strong></div>
+          <div><span>โพสต์ที่เปิดอยู่</span><strong id="owner-open-posts">–</strong></div>
+          <div><span>รอมารับ</span><strong id="owner-waiting-count">–</strong></div>
+          <div><span>ส่งมอบแล้ว (ทุกช่องทาง)</span><strong id="owner-collected-count">–</strong></div>
+        </div>
+      </section>
+      <div class="owner-list-heading">
+        <div>
+          <h2>รายการที่ฉันแบ่งปัน</h2>
+          <p>ปรับจำนวน แจกนอกเว็บ หรือดูผู้จองได้จากการ์ดโดยตรง</p>
+        </div>
+        <div class="owner-filters" role="group" aria-label="กรองโพสต์ของฉัน">
+          <button type="button" class="active" data-owner-filter="all">ทั้งหมด</button>
+          <button type="button" data-owner-filter="waiting">มีคนรอรับ</button>
+          <button type="button" data-owner-filter="open">เปิดอยู่</button>
+          <button type="button" data-owner-filter="done">เสร็จ/ปิดแล้ว</button>
+        </div>
+      </div>
+      <div id="my-posts" class="managed-posts" aria-live="polite">
+        <div class="loading-box">กำลังโหลดโพสต์…</div>
+      </div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+    <dialog id="scan-dialog" class="scan-dialog">
+      <div class="scan-header"><div><span class="section-kicker">SCAN &amp; SHARE</span><h2>สแกนบัตรรับอาหาร</h2></div><button type="button" id="scan-close" aria-label="ปิดกล้อง">×</button></div>
+      <div id="scan-camera-stage">
+        <p>ให้ผู้รับเปิด QR ในหน้า “การจองของฉัน” แล้วหันหน้าจอเข้าหากล้อง</p>
+        <div class="scan-viewfinder">
+          <video id="scan-video" autoplay muted playsinline aria-label="ภาพจากกล้องสำหรับสแกน QR"></video>
+          <span class="scan-corner top-left"></span><span class="scan-corner top-right"></span>
+          <span class="scan-corner bottom-left"></span><span class="scan-corner bottom-right"></span>
+        </div>
+        <canvas id="scan-canvas" hidden></canvas>
+        <p id="scan-status" role="status">กำลังเปิดกล้อง…</p>
+        <div class="scan-alternatives">
+          <label class="btn btn-white full" for="scan-image">เลือกรูป QR จากเครื่อง</label>
+          <input id="scan-image" type="file" accept="image/png,image/jpeg" hidden>
+          <button type="button" id="scan-fallback" class="btn btn-soft full">กรอกรหัส 6 หลักแทน</button>
+        </div>
+      </div>
+      <div id="scan-review" class="scan-review" hidden>
+        <div class="scan-review-person">
+          <img id="scan-member-photo" src="/images/default-profile.png" alt="รูปโปรไฟล์ผู้จอง">
+          <div><span class="section-kicker">ตรวจสอบก่อนส่งมอบ</span><h3 id="scan-member-name"></h3><p id="scan-reference"></p></div>
+        </div>
+        <dl class="scan-review-details">
+          <div><dt>รายการ</dt><dd id="scan-post-title"></dd></div>
+          <div><dt>จำนวน</dt><dd id="scan-quantity"></dd></div>
+          <div><dt>จุดรับ</dt><dd id="scan-location"></dd></div>
+          <div><dt>เวลานัดรับ</dt><dd id="scan-window"></dd></div>
+        </dl>
+        <div id="scan-review-actions" class="scan-review-actions">
+          <button type="button" id="scan-retry" class="btn btn-white">สแกนใหม่</button>
+          <button type="button" id="scan-confirm" class="btn btn-green">ยืนยันว่าส่งมอบแล้ว</button>
+        </div>
+        <div id="scan-success" class="scan-success" hidden>
+          <span>✓</span><div><strong>ส่งมอบเรียบร้อย</strong><p>ระบบบันทึกการรับอาหารแล้ว</p></div>
+          <button type="button" id="scan-done" class="btn btn-green">เสร็จสิ้น</button>
+        </div>
+      </div>
+    </dialog>
+    <button type="button" id="owner-mobile-scan" class="owner-mobile-scan" aria-label="สแกน QR เพื่อส่งมอบ">
+      <svg class="icon" aria-hidden="true"><use href="#i-camera"></use></svg><span>สแกนส่งมอบ</span>
+    </button>
+  </body>
+</html>

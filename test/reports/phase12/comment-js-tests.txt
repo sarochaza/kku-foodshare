@@ -1,0 +1,28 @@
+✔ feed shows only count and click-to-read, without an inline preview (2.688085ms)
+✔ grouping retains one visual level, including replies to other replies (19.099589ms)
+✔ missing or deleted roots preserve replies without exposing deleted text (0.478278ms)
+✔ comment body, names and reply mentions are escaped and deletion follows server permission (3.033363ms)
+✔ comments fetch only on opening; guests get a login invite without protected requests (3.561132ms)
+✔ reply sends the selected comment ID and expands its root thread (4.106549ms)
+✔ root comments omit parent, cancellation resets reply, failed submissions preserve draft (0.849547ms)
+✔ load more merges duplicate IDs, keeps expanded replies and real totals (9.725747ms)
+✔ closing invalidates late responses and restores opener focus (0.647066ms)
+✔ double-submit does not create duplicate comments (0.866352ms)
+✔ delete reloads real comments and leaves replies attached to a deleted-root placeholder (1.381977ms)
+✔ report uses the existing moderation endpoint with correct post and comment (0.465332ms)
+✔ switching posts ignores the old request and blank or overlong input makes no mutation (0.930308ms)
+✔ edit menu follows author permission independently from moderation deletion (0.511721ms)
+✔ editing saves with PUT, replaces the row, and preserves count and reply thread (2.013817ms)
+✔ failed edits preserve draft and edit mode; cancelling returns to root creation (3.726475ms)
+✔ switching from edit to reply sends a reply instead of changing the old comment (4.619008ms)
+✔ pagination cannot fetch stale comment data while an edit is being saved (1.801185ms)
+✔ an old edit response cannot change another post or erase its draft (0.803444ms)
+✔ blank and overlong edits make no PUT and keep editing available (0.616819ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 200.509957

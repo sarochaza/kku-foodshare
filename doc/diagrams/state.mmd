@@ -1,0 +1,8 @@
+stateDiagram-v2
+  [*] --> RESERVED: reserve
+  RESERVED --> COLLECTED: correct pickup code
+  RESERVED --> CANCELLED: cancel or close post
+  RESERVED --> EXPIRED: pickup deadline passes
+  COLLECTED --> [*]
+  CANCELLED --> [*]
+  EXPIRED --> [*]

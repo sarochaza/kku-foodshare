@@ -1,0 +1,41 @@
+package com.kku.foodshare.service.impl;
+
+import com.kku.foodshare.domain.entity.User;
+import com.kku.foodshare.dto.request.RegisterRequest;
+import com.kku.foodshare.repository.UserRepository;
+import com.kku.foodshare.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+
+  public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
+
+  @Override
+  public User register(RegisterRequest request) {
+
+    request.setEmail(request.getEmail().trim().toLowerCase(java.util.Locale.ROOT));
+    if (request.getPassword().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+      throw new IllegalArgumentException("รหัสผ่านยาวเกินไป");
+    if (userRepository.findByEmailIgnoreCase(request.getEmail()).isPresent()) {
+      throw new IllegalArgumentException("อีเมลนี้ถูกใช้งานแล้ว");
+    }
+
+    User user = new User();
+
+    user.setEmail(request.getEmail());
+    // ผ่าน BCrypt ก่อน แล้วกลายเป็นค่าประมาณ
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setDisplayName(request.getDisplayName().trim());
+
+    return userRepository.save(user);
+  }
+}

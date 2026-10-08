@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('การแจ้งเตือน')}"></head>
+  <body data-page="notifications">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main narrow">
+      <details class="panel notification-preferences" id="notification-preferences">
+        <summary>ปรับความสนใจการแจ้งเตือน</summary>
+        <p class="field-note">เลือกหมวดหรือคำ/พื้นที่ที่อยากติดตาม</p>
+        <form id="notification-preference-form">
+          <div class="preference-options"><label><input type="checkbox" name="categories" value="FOOD"> อาหาร</label><label><input type="checkbox" name="categories" value="DRINK"> เครื่องดื่ม</label><label><input type="checkbox" name="categories" value="SNACK"> ของว่าง</label></div>
+          <label>คำค้นหาหรือพื้นที่ <input name="keywords" maxlength="300" placeholder="เช่น มข. หอสมุด Complex"></label>
+          <button class="btn btn-soft" type="submit">บันทึกความสนใจ</button>
+        </form>
+      </details>
+      <div id="notification-types" class="notification-types" role="tablist" aria-label="ประเภทการแจ้งเตือน">
+        <button type="button" class="active" data-notification-type="ALL" aria-pressed="true">ทั้งหมด</button>
+        <button type="button" data-notification-type="RESERVATION" aria-pressed="false">การจอง</button>
+        <button type="button" data-notification-type="COMMENT" aria-pressed="false">คอมเมนต์</button>
+        <button type="button" data-notification-type="INTEREST" aria-pressed="false">อาหารที่สนใจ</button>
+        <button type="button" data-notification-type="UPDATE" aria-pressed="false">อื่น ๆ</button>
+      </div>
+      <div
+        id="notification-list"
+        class="notification-list"
+        aria-live="polite"
+      ></div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('ไม่สามารถเปิดหน้านี้')}"></head>
+  <body data-page="error">
+    <header th:replace="~{fragments :: header('none')}"></header>
+    <main class="container error-page">
+      <span class="error-leaf"
+        ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+      ></span>
+      <p class="section-kicker" th:text="${status ?: 'FOODSHARE'}"></p>
+      <h1>ขออภัย มีบางอย่างสะดุด</h1>
+      <p
+        th:text="${message ?: 'ไม่พบหน้าที่ต้องการ หรือบริการยังไม่พร้อม กรุณาลองอีกครั้ง'}"
+      ></p>
+      <a href="/explore" class="btn btn-primary"
+        >กลับไปค้นหาอาหาร
+        <svg class="icon" aria-hidden="true"><use href="#i-arrow"></use></svg
+      ></a>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>
