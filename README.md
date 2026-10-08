@@ -10,8 +10,12 @@
 เจ้าของยืนยันการรับด้วย QR หรือรหัสรับอาหาร พร้อมจัดการสต็อกและรายการแจกนอกเว็บ  
 ระบบรองรับความคิดเห็น บันทึกโพสต์ โปรไฟล์ และการแจ้งเตือน โดยออกแบบตามหลัก Software Design
 
-## LINK : https://kku-foodshare.onrender.com/
+## Deployment URL
 
+| รายการ | URL ที่เอกสารเดิมระบุ |
+|---|---|
+| เว็บไซต์ | [https://kku-foodshare.onrender.com](https://kku-foodshare.onrender.com) |
+| Swagger UI | [https://kku-foodshare.onrender.com/swagger-ui/index.html](https://kku-foodshare.onrender.com/swagger-ui/index.html) |
 
 ## สมาชิกกลุ่ม
 
@@ -303,12 +307,6 @@ Java แสดง `BUILD SUCCESS` และสร้าง executable JAR สำ
 
 ก่อนส่งให้เติม commit ที่ทดสอบ หากแก้ source ให้รันใหม่และปรับรายงานตามผลจริง ยังไม่มีหลักฐาน browser journeys, PostgreSQL/Flyway และ public deployment ของรุ่นนี้ การมี GitHub Actions workflow ไม่แทนหลักฐานว่า CI ผ่านแล้ว
 
-## Deployment URL
-
-| รายการ | URL ที่เอกสารเดิมระบุ |
-|---|---|
-| เว็บไซต์ | [https://kku-foodshare.onrender.com](https://kku-foodshare.onrender.com) |
-| Swagger UI | [https://kku-foodshare.onrender.com/swagger-ui/index.html](https://kku-foodshare.onrender.com/swagger-ui/index.html) |
 
 > **รอยืนยันรุ่นส่ง:** ทีมต้องตรวจว่าเว็บและ Swagger เปิดได้จริง และใช้ source/commit ที่ส่งงาน หากเปลี่ยน URL ให้แก้ตารางนี้ตามระบบจริง
 
