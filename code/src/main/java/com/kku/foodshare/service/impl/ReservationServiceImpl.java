@@ -3,7 +3,7 @@ package com.kku.foodshare.service.impl;
 import com.kku.foodshare.domain.entity.*;
 import com.kku.foodshare.dto.response.*;
 import com.kku.foodshare.exception.*;
-import com.kku.foodshare.mapper.PostViewMapper;
+import com.kku.foodshare.service.PostViewService;
 import com.kku.foodshare.repository.*;
 import com.kku.foodshare.service.*;
 import com.kku.foodshare.service.event.*;
@@ -22,7 +22,7 @@ public class ReservationServiceImpl implements ReservationService {
   private final FoodPostRepository posts;
   private final MemberService members;
   private final PickupCodeService codes;
-  private final PostViewMapper mapper;
+  private final PostViewService mapper;
   private final Clock clock;
   private final ApplicationEventPublisher events;
 
@@ -31,7 +31,7 @@ public class ReservationServiceImpl implements ReservationService {
       FoodPostRepository posts,
       MemberService members,
       PickupCodeService codes,
-      PostViewMapper mapper,
+      PostViewService mapper,
       Clock clock,
       ApplicationEventPublisher events) {
     this.repo = repo;

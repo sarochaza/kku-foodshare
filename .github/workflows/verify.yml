@@ -24,11 +24,11 @@ jobs:
           cache-dependency-path: code/pom.xml
       - name: Unit and H2 integration tests
         working-directory: code
-        run: ./mvnw -B verify
+        run: bash ./mvnw -B verify
       - name: PostgreSQL migration, validation, stock and concurrency integration
         working-directory: code
         run: >-
-          ./mvnw -B -Dtest=FoodJourneyTest,ReviewRegressionTest,WebPagesTest
+          bash ./mvnw -B -Dtest=FoodJourneyTest,ReviewRegressionTest,WebPagesTest,CommentCrudJourneyTest
           -Dspring.datasource.url=jdbc:postgresql://localhost:5432/foodshare
           -Dspring.datasource.username=foodshare
           -Dspring.datasource.password=ci-test-only

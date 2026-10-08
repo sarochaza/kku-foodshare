@@ -3259,10 +3259,10 @@ dialog p {
 
 /* Coach marks point at live controls and remain reversible. */
 .home-guide { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; z-index: 300; }
-.home-guide::backdrop { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.home-guide::backdrop { background: transparent; }
 .home-guide[open] { display: block; }
 html.guide-open, html.guide-open body { overflow: hidden; }
-.guide-shade { position: absolute; inset: 0; background: rgba(9, 43, 59, 0.16); pointer-events: auto; }
+.guide-shade { position: absolute; inset: 0; background: #092b3bba; pointer-events: auto; }
 .guide-target { position: relative !important; z-index: 302 !important; box-shadow: 0 0 0 5px #fff, 0 0 0 10px #91dab8 !important; border-radius: 16px; pointer-events: auto; }
 .site-header:has(.guide-target) { z-index: 302; }
 .guide-card { position: absolute; bottom: max(102px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 30px)); max-height: calc(100dvh - 125px); overflow-y: auto; padding: 22px; background: white; color: #183b48; border-radius: 22px; box-shadow: 0 16px 55px #0b344a47; pointer-events: auto; z-index: 304; }
@@ -4271,12 +4271,4 @@ body[data-page="admin"] .page-heading h1 { font-size:clamp(26px,4vw,40px); overf
   scroll-margin-top: 160px;
   outline: 2px solid var(--blue, #4b78ef);
   outline-offset: 3px;
-}
-.home-guide::backdrop {
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-.home-guide .guide-shade {
-  background: rgba(9, 43, 59, 0.16);
 }

@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+actor Guest
+actor Member
+actor Admin
+Member --|> Guest
+Admin --|> Member
+rectangle "KKU FoodShare" {
+  usecase "Browse food and map" as Browse
+  usecase "Register / Login / Reset password" as Login
+  usecase "Manage profile and guide" as Profile
+  usecase "Create / Edit / Close food post" as Post
+  usecase "Reserve / Change / Cancel" as Reserve
+  usecase "Show QR or pickup code" as QR
+  usecase "Confirm pickup and adjust stock" as Pickup
+  usecase "Comment / Save / Report" as Social
+  usecase "Read notifications and preferences" as Notices
+  usecase "Moderate reports and accounts" as Moderate
+}
+Guest --> Browse
+Guest --> Login
+Member --> Profile
+Member --> Post
+Member --> Reserve
+Member --> QR
+Member --> Pickup
+Member --> Social
+Member --> Notices
+Admin --> Moderate
+@enduml

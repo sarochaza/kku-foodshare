@@ -6,7 +6,7 @@ import com.kku.foodshare.dto.response.MapFoodPostResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FoodPostMapper {
+public class FoodPostMapper implements FoodPostMapping {
 
   public MapFoodPostResponse toMapResponse(FoodPost post) {
 

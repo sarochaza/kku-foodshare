@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 /** Bounded, per-instance throttle; the deployment runs one application instance. */
 @Service
-public class RequestRateLimiter {
+public class RequestRateLimiter implements PasswordResetLimiter {
   private final Clock clock;
   private final Map<String, ArrayDeque<Instant>> requests = new HashMap<>();
 

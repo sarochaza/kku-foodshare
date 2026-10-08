@@ -4,7 +4,7 @@ import com.kku.foodshare.domain.entity.SavedPost;
 import com.kku.foodshare.dto.response.PageView;
 import com.kku.foodshare.dto.response.PostView;
 import com.kku.foodshare.exception.Problem;
-import com.kku.foodshare.mapper.PostViewMapper;
+import com.kku.foodshare.service.PostViewService;
 import com.kku.foodshare.repository.FoodPostRepository;
 import com.kku.foodshare.repository.SavedPostRepository;
 import com.kku.foodshare.service.MemberService;
@@ -21,10 +21,10 @@ public class SavedPostServiceImpl implements SavedPostService {
   private final SavedPostRepository saved;
   private final FoodPostRepository posts;
   private final MemberService members;
-  private final PostViewMapper mapper;
+  private final PostViewService mapper;
   private final Clock clock;
 
-  public SavedPostServiceImpl(SavedPostRepository saved, FoodPostRepository posts, MemberService members, PostViewMapper mapper, Clock clock) {
+  public SavedPostServiceImpl(SavedPostRepository saved, FoodPostRepository posts, MemberService members, PostViewService mapper, Clock clock) {
     this.saved = saved; this.posts = posts; this.members = members; this.mapper = mapper; this.clock = clock;
   }
 

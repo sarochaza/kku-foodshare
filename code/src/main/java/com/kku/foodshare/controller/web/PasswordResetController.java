@@ -17,11 +17,11 @@ public class PasswordResetController {
 
   private final PasswordResetService passwordResetService;
 
-  private final com.kku.foodshare.service.RequestRateLimiter limiter;
+  private final com.kku.foodshare.service.PasswordResetLimiter limiter;
 
   public PasswordResetController(
       PasswordResetService passwordResetService,
-      com.kku.foodshare.service.RequestRateLimiter limiter) {
+      com.kku.foodshare.service.PasswordResetLimiter limiter) {
     this.limiter = limiter;
 
     this.passwordResetService = passwordResetService;

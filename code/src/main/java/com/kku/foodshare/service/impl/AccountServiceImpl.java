@@ -4,7 +4,7 @@ import com.kku.foodshare.domain.entity.FoodPost;
 import com.kku.foodshare.domain.entity.FoodPostStatus;
 import com.kku.foodshare.domain.entity.User;
 import com.kku.foodshare.dto.response.AccountPageResponse;
-import com.kku.foodshare.mapper.AccountMapper;
+import com.kku.foodshare.mapper.AccountMapping;
 import com.kku.foodshare.repository.FoodPostRepository;
 import com.kku.foodshare.repository.UserRepository;
 import com.kku.foodshare.service.AccountService;
@@ -17,12 +17,12 @@ public class AccountServiceImpl implements AccountService {
 
   private final UserRepository userRepository;
   private final FoodPostRepository foodPostRepository;
-  private final AccountMapper accountMapper;
+  private final AccountMapping accountMapper;
 
   public AccountServiceImpl(
       UserRepository userRepository,
       FoodPostRepository foodPostRepository,
-      AccountMapper accountMapper) {
+      AccountMapping accountMapper) {
     this.userRepository = userRepository;
     this.foodPostRepository = foodPostRepository;
     this.accountMapper = accountMapper;

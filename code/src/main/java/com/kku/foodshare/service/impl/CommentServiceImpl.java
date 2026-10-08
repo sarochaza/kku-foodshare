@@ -22,15 +22,25 @@ public class CommentServiceImpl implements CommentService {
     return new View(c.id,c.post.getId(),c.author.getId(),c.author.getDisplayName(),c.body,c.createdAt,can,
         c.parent == null ? null : c.parent.getId(), c.replyTo == null ? null : c.replyTo.getId(),
         c.replyTo == null || c.replyTo.getDeletedAt() != null ? null : c.replyTo.getAuthor().getDisplayName(),
-        c.parent != null && c.parent.getDeletedAt() != null);
+        c.parent != null && c.parent.getDeletedAt() != null,
+        actor != null && actor.getId().equals(c.author.getId()));
   }
   @Transactional(readOnly=true) public PageView<View> list(long postId, String email, int page) { User actor=email==null?null:members.require(email); if (!posts.existsById(postId)) throw Problem.missing(); return PageView.of(comments.findByPostIdAndDeletedAtIsNullOrderByCreatedAtAscIdAsc(postId, PageRequest.of(Math.max(0,page),30)).map(c->view(c,actor))); }
+  @Transactional(readOnly=true)
+  public View get(String email, long id) {
+    User actor = members.require(email);
+    return view(comments.findByIdAndDeletedAtIsNull(id).orElseThrow(Problem::missing), actor);
+  }
+  private String text(String body) {
+    String text = body == null ? "" : body.trim().replaceAll("\\s+", " ");
+    if (text.isBlank() || text.length() > 800) throw new Problem(400, "ความคิดเห็นต้องมีความยาว 1–800 ตัวอักษร");
+    return text;
+  }
   public View add(String email, long postId, String body) { return add(email, postId, body, null); }
   public View add(String email, long postId, String body, Long parentCommentId) {
     User user = members.require(email);
     FoodPost post = posts.findById(postId).orElseThrow(Problem::missing);
-    String text = body == null ? "" : body.trim().replaceAll("\\s+", " ");
-    if (text.isBlank() || text.length() > 800) throw new Problem(400, "ความคิดเห็นต้องมีความยาว 1–800 ตัวอักษร");
+    String text = text(body);
     PostComment target = null, root = null;
     if (parentCommentId != null) {
       if (parentCommentId < 1) throw new Problem(400, "ความคิดเห็นต้นทางไม่ถูกต้อง");
@@ -53,6 +63,13 @@ public class CommentServiceImpl implements CommentService {
       events.publishEvent(new com.kku.foodshare.service.event.ActivityNotice(target.author, user, "มีคนตอบกลับความคิดเห็นของคุณ",
           "ในโพสต์ “" + post.getTitle() + "”: " + text, href));
     }
+    return view(c, user);
+  }
+  public View update(String email, long id, String body) {
+    User user = members.require(email);
+    PostComment c = comments.lockActive(id).orElseThrow(Problem::missing);
+    if (!user.getId().equals(c.author.getId())) throw Problem.forbidden();
+    c.body = text(body);
     return view(c, user);
   }
   public void remove(String email,long id) { User user=members.require(email); PostComment c=comments.lockActive(id).orElseThrow(Problem::missing); if(!user.getId().equals(c.author.getId())&&!user.getId().equals(c.post.getOwner().getId())&&user.getRole()!=UserRole.ADMIN) throw Problem.forbidden(); c.deletedAt=LocalDateTime.now(clock);c.deletedBy=user; }

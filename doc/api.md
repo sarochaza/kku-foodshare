@@ -1,58 +1,92 @@
-# API contract
+# REST API contract
 
-Base path `/api/v1`. JSON UTF-8. ใช้ session cookie เดียวกับการเข้าสู่ระบบหน้าเว็บ ทุก POST/PUT/PATCH/DELETE ต้องส่ง CSRF token ของ session ผ่าน header ตามค่า `meta[name=_csrf_header]` และ `meta[name=_csrf]` ใน HTML ห้ามฝัง token คงที่
+Base path `/api/v1` uses UTF-8 JSON and the same session as the web login. Mutating requests need the session CSRF token from HTML meta `_csrf` and `_csrf_header`. Public routes and protected routes are configured in SecurityConfig; ownership/state checks also run in services.
 
-| Method | Path | สิทธิ์ / ผลลัพธ์ |
+## Main CRUD resources
+
+| Resource | Create | Read | Update | Delete |
+|---|---|---|---|---|
+| Food posts | POST /food-posts → 201 + Location | GET /food-posts and /food-posts/{id} | PUT /food-posts/{id} | DELETE /food-posts/{id} → 204; closes post and cancels pending bookings |
+| Reservations | POST /food-posts/{id}/reservations → 201 | GET /reservations/{id}, /me/reservations | PUT /reservations/{id} | DELETE /reservations/{id} → 204; cancels without deleting history |
+| Comments | POST /food-posts/{postId}/comments → 201 + Location | GET /food-posts/{postId}/comments and /comments/{id} | PUT /comments/{id} → 200; author only | DELETE /comments/{id} → 204; soft delete and retain replies |
+
+Comment create accepts `{body:"ข้อความ",parentCommentId:123}` (omit parentCommentId for a root comment).
+Update accepts only `{body:"ข้อความใหม่"}` and preserves author, post, creation time and reply links.
+Body is required, nonblank and at most 800 characters. `canEdit` is true only for the author;
+`canDelete` remains true for the author, post owner or admin. Deleted/missing comments return 404.
+Comment list returns 30 items per page, ordered by createdAt then id ascending, and uses the existing PageView format.
+See [Comment CRUD and Docker test guide](comment-crud.md).
+
+Create reservation body is `{quantity:2}` with an `Idempotency-Key`. Retrying the same request/key returns the existing booking; using the key for a different post or quantity returns 409. Pickup collection body is `{code:"123456"}` and requires the food-post owner.
+
+## Validation, pagination, sorting and errors
+
+FoodPostRequest uses Bean Validation and service-level quantity/time/location rules. Dates for pickup are Asia/Bangkok local time. Reset token timestamps use Instant internally. Post create/edit can set maxPerPerson; null means no configured per-person cap.
+
+`GET /food-posts?q=ข้าว&category=FOOD&sort=expiry&now=true&page=0&size=12` supports pagination and `expiry/latest/nearby` sorting. Nearby requires lat/lng. Page starts at 0 and size is at most 200. Response uses `{items:[],page:0,totalPages:1,totalElements:0}`.
+
+ApiExceptionHandler returns `{status,message,fields}`. Statuses include 400 malformed/validation, 401 login required, 403 permission/CSRF, 404 missing resource, 409 stock/state/version conflict, 413 oversized upload, 422 unreadable QR, 429 throttling and 500 unexpected failure. Security boundary responses can omit fields; web errors render HTML.
+
+Gallery uploads use multipart `file` on the image endpoint, preserving existing JPG/PNG size/pixel validation. Removing an image checks ownership. Profile GET `/members/{id}` returns only `{id,name}` and returns 404 for missing or inactive accounts. API DTOs avoid sending password/reset-token/pickup-code internals to strangers.
+
+## Swagger/OpenAPI
+
+`/swagger-ui/index.html` (or `/swagger-ui.html`) and `/v3/api-docs` are configured publicly. For protected mutations in Swagger, use an authenticated session with its CSRF token. A configured route is not proof that the submitted commit is deployed; check the public URLs before presentation.
+
+## Endpoint inventory
+
+Paths below are extracted from controller annotations of this source version. Controller names identify where to inspect status codes, validation and service calls. Legacy `/api/food-posts/map` is retained for compatibility with existing clients.
+
+| Method | Path | Controller |
 |---|---|---|
-| GET | `/food-posts` | สาธารณะ, หน้าอาหารที่ยังมีจำนวนและยังไม่หมดเวลา |
-| GET | `/food-posts/map` | สาธารณะ, q/category/now, สูงสุด 200 จุด |
-| GET | `/food-posts/{id}` | สาธารณะ; โพสต์ปิดแสดงเฉพาะเจ้าของ |
-| POST | `/food-posts` | สมาชิก, สร้างโพสต์ → 201 |
-| PUT | `/food-posts/{id}` | เจ้าของ, แก้ไขทั้งหมด |
-| DELETE | `/food-posts/{id}` | เจ้าของ, ปิดโพสต์และยกเลิกการจองค้าง → 204 |
-| POST | `/food-posts/{id}/images` | เจ้าของ, multipart field `file` JPG/PNG ≤5MB |
-| GET | `/me/posts` | โพสต์ของสมาชิกปัจจุบัน |
-| POST | `/food-posts/{id}/reservations` | ผู้รับ, `{quantity:2}` + `Idempotency-Key` UUID → 201 |
-| GET | `/food-posts/{id}/reservations` | เจ้าของ, รายการผู้จอง ไม่มี pickupCode |
-| GET | `/reservations/{id}` | ผู้รับหรือเจ้าของ |
-| PUT | `/reservations/{id}` | ผู้รับ, `{quantity:3}` |
-| DELETE | `/reservations/{id}` | ผู้รับหรือเจ้าของ, ยกเลิก → 204 |
-| POST | `/reservations/{id}/collection` | เจ้าของ, `{code:"123456"}` |
-| GET | `/me/reservations` | การจองของผู้รับปัจจุบัน |
-| GET | `/me/notifications` | การแจ้งเตือนของสมาชิกปัจจุบัน |
-| POST | `/me/notifications/{id}/read` | ทำเครื่องหมายอ่านแล้ว |
-| PATCH | `/me/profile` | `{name:"ชื่อใหม่"}` |
-| POST | `/reports` | `{postId:1, reason:"รายละเอียดปัญหา"}` |
-| GET | `/admin/reports` | ผู้ดูแล, รายงานทุกสถานะ |
-| PATCH | `/admin/reports/{id}` | `{reason:"ผลตรวจ",closePost:true}` |
-| GET | `/admin/users` | ผู้ดูแล, สมาชิกแบบแบ่งหน้า |
-| PATCH | `/admin/users/{id}` | `{active:false,reason:"เหตุผล"}` |
-| GET | `/stats` | จำนวนสมาชิก/โพสต์/อาหารที่รับแล้วจากฐานข้อมูล |
-
-ค้นหา `/food-posts?q=ข้าว&category=FOOD&sort=expiry&now=true&page=0&size=12` ประเภท `FOOD,DRINK,SNACK` ลำดับ `expiry,latest,nearby`; nearby ต้องส่ง `lat,lng` หน้านับจาก 0; size สูงสุด 200
-
-```json
-{
-  "title": "ข้าวกล่องจากงานประชุม",
-  "description": "ระบุเวลาปรุงและการเก็บรักษา",
-  "category": "FOOD",
-  "quantity": 5,
-  "unit": "กล่อง",
-  "pickupLocationName": "โต๊ะหน้าหอสมุด",
-  "latitude": 16.4745,
-  "longitude": 102.8237,
-  "availableFrom": "2026-10-06T12:00:00",
-  "availableUntil": "2026-10-06T14:00:00",
-  "allergens": "ไข่"
-}
-```
-
-ตัวอย่างเวลาเป็นรูปแบบข้อมูล ให้ใช้เวลาในอนาคตที่เหมาะกับการใช้งานจริง ทุกเวลานัดรับเป็น Bangkok local time, ไม่มี offset ใน JSON; token reset ใช้ Instant UTC ภายใน
-
-Page response: `{items:[],page:0,totalPages:1,totalElements:3}`. Post response มี `quantity,reservedQuantity,collectedQuantity,availableQuantity,imageUrl,mine,distanceKm,status` เพิ่มจากข้อมูลกรอก
-
-Error response: `{status:400,message:"…",fields:{quantity:"…"}}`. ความหมายหลัก: 400 validation, 401 ต้องเข้าสู่ระบบ, 403 ไม่มีสิทธิ์/CSRF, 404 ไม่พบ, 409 สถานะเปลี่ยน/จำนวนไม่พอ/ข้อมูลชนกัน, 413 ไฟล์ใหญ่เกิน, 429 จำกัดการลองรหัส
-
-เก็บ idempotency key เดิมเมื่อ retry คำขอจองเดิมเท่านั้น การเปลี่ยน post/quantity โดยใช้ key เดิมตอบ 409 การรับซ้ำหรือยกเลิกซ้ำไม่เปลี่ยนจำนวนซ้ำ รหัสรับแสดงเฉพาะเจ้าของการจองที่ยัง RESERVED; รหัสผิด 5 ครั้งล็อก 15 นาที
-
-Endpoint รูปโปรไฟล์อยู่นอก API: `POST /account/photo` multipart `photo` และ `GET /account/photo` ใช้สมาชิกและ CSRF เหมือนฟอร์มทั่วไป
+| GET | `/api/v1/food-posts/{postId}/comments` | `CommentController` |
+| POST | `/api/v1/food-posts/{postId}/comments` | `CommentController` |
+| GET | `/api/v1/comments/{id}` | `CommentController` |
+| PUT | `/api/v1/comments/{id}` | `CommentController` |
+| DELETE | `/api/v1/comments/{id}` | `CommentController` |
+| GET | `/api/v1/food-posts` | `FoodCatalogController` |
+| GET | `/api/v1/food-posts/map` | `FoodCatalogController` |
+| GET | `/api/v1/food-posts/{id}` | `FoodCatalogController` |
+| POST | `/api/v1/food-posts` | `FoodCatalogController` |
+| PUT | `/api/v1/food-posts/{id}` | `FoodCatalogController` |
+| POST | `/api/v1/food-posts/{id}/extend` | `FoodCatalogController` |
+| DELETE | `/api/v1/food-posts/{id}` | `FoodCatalogController` |
+| POST | `/api/v1/food-posts/{id}/images` | `FoodCatalogController` |
+| DELETE | `/api/v1/food-posts/{id}/images/{imageId}` | `FoodCatalogController` |
+| GET | `/api/v1/me/posts` | `FoodCatalogController` |
+| GET | `/api/v1/members/{ownerId}/posts` | `FoodCatalogController` |
+| GET | `/api/v1/me/posts/management-summary` | `FoodCatalogController` |
+| GET | `/api/v1/stats` | `FoodCatalogController` |
+| GET | `/api/food-posts/map` | `FoodPostApiController` |
+| GET | `/api/v1/members/{id}/photo` | `MemberPhotoController` |
+| GET | `/api/v1/members/{id}` | `MemberProfileController` |
+| POST | `/api/v1/reports` | `ModerationController` |
+| GET | `/api/v1/admin/pending-reports` | `ModerationController` |
+| GET | `/api/v1/admin/posts` | `ModerationController` |
+| GET | `/api/v1/admin/reports` | `ModerationController` |
+| PATCH | `/api/v1/admin/reports/{id}` | `ModerationController` |
+| GET | `/api/v1/admin/users` | `ModerationController` |
+| PATCH | `/api/v1/admin/users/{id}` | `ModerationController` |
+| GET | `/api/v1/food-posts/{id}/stock` | `OwnerStockController` |
+| POST | `/api/v1/food-posts/{id}/stock` | `OwnerStockController` |
+| POST | `/api/v1/pickup/scan` | `PickupScanController` |
+| GET | `/api/v1/food-posts/{id}/owner-photo` | `PostProfileController` |
+| PATCH | `/api/v1/me/profile` | `ProfileSettingsController` |
+| POST | `/api/v1/me/onboarding` | `ProfileSettingsController` |
+| POST | `/api/v1/food-posts/{id}/reservations` | `ReservationController` |
+| GET | `/api/v1/food-posts/{id}/reservations` | `ReservationController` |
+| GET | `/api/v1/food-posts/{id}/my-reservation` | `ReservationController` |
+| GET | `/api/v1/reservations/{id}` | `ReservationController` |
+| PUT | `/api/v1/reservations/{id}` | `ReservationController` |
+| DELETE | `/api/v1/reservations/{id}` | `ReservationController` |
+| POST | `/api/v1/reservations/{id}/collection` | `ReservationController` |
+| GET | `/api/v1/me/reservations` | `ReservationController` |
+| GET | `/api/v1/me/notifications` | `ReservationController` |
+| POST | `/api/v1/me/notifications/{id}/read` | `ReservationController` |
+| GET | `/api/v1/me/notifications/unread` | `ReservationController` |
+| GET | `/api/v1/me/notification-preferences` | `ReservationController` |
+| PUT | `/api/v1/me/notification-preferences` | `ReservationController` |
+| GET | `/api/v1/reservations/{id}/member-photo` | `ReservationMediaController` |
+| PUT | `/api/v1/food-posts/{id}/saved` | `SavedPostController` |
+| DELETE | `/api/v1/food-posts/{id}/saved` | `SavedPostController` |
+| GET | `/api/v1/me/saved-posts` | `SavedPostController` |

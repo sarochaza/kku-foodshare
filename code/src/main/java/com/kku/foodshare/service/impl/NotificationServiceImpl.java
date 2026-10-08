@@ -8,6 +8,7 @@ import com.kku.foodshare.exception.Problem;
 import com.kku.foodshare.repository.NotificationRepository;
 import com.kku.foodshare.repository.NotificationPreferenceRepository;
 import com.kku.foodshare.service.*;
+import com.kku.foodshare.service.PickupReminderService;
 import com.kku.foodshare.service.event.ActivityNotice;
 import java.time.*;
 import java.util.*;

@@ -5,7 +5,7 @@ import com.kku.foodshare.dto.response.UserProfileResponse;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserProfileMapper {
+public class UserProfileMapper implements UserProfileMapping {
 
   public UserProfileResponse toResponse(User user, String providerLabel) {
 

@@ -2,6 +2,7 @@ package com.kku.foodshare.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.kku.foodshare.service.impl.QrScanServiceImpl;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -16,6 +17,6 @@ class QrScanServiceTest {
     var output = new ByteArrayOutputStream();
     ImageIO.write(MatrixToImageWriter.toBufferedImage(matrix), "png", output);
 
-    assertEquals("FS1:42:001234", new QrScanService().decode(output.toByteArray()));
+    assertEquals("FS1:42:001234", new QrScanServiceImpl().decode(output.toByteArray()));
   }
 }

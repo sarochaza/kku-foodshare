@@ -4,7 +4,7 @@ import com.kku.foodshare.domain.entity.*;
 import com.kku.foodshare.dto.request.*;
 import com.kku.foodshare.dto.response.*;
 import com.kku.foodshare.exception.Problem;
-import com.kku.foodshare.mapper.PostViewMapper;
+import com.kku.foodshare.service.PostViewService;
 import com.kku.foodshare.repository.*;
 import com.kku.foodshare.service.*;
 import com.kku.foodshare.service.discovery.*;
@@ -25,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FoodCatalogServiceImpl implements FoodCatalogService {
   private final FoodPostRepository posts;
   private final MemberService members;
-  private final PostViewMapper mapper;
+  private final PostViewService mapper;
   private final Clock clock;
   private final List<FoodDiscoveryStrategy> strategies;
   private final ApplicationEventPublisher events;
@@ -38,7 +38,7 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   public FoodCatalogServiceImpl(
       FoodPostRepository posts,
       MemberService members,
-      PostViewMapper mapper,
+      PostViewService mapper,
       Clock clock,
       List<FoodDiscoveryStrategy> strategies,
       ApplicationEventPublisher events,
