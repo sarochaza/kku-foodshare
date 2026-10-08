@@ -3259,10 +3259,29 @@ dialog p {
 
 /* Coach marks point at live controls and remain reversible. */
 .home-guide { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; z-index: 300; }
-.home-guide::backdrop { background: transparent; }
+.home-guide::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 .home-guide[open] { display: block; }
 html.guide-open, html.guide-open body { overflow: hidden; }
 .guide-shade { position: absolute; inset: 0; background: #092b3bba; pointer-events: auto; }
+.guide-shade.is-spotlight { background: transparent; }
+.guide-shade.is-spotlight::before {
+  content: "";
+  position: absolute;
+  left: var(--guide-left);
+  top: var(--guide-top);
+  width: var(--guide-width);
+  height: var(--guide-height);
+  box-sizing: border-box;
+  border: 3px solid #fff;
+  outline: 3px solid #60a5fa;
+  border-radius: 16px;
+  box-shadow: 0 0 0 100vmax #092b3bba;
+  pointer-events: none;
+}
 .guide-target { position: relative !important; z-index: 302 !important; box-shadow: 0 0 0 5px #fff, 0 0 0 10px #91dab8 !important; border-radius: 16px; pointer-events: auto; }
 .site-header:has(.guide-target) { z-index: 302; }
 .guide-card { position: absolute; bottom: max(102px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 30px)); max-height: calc(100dvh - 125px); overflow-y: auto; padding: 22px; background: white; color: #183b48; border-radius: 22px; box-shadow: 0 16px 55px #0b344a47; pointer-events: auto; z-index: 304; }
