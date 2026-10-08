@@ -1,0 +1,20 @@
+erDiagram
+  USERS ||--o| USER_PROFILE_IMAGES : avatar
+  USERS ||--o| NOTIFICATION_PREFERENCES : preferences
+  USERS ||--o{ FOOD_POSTS : shares
+  USERS ||--o{ RESERVATIONS : books
+  FOOD_POSTS ||--o{ RESERVATIONS : contains
+  FOOD_POSTS ||--o{ FOOD_POST_IMAGES : gallery
+  USERS ||--o{ POST_COMMENTS : authors
+  FOOD_POSTS ||--o{ POST_COMMENTS : discusses
+  POST_COMMENTS o|--o{ POST_COMMENTS : replies
+  USERS ||--o{ NOTIFICATIONS : receives
+  USERS o|--o{ NOTIFICATIONS : visible_actor
+  USERS ||--o{ SAVED_POSTS : saves
+  FOOD_POSTS ||--o{ SAVED_POSTS : saved_by
+  USERS ||--o{ PASSWORD_RESET_TOKENS : resets
+  FOOD_POSTS ||--o{ REPORTS : reported
+  USERS ||--o{ REPORTS : reporter
+  USERS o|--o{ REPORTS : reviewer
+  POST_COMMENTS o|--o{ REPORTS : comment_report
+  USERS ||--o{ AUDIT_EVENTS : actor

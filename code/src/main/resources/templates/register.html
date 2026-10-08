@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('สมัครสมาชิก')}"></head>
+  <body data-page="register" class="auth-page">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container auth-layout">
+      <aside class="auth-art">
+        <div class="auth-orb auth-orb-blue" aria-hidden="true"></div><div class="auth-orb auth-orb-green" aria-hidden="true"></div>
+        <div class="auth-art-copy">
+        <span class="eyebrow">A COMMUNITY THAT CARES</span>
+        <h2>มื้อเล็ก ๆ ของเรา<br /><span>ความสุขใหญ่ ๆ ของใคร</span></h2>
+        <p>เริ่มต้นเรื่องราวดี ๆ ด้วยการแบ่งปัน</p>
+        </div>
+        <div class="auth-image-stage"><span class="auth-art-ring" aria-hidden="true"></span><img src="/images/register-mascot.webp" alt="มาสคอต FoodShare ชวนแบ่งปันอาหาร" /><span class="auth-float-note"><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg><span>แบ่งปันได้ รับได้<small>เริ่มได้ในบัญชีเดียว</small></span></span></div>
+        <div class="auth-art-bottom">
+          <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          KKU FOODSHARE COMMUNITY
+        </div>
+      </aside>
+      <section class="auth-form-panel">
+        <span class="auth-card-kicker">A SMALL START, A KINDER COMMUNITY</span>
+        <span class="auth-symbol"
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+        ></span>
+        <h1>เริ่มแบ่งปันสิ่งดี ๆ</h1>
+        <p class="auth-subtitle">สร้างบัญชี แล้วมาเป็นส่วนหนึ่งของชุมชน</p>
+        <p th:if="${error}" th:text="${error}" class="form-error"></p>
+        <form
+          th:action="@{/register}"
+          th:object="${registerRequest}"
+          method="post"
+          class="auth-form"
+        >
+          <label for="displayName"><span class="auth-field-label">ชื่อที่แสดง</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg><input
+              th:field="*{displayName}"
+              maxlength="80"
+              required
+              autocomplete="name"
+              placeholder="อยากให้เพื่อนเรียกคุณว่าอะไร" /></span><small
+              class="field-error"
+              th:errors="*{displayName}"
+            ></small></label
+          ><label for="email"><span class="auth-field-label">อีเมล</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><input
+              type="email"
+              th:field="*{email}"
+              required
+              maxlength="254"
+              autocomplete="email"
+              placeholder="your@email.com" /></span><small
+              class="field-error"
+              th:errors="*{email}"
+            ></small></label
+          ><label for="password"><span class="auth-field-label">รหัสผ่าน</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><input
+              type="password"
+              th:field="*{password}"
+              minlength="8"
+              maxlength="72"
+              required
+              autocomplete="new-password"
+              placeholder="อย่างน้อย 8 ตัวอักษร" /><button type="button" class="password-toggle" data-password-toggle="password" aria-controls="password" aria-pressed="false" aria-label="แสดงรหัสผ่าน">แสดง</button></span><small
+              class="field-error"
+              th:errors="*{password}"
+            ></small></label
+          ><button class="btn btn-primary btn-lg full" type="submit">
+            สร้างบัญชี FoodShare
+            <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          </button>
+        </form>
+        <p class="auth-bottom">
+          มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a>
+        </p>
+        <p class="auth-community-note">หนึ่งบัญชี เป็นได้ทั้งผู้รับและผู้แบ่งปันอาหาร</p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

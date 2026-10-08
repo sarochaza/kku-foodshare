@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('โพสต์ที่บันทึกไว้')}"></head>
+  <body data-page="saved">
+    <header th:replace="~{fragments :: header('saved')}"></header>
+    <main class="container page-main">
+      <div class="page-heading saved-heading">
+        <span class="section-kicker">SAVE FOR LATER</span>
+        <h1>โพสต์ที่บันทึกไว้</h1>
+        <p>เก็บมื้อที่สนใจไว้ แล้วกลับมาจองได้ทันเวลา</p>
+      </div>
+      <div id="saved-posts" class="food-grid" aria-live="polite"><div class="loading-box">กำลังโหลดโพสต์ที่บันทึกไว้…</div></div>
+      <nav id="pagination" class="pagination" aria-label="หน้าโพสต์ที่บันทึก"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

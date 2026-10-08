@@ -1,0 +1,15 @@
+sequenceDiagram
+  actor Owner
+  participant API as FoodCatalogController
+  participant Service as FoodCatalogService
+  participant Repo as JPA Repositories
+  Owner->>API: POST /api/v1/food-posts
+  API->>API: Validate request and session
+  API->>Service: create(email, request)
+  Service->>Repo: Require active member
+  Service->>Service: Validate coordinates, quantity and time
+  Service->>Repo: Save FoodPost in transaction
+  Service->>Service: Build PostView through mapper
+  Service-->>API: PostView
+  API-->>Owner: 201 + Location + PostView
+

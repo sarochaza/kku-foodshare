@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('เข้าสู่ระบบ')}"></head>
+  <body data-page="login" class="auth-page">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container auth-layout">
+      <aside class="auth-art">
+        <div class="auth-orb auth-orb-blue" aria-hidden="true"></div><div class="auth-orb auth-orb-green" aria-hidden="true"></div>
+        <div class="auth-art-copy">
+        <span class="eyebrow">A COMMUNITY THAT CARES</span>
+        <h2>มื้อเล็ก ๆ ของเรา<br /><span>ความสุขใหญ่ ๆ ของใคร</span></h2>
+        <p>เริ่มต้นเรื่องราวดี ๆ ด้วยการแบ่งปัน</p>
+        </div>
+        <div class="auth-image-stage"><span class="auth-art-ring" aria-hidden="true"></span><img src="/images/register-mascot.webp" alt="มาสคอต FoodShare โบกมือต้อนรับ" /><span class="auth-float-note"><svg class="icon" aria-hidden="true"><use href="#i-heart"></use></svg><span>อิ่มท้อง อิ่มใจ<small>ส่งต่อมื้อดี ๆ ให้กัน</small></span></span></div>
+        <div class="auth-art-bottom">
+          <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          KKU FOODSHARE COMMUNITY
+        </div>
+      </aside>
+      <section class="auth-form-panel">
+        <span class="auth-card-kicker">YOUR COMMUNITY, YOUR NEXT MEAL</span>
+        <span class="auth-symbol"
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+        ></span>
+        <h1>ยินดีต้อนรับกลับมา</h1>
+        <p class="auth-subtitle">มื้อดี ๆ และเพื่อนในชุมชนรอคุณอยู่</p>
+        <div class="form-error" th:if="${param.error}">
+          อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง
+        </div>
+        <div class="form-error" th:if="${param.disabled}">
+          บัญชีนี้ถูกระงับ กรุณาติดต่อผู้ดูแล
+        </div>
+        <div class="success-note" th:if="${param.registered}">
+          สมัครสำเร็จ เข้าสู่ระบบเพื่อเริ่มแบ่งปันได้เลย
+        </div>
+        <div class="success-note" th:if="${param.resetSuccess}">ตั้งรหัสผ่านใหม่สำเร็จแล้ว เข้าสู่ระบบด้วยรหัสผ่านใหม่ได้เลย</div>
+        <form th:action="@{/login}" method="post" class="auth-form">
+          <label for="login-email"><span class="auth-field-label">อีเมล</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><input
+              id="login-email"
+              type="email"
+              name="email"
+              autocomplete="username"
+              required
+              placeholder="your@email.com" /></span></label>
+          <label for="login-password"><span class="auth-field-label">รหัสผ่าน</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><input
+              id="login-password"
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              required
+              placeholder="กรอกรหัสผ่านของคุณ" /><button type="button" class="password-toggle" data-password-toggle="login-password" aria-controls="login-password" aria-pressed="false" aria-label="แสดงรหัสผ่าน">แสดง</button></span></label
+          ><a href="/forgot-password" class="forgot-link">ลืมรหัสผ่าน?</a
+          ><button class="btn btn-primary btn-lg full" type="submit">
+            เข้าสู่ระบบ
+            <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          </button>
+        </form>
+        <div th:if="${googleEnabled}" class="google-section">
+          <div class="or-divider"><span>หรือ</span></div>
+          <a href="/oauth2/authorization/google" class="btn btn-white full"
+            ><img src="/images/logo_gg.webp" width="20" height="20" alt="" />
+            เข้าสู่ระบบด้วย Google</a
+          >
+        </div>
+        <p class="auth-bottom">
+          เพิ่งมาเป็นครั้งแรก? <a href="/register">สร้างบัญชีฟรี</a>
+        </p>
+        <a class="auth-explore-link" href="/explore">ดูอาหารในชุมชนก่อน</a>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('โปรไฟล์ผู้แบ่งปัน')}"></head>
+  <body data-page="member-profile" th:attr="data-member-id=${memberId}">
+    <header th:replace="~{fragments :: header('explore')}"></header>
+    <main class="container page-main">
+      <section id="member-profile" class="member-profile panel" aria-live="polite"></section>
+      <section class="section"><div class="section-heading"><div><span class="section-kicker">SHARED BY THIS MEMBER</span><h2>ประวัติการแบ่งปันอาหาร</h2></div></div><div id="member-posts" class="food-grid"></div><nav id="pagination" class="pagination"></nav></section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

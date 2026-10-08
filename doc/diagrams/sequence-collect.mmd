@@ -1,0 +1,19 @@
+sequenceDiagram
+  actor Owner
+  participant API as ReservationController
+  participant Service as ReservationService
+  participant Repo as JPA Repositories
+  Owner->>API: POST /reservations/id/collection
+  API->>Service: collect(email, id, code)
+  Service->>Repo: Lock post then load reservation
+  Service->>Service: Check owner, state, pickup window and code
+  alt Correct code
+    Service->>Repo: Reduce reserved, increase collected, mark COLLECTED
+    Service->>Service: Publish ActivityNotice
+    Service-->>API: ReservationView
+    API-->>Owner: 200
+  else Invalid code
+    Service->>Repo: Retain failed attempts and lock deadline
+    Service-->>API: InvalidPickupCode 400 or 429
+    API-->>Owner: Standard error JSON
+  end

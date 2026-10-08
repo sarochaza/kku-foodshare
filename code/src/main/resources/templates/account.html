@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('บัญชีของฉัน')}"></head>
+  <body data-page="account">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main narrow">
+      <section class="panel profile-panel">
+        <div class="profile-cover">
+          <span>GOOD FOOD. GOOD PEOPLE.</span
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+        </div>
+        <div class="profile-body">
+          <img
+            src="/account/photo"
+            class="profile-avatar"
+            alt="รูปโปรไฟล์"
+          /><span
+            class="profile-role"
+            th:text="${viewer.role=='ADMIN'?'ผู้ดูแลชุมชน':'สมาชิกชุมชน KKU'}"
+          ></span>
+          <h2 th:text="${viewer.name}"></h2>
+          <p th:text="${viewer.email}"></p>
+          <form id="profile-form">
+            <label
+              >ชื่อที่แสดง<input
+                name="name"
+                th:value="${viewer.name}"
+                maxlength="80"
+                required /></label
+            ><button class="btn btn-primary" type="submit">บันทึกชื่อ</button>
+          </form>
+          <form
+            th:action="@{/account/photo}"
+            method="post"
+            enctype="multipart/form-data"
+            class="avatar-form"
+          >
+            <label
+              >เปลี่ยนรูปโปรไฟล์<input
+                name="photo"
+                type="file"
+                accept="image/jpeg,image/png"
+                required /></label
+            ><button class="btn btn-soft" type="submit">อัปโหลดรูป</button>
+          </form>
+          <p class="field-note">รูปโปรไฟล์ JPG/PNG ไม่เกิน 2 MB</p>
+          <p
+            th:if="${photoError}"
+            th:text="${photoError}"
+            class="form-error"
+          ></p>
+          <p
+            th:if="${photoSuccess}"
+            th:text="${photoSuccess}"
+            class="success-note"
+          ></p>
+        </div>
+      </section>
+      <nav class="account-options">
+        <a href="/?guide=1"
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+          ><span><strong>ดูวิธีใช้งานอีกครั้ง</strong><small>แนะนำการค้นหา จอง และแบ่งปันอาหาร</small></span
+          ><svg class="icon" aria-hidden="true"><use href="#i-chevron"></use></svg></a>
+        <a href="/account/posts"
+          ><svg class="icon" aria-hidden="true"><use href="#i-grid"></use></svg
+          ><span
+            ><strong>โพสต์อาหารของฉัน</strong
+            ><small>ดูผู้จอง แก้ไข และยืนยันส่งมอบ</small></span
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-chevron"></use></svg></a
+        ><a href="/reservations"
+          ><svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg
+          ><span
+            ><strong>การจองของฉัน</strong
+            ><small>ดูรหัสรับอาหารและประวัติการรับ</small></span
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-chevron"></use></svg></a
+        ><a href="/notifications"
+          ><svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg
+          ><span
+            ><strong>การแจ้งเตือน</strong
+            ><small>อัปเดตการแบ่งปันของคุณ</small></span
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-chevron"></use></svg></a
+        ><a th:if="${viewer.role=='ADMIN'}" href="/admin"
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-shield"></use></svg
+          ><span
+            ><strong>จัดการชุมชน</strong
+            ><small>ตรวจรายงานและจัดการสมาชิก</small></span
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-chevron"></use></svg
+        ></a>
+      </nav>
+      <form th:action="@{/logout}" method="post">
+        <button class="btn btn-white logout-button" type="submit">
+          <svg class="icon" aria-hidden="true">
+            <use href="#i-logout"></use>
+          </svg>
+          ออกจากระบบ
+        </button>
+      </form>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>

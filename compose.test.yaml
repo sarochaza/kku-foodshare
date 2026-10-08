@@ -1,0 +1,47 @@
+# Isolated tests: this file does not use the running app, its .env, or its volumes.
+services:
+  java-tests:
+    image: maven:3.9-eclipse-temurin-17
+    working_dir: /workspace/code
+    command: ["mvn", "-B", "clean", "verify"]
+    volumes:
+      - .:/workspace
+      - maven_test_cache:/root/.m2
+  js-tests:
+    image: node:22-alpine
+    working_dir: /workspace
+    command: ["sh", "-c", "node --test code/src/test/js/*.test.mjs"]
+    volumes:
+      - .:/workspace
+  test-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: foodshare_test
+      POSTGRES_USER: foodshare_test
+      POSTGRES_PASSWORD: isolated-test-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foodshare_test -d foodshare_test"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+  postgres-tests:
+    image: maven:3.9-eclipse-temurin-17
+    working_dir: /workspace/code
+    depends_on:
+      test-db:
+        condition: service_healthy
+    command:
+      - mvn
+      - -B
+      - -Dtest=CommentCrudJourneyTest,FoodJourneyTest,ReviewRegressionTest,WebPagesTest
+      - -Dspring.datasource.url=jdbc:postgresql://test-db:5432/foodshare_test
+      - -Dspring.datasource.username=foodshare_test
+      - -Dspring.datasource.password=isolated-test-only
+      - -Dspring.flyway.enabled=true
+      - -Dspring.jpa.hibernate.ddl-auto=validate
+      - test
+    volumes:
+      - .:/workspace
+      - maven_test_cache:/root/.m2
+volumes:
+  maven_test_cache:

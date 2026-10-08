@@ -1,0 +1,20 @@
+sequenceDiagram
+  actor Receiver
+  participant API as ReservationController
+  participant Service as ReservationService
+  participant Repo as JPA Repositories
+  Receiver->>API: POST reservation + Idempotency-Key
+  API->>Service: reserve(email, postId, quantity, key)
+  Service->>Repo: Require member and lock post
+  Service->>Repo: Check previous key and active booking
+  Service->>Service: Check owner, stock, time and limit
+  alt Allowed
+    Service->>Repo: Save reservation and update reserved stock
+    Service->>Service: Publish ActivityNotice
+    Service-->>API: ReservationView with pickup code
+    API-->>Receiver: 201
+  else Conflict
+    Service-->>API: Problem 409
+    API-->>Receiver: Standard error JSON
+  end
+

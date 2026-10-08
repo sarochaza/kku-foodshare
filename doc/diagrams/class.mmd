@@ -1,0 +1,35 @@
+classDiagram
+  direction TB
+  class FoodDiscoveryStrategy {
+    <<Strategy>>
+    +key() String
+    +order(cb, post, lat, lng) Order
+  }
+  FoodDiscoveryStrategy <|.. ExpiryFoodStrategy
+  FoodDiscoveryStrategy <|.. LatestFoodStrategy
+  FoodDiscoveryStrategy <|.. NearbyFoodStrategy
+  FoodCatalogServiceImpl --> FoodDiscoveryStrategy
+  class ReservationState {
+    <<State>>
+    +requireMutable()
+  }
+  ReservationState <|.. ReservationStatus
+  ReservationServiceImpl --> ReservationStatus
+  ReservationServiceImpl --> ApplicationEventPublisher
+  ApplicationEventPublisher --> ActivityNotice : publishes
+  class NotificationServiceImpl {
+    <<Observer>>
+    +notify(ActivityNotice)
+  }
+  ActivityNotice --> NotificationServiceImpl : event listener
+  NotificationServiceImpl --> PickupReminderService
+  PickupReminderService <|.. PickupReminderServiceImpl
+  ImageStorage <|.. LocalImageStorage
+  ImageStorage <|.. CloudinaryImageStorage
+  CloudinaryImageStorage --> ImageStorage : local qualifier
+  PostViewService <|.. PostViewServiceImpl
+  PostViewServiceImpl --> PostViewMapping
+  PostViewMapping <|.. PostViewMapper
+  PostViewServiceImpl --> PostViewContext
+  PostViewMapper --> PostViewContext
+

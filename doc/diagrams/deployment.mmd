@@ -1,0 +1,7 @@
+flowchart TD
+  Browser["Browser on desktop or phone"] -->|HTTPS| App["Spring Boot application"]
+  App -->|JDBC TLS| DB["PostgreSQL or Neon"]
+  App -->|signed HTTPS| Cloud["Cloudinary image storage"]
+  App -->|HTTPS API| Mail["Brevo email provider"]
+  App -->|OAuth| Google["Google identity provider"]
+  Browser -->|tiles and routes| Maps["Map services"]

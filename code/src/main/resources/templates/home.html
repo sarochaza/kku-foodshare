@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('แบ่งปันอาหาร เติมรอยยิ้ม')}"></head>
+  <body data-page="home" class="welcome-page">
+    <header th:replace="~{fragments :: header('home')}"></header>
+    <main>
+      <section class="landing-hero">
+        <div class="container hero-layout">
+          <div class="hero-copy">
+            <span class="eyebrow"
+              ><svg class="icon" aria-hidden="true">
+                <use href="#i-leaf"></use>
+              </svg>
+              อิ่มง่าย ไม่เหลือทิ้ง</span
+            >
+            <h1>
+              แบ่งปันอาหาร<br /><span class="highlight">สร้างสังคมที่ยั่งยืน</span>
+            </h1>
+            <p>
+              เชื่อมต่อมื้อดี ๆ กับคนที่ต้องการในชุมชน มข.<br />ค้นหา จอง และนัดรับอาหารใกล้คุณ<br class="desktop-break" />หรือแบ่งปันมื้อที่ยังทานได้ ให้ทุกมื้อมีความหมาย
+            </p>
+            <p th:if="${viewer == null}" class="guest-hero-caption">ดูอาหารและจุดรับได้ โดยยังไม่ต้องเข้าสู่ระบบ</p>
+            <form class="home-search" id="home-search" action="/explore" method="get" role="search">
+              <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+              <input name="q" aria-label="ค้นหาอาหาร" placeholder="วันนี้อยากกินอะไร? ค้นหาอาหารหรือจุดรับ" />
+              <button type="submit" aria-label="ค้นหาอาหาร">ค้นหา</button>
+            </form>
+            <div class="hero-buttons">
+              <a href="/explore" class="btn btn-primary btn-lg"
+                ><svg class="icon" aria-hidden="true"><use href="#i-food"></use></svg>เริ่มค้นหาอาหาร</a
+              >
+              <a href="/posts/new" class="welcome-share-link">มีอาหารอยากแบ่งปัน? เริ่มสร้างโพสต์</a>
+            </div>
+            <div class="hero-reassurance">
+              <span
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-check"></use>
+                </svg>
+                แบ่งปันฟรี</span
+              ><span
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-check"></use>
+                </svg>
+                นัดรับใกล้คุณ</span
+              ><span
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-check"></use>
+                </svg>
+                ดีต่อโลก</span
+              >
+            </div>
+            <div th:if="${viewer == null}" class="guest-account-entry">
+              <a class="btn btn-soft" href="/register">สร้างบัญชีฟรี</a>
+              <a class="guest-login" href="/login">มีบัญชีแล้ว? เข้าสู่ระบบ</a>
+            </div>
+          </div>
+          <div class="hero-art welcome-art">
+            <img class="welcome-illustration" src="/images/welcome-community.webp" width="1536" height="1024" fetchpriority="high" alt="ภาพประกอบนักศึกษาแบ่งปันอาหารในชุมชนมหาวิทยาลัย" />
+            <div class="floating-note note-top">
+              <span class="note-icon"
+                ><svg class="icon" aria-hidden="true">
+                  <use href="#i-heart"></use></svg
+              ></span>
+              <div>
+                <strong>ความอิ่มที่ส่งต่อได้</strong
+                ><small>มื้อเล็ก ๆ ที่ทำให้ใครยิ้มได้</small>
+              </div>
+            </div>
+            <div class="floating-note note-bottom">
+              <span>🌱</span>
+              <div>
+                <strong>อิ่มท้อง อิ่มใจ</strong
+                ><small>ให้ทุกมื้อมีความหมาย</small>
+              </div>
+            </div>
+            <span class="art-spark spark-two" aria-hidden="true">✦</span>
+          </div>
+        </div>
+      </section>
+      <section th:if="${viewer == null}" id="guest-start" class="container guest-start" aria-labelledby="guest-start-title">
+        <div class="guest-start-heading"><span class="section-kicker">WELCOME TO FOODSHARE</span><h2 id="guest-start-title">ครั้งแรกใช่ไหม? เริ่มจากตรงนี้</h2><p>หนึ่งบัญชีเป็นได้ทั้งผู้รับและผู้แบ่งปัน ไม่ต้องเลือกฝั่งตอนสมัคร</p></div>
+        <div class="guest-role-grid">
+          <article><span class="guest-role-icon"><svg class="icon" aria-hidden="true"><use href="#i-bag"></use></svg></span><h3>อยากรับอาหาร</h3><ol><li>ค้นหาอาหาร ดูรูป จำนวน และจุดรับ</li><li>เข้าสู่ระบบแล้วจองจำนวนที่ต้องการ</li><li>ไปตามเวลานัด แสดง QR หรือรหัสรับอาหาร 6 หลัก</li></ol><a href="/explore">ดูอาหารที่แบ่งปัน</a></article>
+          <article><span class="guest-role-icon"><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg></span><h3>อยากแบ่งปันอาหาร</h3><ol><li>สมัครหรือเข้าสู่ระบบ แล้วสร้างโพสต์</li><li>เพิ่มรูป จำนวน เวลารับ และปักหมุดจุดนัดรับ</li><li>ดูผู้จองและยืนยันการรับด้วย QR หรือรหัส 6 หลัก</li></ol><a href="/register">สมัครเพื่อเริ่มแบ่งปัน</a></article>
+        </div>
+        <p class="guest-safety"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>แบ่งปันเฉพาะอาหารที่ยังปลอดภัย อ่านส่วนผสมที่อาจแพ้ และนัดรับให้ทันเวลาที่ระบุ</p>
+      </section>
+      <section id="home-discover" class="container home-discover" aria-labelledby="discover-title">
+        <div class="home-discovery-heading">
+          <div>
+            <span class="section-kicker">LIVE FOOD MAP</span>
+            <h2 id="discover-title">มื้อดี ๆ รอบตัวคุณ ตอนนี้</h2>
+            <p>เลือกหมวด ดูหมุดจริง แล้ววางแผนไปรับได้จากหน้าเดียว</p>
+          </div>
+          <span class="live-pill"><i aria-hidden="true"></i> อัปเดตจากรายการที่เปิดรับ</span>
+        </div>
+
+        <div class="home-discovery-toolbar">
+          <div id="home-category-filters" class="home-categories home-categories-compact" aria-label="เลือกหมวดหมู่อาหาร">
+            <button type="button" class="home-category active" data-home-category="" aria-pressed="true"><span>✨</span> ทั้งหมด</button>
+            <button type="button" class="home-category" data-home-category="FOOD" aria-pressed="false"><span>🍱</span> อาหาร</button>
+            <button type="button" class="home-category" data-home-category="DRINK" aria-pressed="false"><span>🥤</span> เครื่องดื่ม</button>
+            <button type="button" class="home-category" data-home-category="SNACK" aria-pressed="false"><span>🥐</span> ของว่าง</button>
+          </div>
+          <label class="home-sort">เรียงตาม
+            <select id="home-sort" aria-label="เรียงรายการอาหาร">
+              <option value="expiry">หมดเวลารับก่อน</option>
+              <option value="latest">โพสต์ล่าสุด</option>
+              <option value="nearby">ใกล้ฉัน</option>
+            </select>
+          </label>
+          <label class="home-now-compact"><input id="home-available-now" type="checkbox" /> รับได้ตอนนี้</label>
+          <a class="home-sharing-map-icon" data-sharing-map href="/explore?view=map" aria-label="เปิดแผนที่แบ่งปัน"><svg class="icon" aria-hidden="true"><use href="#i-map"></use></svg></a>
+        </div>
+
+        <div class="home-map-intro"><h2>ดูตำแหน่งอาหารก่อนเลือกจอง</h2><p class="field-note">🍱 หมุดอาหาร · 🔵 ตำแหน่งของคุณ · เลือกหมุดแล้วเปิดรายละเอียดเพื่อเลือกเดินเท้าหรือขับรถ และตรวจเวลาไปรับ</p></div>
+        <div id="home-map" class="home-map-layout">
+          <div id="home-map-shell" class="home-map-shell">
+            <div id="home-live-map" class="home-live-map" role="region" aria-label="แผนที่หมุดอาหารในชุมชนมหาวิทยาลัยขอนแก่น"></div>
+            <button id="home-locate" class="home-locate" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-locate"></use></svg>
+              <span>ตำแหน่งของฉัน</span>
+            </button>
+            <div id="home-map-preview" class="home-map-preview" hidden aria-live="polite"></div>
+          </div>
+          <aside class="home-map-aside" aria-label="รายการอาหารบนแผนที่">
+            <div class="home-map-aside-head">
+              <div><span class="section-kicker">NEAR THE CAMPUS</span><h3>เลือกหมุดที่อยากแวะ</h3></div>
+              <span id="home-map-count" class="map-count">กำลังค้นหา…</span>
+            </div>
+            <p id="home-location-status" class="home-location-status">
+              <svg class="icon" aria-hidden="true"><use href="#i-pin"></use></svg>
+              แผนที่เริ่มจากพื้นที่ มข. กด “ตำแหน่งของฉัน” เพื่อดูระยะทาง
+            </p>
+            <div id="home-map-list" class="home-map-list" aria-live="polite">
+              <div class="loading-box">กำลังโหลดจุดแบ่งปัน…</div>
+            </div>
+            <a class="btn btn-soft full" data-sharing-map href="/explore?view=map">เปิดแผนที่แบ่งปัน</a>
+          </aside>
+        </div>
+        <a th:if="${viewer != null}" id="home-bookings-entry" class="home-bookings-entry" href="/reservations">ดูการจองของฉัน</a>
+      </section>
+      <section class="container section">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">FRESH FROM OUR COMMUNITY</span>
+            <h2 id="home-results-title">มีอาหารดี ๆ รอแบ่งปัน</h2>
+            <p id="home-results-copy">ค้นหามื้ออร่อย แล้วนัดรับในเวลาที่สะดวก</p>
+          </div>
+          <div class="feed-display-controls">
+            <a href="/explore" class="text-link">ดูอาหารทั้งหมด</a>
+          </div>
+        </div>
+        <div id="home-food" class="food-grid" aria-live="polite">
+          <div class="loading-box">กำลังค้นหาอาหารที่แบ่งปัน…</div>
+        </div>
+        <nav class="pagination" id="pagination" aria-label="หน้ารายการอาหาร"></nav>
+      </section>
+      <section class="how-section" id="how">
+        <div class="container">
+          <div class="section-heading centered">
+            <div>
+              <span class="section-kicker">SHARING IS SIMPLE</span>
+              <h2>จากหนึ่งมื้อ สู่รอยยิ้มอีกหนึ่งคน</h2>
+              <p>แบ่งปันง่าย ๆ ใน 3 ขั้นตอน</p>
+            </div>
+          </div>
+          <div class="steps-grid">
+            <article>
+              <span class="step-number">01</span>
+              <div class="step-icon blue">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-search"></use>
+                </svg>
+              </div>
+              <h3>หาอาหารที่ถูกใจ</h3>
+              <p>เลือกรายการที่อยากรับ<br />ดูจำนวนและเวลานัดรับบนแผนที่</p>
+            </article>
+            <article>
+              <span class="step-number">02</span>
+              <div class="step-icon green">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-bag"></use>
+                </svg>
+              </div>
+              <h3>จองมื้อของคุณ</h3>
+              <p>ระบุจำนวนที่ต้องการ<br />ระบบจะเก็บรหัสรับอาหารให้คุณ</p>
+            </article>
+            <article>
+              <span class="step-number">03</span>
+              <div class="step-icon peach">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#i-heart"></use>
+                </svg>
+              </div>
+              <h3>นัดรับ แล้วส่งต่อรอยยิ้ม</h3>
+              <p>ไปตามหมุดในเวลานัดรับ<br />แสดงรหัสให้ผู้แบ่งปันยืนยัน</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="container section" id="share">
+        <div class="share-banner">
+          <div>
+            <span class="eyebrow">SMALL ACTION, BIG KINDNESS</span>
+            <h2>มีอาหารเหลืออยู่ไหม?<br />ส่งต่อความอร่อยกันเถอะ</h2>
+            <p>
+              อาหารจากงานประชุม ขนม หรือผลไม้ที่ยังทานได้<br />มื้อเล็ก ๆ
+              ของคุณสร้างรอยยิ้มได้มากกว่าที่คิด
+            </p>
+            <a class="btn btn-primary" href="/posts/new"
+              ><svg class="icon" aria-hidden="true">
+                <use href="#i-plus"></use>
+              </svg>
+              แบ่งปันอาหารเลย</a
+            >
+          </div>
+          <img
+            class="share-banner-image"
+            src="/images/foodshare-share-banner.png"
+            width="1536"
+            height="1024"
+            alt="นักศึกษา มข. ส่งต่อถุงอาหารให้กันริมสระในมหาวิทยาลัย"
+            loading="lazy"
+          />
+        </div>
+      </section>
+      <section class="container welcome-faq" id="faq" aria-labelledby="faq-title">
+        <div class="section-heading centered"><div><span class="section-kicker">A LITTLE HELP</span><h2 id="faq-title">สงสัยก่อนเริ่ม? เราช่วยได้</h2><p>รู้จัก FoodShare อีกนิด แล้วเริ่มแบ่งปันไปด้วยกัน</p></div></div>
+        <div class="welcome-faq-list">
+          <details><summary>ต้องมีบัญชีก่อนดูอาหารไหม?</summary><p>ดูรายการอาหารและจุดรับได้โดยยังไม่เข้าสู่ระบบ เมื่อต้องการจองหรือสร้างโพสต์ ให้สมัครหรือเข้าสู่ระบบก่อน</p></details>
+          <details><summary>รับอาหารที่จองไว้อย่างไร?</summary><p>ตรวจจุดนัดรับและเวลาที่ผู้แบ่งปันระบุ ไปให้ทันเวลา แล้วแสดง QR หรือรหัสรับอาหาร 6 หลักจากหน้าการจองให้ผู้แบ่งปันยืนยัน</p></details>
+          <details><summary>แบ่งปันอาหารแบบไหนได้บ้าง?</summary><p>อาหาร เครื่องดื่ม และของว่างที่ยังปลอดภัยสำหรับรับประทาน ระบุรายละเอียด ส่วนผสมที่อาจแพ้ จำนวน และเวลารับให้ชัดเจน ไม่แบ่งปันอาหารที่เสื่อมสภาพ</p></details>
+          <details><summary>ใช้แผนที่กับตำแหน่งปัจจุบันอย่างไร?</summary><p>กด “ตำแหน่งของฉัน” และอนุญาตการเข้าถึงตำแหน่ง เลือกหมุดอาหารเพื่อดูรายละเอียด และเปิด Google Maps จากรายการอาหารเพื่อดูเส้นทางไปจุดนัดรับ</p></details>
+        </div>
+        <p class="welcome-closing">หนึ่งมื้อที่แบ่งปัน อาจเป็นรอยยิ้มของใครสักคน <svg class="icon" aria-hidden="true"><use href="#i-heart"></use></svg></p>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+    <dialog th:replace="~{fragments :: onboardingGuide}"></dialog>
+  </body>
+</html>

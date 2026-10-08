@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('อาหารใกล้คุณ')}"></head>
+  <body data-page="dashboard">
+    <header th:replace="~{fragments :: header('explore')}"></header>
+    <main class="container page-main">
+      <form id="search-form" class="search-toolbar">
+        <label class="search-input"
+          ><svg class="icon" aria-hidden="true">
+            <use href="#i-search"></use></svg
+          ><input
+            id="search"
+            name="q"
+            placeholder="ค้นหาชื่ออาหาร หรือจุดรับอาหาร…"
+            aria-label="ค้นหาอาหาร" /></label
+        ><button class="btn btn-primary" type="submit">ค้นหา</button
+        ><button class="btn btn-white" type="button" id="nearby-button">
+          <svg class="icon" aria-hidden="true">
+            <use href="#i-locate"></use>
+          </svg>
+          ใกล้ฉัน
+        </button>
+      </form>
+      <div class="nearby-feedback"><p id="nearby-status" class="location-feedback" role="status" hidden></p><button id="manual-location-button" class="btn btn-soft" type="button" hidden>เลือกจุดของฉันบนแผนที่</button></div>
+      <div class="filter-row">
+        <div class="chips" id="category-filters">
+          <button data-category="" class="chip active" type="button">
+            ทั้งหมด</button
+          ><button data-category="FOOD" class="chip" type="button">
+            🍱 อาหาร</button
+          ><button data-category="DRINK" class="chip" type="button">
+            🥤 เครื่องดื่ม</button
+          ><button data-category="SNACK" class="chip" type="button">
+            🥐 ของว่าง</button
+          ><label class="chip check-chip"
+            ><input type="checkbox" id="available-now" /> รับได้ตอนนี้</label
+          >
+          <span class="owner-filter" aria-label="ตัวกรองเจ้าของโพสต์"><span class="owner-filter-label">โพสต์</span><button type="button" data-owner="">ทั้งหมด</button><button type="button" data-owner="mine">ของฉัน</button><button type="button" data-owner="others">ของคนอื่น</button></span>
+        </div>
+        <div class="view-switch" aria-label="มุมมอง">
+          <button id="list-view" type="button" class="active" aria-label="แสดงรายการ" aria-pressed="true">
+            <svg class="icon" aria-hidden="true">
+              <use href="#i-grid"></use>
+            </svg></button
+          ><button id="map-view" type="button" aria-label="แสดงแผนที่แบ่งปัน" aria-pressed="false">
+            <svg class="icon" aria-hidden="true"><use href="#i-map"></use></svg>
+          </button>
+        </div>
+      </div>
+      <section th:replace="~{fragments :: sharingMap}"></section>
+      <div class="results-heading">
+        <h2 id="result-count">อาหารที่พร้อมแบ่งปัน</h2>
+        <div class="feed-display-controls"><label
+          >เรียงตาม
+          <select id="sort">
+            <option value="expiry">หมดเวลารับก่อน</option>
+            <option value="latest">โพสต์ล่าสุด</option>
+            <option value="nearby">ใกล้ฉัน</option>
+          </select></label
+        ></div>
+      </div>
+      <div id="food-results" class="food-grid" aria-live="polite">
+        <div class="loading-box">กำลังโหลดรายการอาหาร…</div>
+      </div>
+      <nav
+        class="pagination"
+        id="pagination"
+        aria-label="หน้ารายการอาหาร"
+      ></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+    <dialog th:replace="~{fragments :: onboardingGuide}"></dialog>
+  </body>
+</html>

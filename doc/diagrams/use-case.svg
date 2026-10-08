@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="930" viewBox="0 0 1080 930">
+<rect width="1080" height="930" fill="white"/>
+<style>text{font-family:Arial,sans-serif;fill:#182b44;font-size:17px}.line{stroke:#53687e;stroke-width:1.5;fill:none}</style>
+<defs><marker id="triangle" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M0 0L12 6L0 12Z" fill="white" stroke="#53687e"/></marker></defs>
+<rect x="280" y="25" width="770" height="880" rx="5" fill="#f8fbff" stroke="#53687e"/>
+<text x="665" y="55" text-anchor="middle" font-size="22">KKU FoodShare</text>
+<circle cx="90" cy="127" r="15" fill="white" stroke="#182b44"/>
+<path class="line" d="M90 142V190 M58 163H122 M90 190L65 222 M90 190L115 222"/>
+<text x="90" y="247" text-anchor="middle">Guest</text>
+<circle cx="90" cy="432" r="15" fill="white" stroke="#182b44"/>
+<path class="line" d="M90 447V495 M58 468H122 M90 495L65 527 M90 495L115 527"/>
+<text x="90" y="552" text-anchor="middle">Member</text>
+<circle cx="90" cy="767" r="15" fill="white" stroke="#182b44"/>
+<path class="line" d="M90 782V830 M58 803H122 M90 830L65 862 M90 830L115 862"/>
+<text x="90" y="887" text-anchor="middle">Admin</text>
+<ellipse cx="665" cy="110" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="116" text-anchor="middle">Browse food and map</text>
+<path class="line" d="M125 163L405 110"/>
+<ellipse cx="665" cy="190" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="196" text-anchor="middle">Register / Login / Reset password</text>
+<path class="line" d="M125 163L405 190"/>
+<ellipse cx="665" cy="270" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="276" text-anchor="middle">Manage profile and guide</text>
+<path class="line" d="M125 468L405 270"/>
+<ellipse cx="665" cy="350" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="356" text-anchor="middle">Create / Edit / Close food post</text>
+<path class="line" d="M125 468L405 350"/>
+<ellipse cx="665" cy="430" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="436" text-anchor="middle">Reserve / Change / Cancel</text>
+<path class="line" d="M125 468L405 430"/>
+<ellipse cx="665" cy="510" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="516" text-anchor="middle">Show QR or pickup code</text>
+<path class="line" d="M125 468L405 510"/>
+<ellipse cx="665" cy="590" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="596" text-anchor="middle">Confirm pickup / Adjust stock</text>
+<path class="line" d="M125 468L405 590"/>
+<ellipse cx="665" cy="670" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="676" text-anchor="middle">Comment / Save / Report</text>
+<path class="line" d="M125 468L405 670"/>
+<ellipse cx="665" cy="750" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="756" text-anchor="middle">Notifications / Preferences</text>
+<path class="line" d="M125 468L405 750"/>
+<ellipse cx="665" cy="830" rx="260" ry="27" fill="white" stroke="#53687e"/>
+<text x="665" y="836" text-anchor="middle">Moderate reports and accounts</text>
+<path class="line" d="M125 803L405 830"/>
+<path class="line" d="M160 460V272H100" marker-end="url(#triangle)"/>
+<path class="line" d="M185 795V575H100" marker-end="url(#triangle)"/>
+</svg>
