@@ -1,225 +1,344 @@
 # KKU FoodShare
 
-ระบบ **KKU FoodShare** สำหรับการแบ่งปันอาหารภายในมหาวิทยาลัย ช่วยให้ผู้ใช้งานสามารถแบ่งปันอาหารที่ต้องการส่งต่อ และช่วยลดปัญหาอาหารเหลือทิ้ง โดยเน้นการออกแบบระบบตามหลักการ Software Design
+![Java](https://img.shields.io/badge/Java-17-007396?style=flat-square)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.1-6DB33F?style=flat-square&logo=springboot&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Tests](https://img.shields.io/badge/Verified_tests-239_passed-16803C?style=flat-square)
+
+**ระบบแบ่งปันอาหารภายในมหาวิทยาลัยขอนแก่น** ช่วยส่งต่ออาหารส่วนเกินและลดอาหารเหลือทิ้ง  
+ผู้แบ่งปันสร้างโพสต์ ระบุจำนวน เวลา จุดรับ และแนบรูปภาพ ส่วนผู้รับค้นหาและจองอาหารได้  
+เจ้าของยืนยันการรับด้วย QR หรือรหัสรับอาหาร พร้อมจัดการสต็อกและรายการแจกนอกเว็บ  
+ระบบรองรับความคิดเห็น บันทึกโพสต์ โปรไฟล์ และการแจ้งเตือน โดยออกแบบตามหลัก Software Design
+
+<p align="center">
+  <img src="code/src/main/resources/static/images/foodshare-about-community.png" alt="ภาพประกอบชุมชน KKU FoodShare" width="760" />
+</p>
 
 ## สมาชิกกลุ่ม
 
-| รหัสนักศึกษา | ชื่อ-นามสกุล          | Email                                                     | Section |
-| ------------ | --------------------- | --------------------------------------------------------- | :-----: |
-| 673380026-6  | นางสาวกัญญาวี ศรีเหรา | [kanyawi.s@kkumail.com](mailto:kanyawi.s@kkumail.com)     |    1    |
-| 673380289-4  | นางสาวรสริน เมืองหงษ์ | [rossarin.m@kkumail.com](mailto:rossarin.m@kkumail.com)   |    1    |
-| 673380296-7  | นางสาวสโรชา เสาทอง    | [sarocha.sao@kkumail.com](mailto:sarocha.sao@kkumail.com) |    1    |
-| 673380048-7  | นายปวริศร์ แพงมา | [pawarit.pan@kkumail.com](mailto:[pawarit.pan@kkumail.com)     |    1    |
+| ลำดับ | ชื่อ-นามสกุล | รหัสนักศึกษา | Section | Branch | หน้าที่รับผิดชอบ | Email |
+|:---:|---|---|:---:|---|---|---|
+| 1 | นางสาวกัญญาวี ศรีเหรา | 673380026-6 | 1 | `kanyawi_6733800266_01` | | [kanyawi.s@kkumail.com](mailto:kanyawi.s@kkumail.com) |
+| 2 | นางสาวรสริน เมืองหงษ์ | 673380289-4 | 1 | `rossarin_6733802894_01` |  | [rossarin.m@kkumail.com](mailto:rossarin.m@kkumail.com) |
+| 3 | นางสาวสโรชา เสาทอง | 673380296-7 | 1 | `sarocha_6733802967_01` |  ความคิดเห็น บันทึกโพสต์ โปรไฟล์ และหน้าจอทั่วไป | [sarocha.sao@kkumail.com](mailto:sarocha.sao@kkumail.com) |
+| 4 | นายปวริศร์ แพงมา | 673380048-7 | 1 | `pawarit_6733800487_01` |   | [pawarit.pan@kkumail.com](mailto:pawarit.pan@kkumail.com) |
 
-## หัวข้อโปรเจค
+> **ชื่อ Branch เป็นชื่อที่เสนอให้ตรงรูปแบบใบงาน** ต้องตรวจให้ตรงกับ branch ที่ใช้จริงก่อนส่ง หน้าที่ข้างต้นเป็นการแบ่งขอบเขตดูแล/ศึกษาต่อ ต้องยืนยันกับงานที่สมาชิกทำจริงและ Git history
 
-**KKU FoodShare – ระบบแบ่งปันอาหารภายในมหาวิทยาลัย**
+ทีมใช้ `develop` รวมงาน และ `main` สำหรับรุ่นส่ง แต่ละคน Commit/Push ด้วยบัญชีของตนเอง และรวมงานผ่าน Pull Request ที่มี reviewer อย่างน้อยหนึ่งคน ตามเกณฑ์ใบงานทุกคนต้องมี meaningful commits อย่างน้อย 15 ครั้งกระจายตลอดช่วงทำงาน
 
-## รายละเอียดโปรเจค
+## Tech Stack
 
-KKU FoodShare เป็นระบบที่พัฒนาขึ้นเพื่อสนับสนุนการแบ่งปันอาหารระหว่างนักศึกษาและบุคลากรภายในมหาวิทยาลัย โดยผู้ใช้งานสามารถนำอาหารที่ต้องการแบ่งปันมาเผยแพร่ให้ผู้อื่นรับไปใช้ประโยชน์ ช่วยลดการสูญเสียอาหารและส่งเสริมการใช้ทรัพยากรอย่างคุ้มค่า
+| ส่วนของระบบ | เทคโนโลยี |
+|---|---|
+| Backend | Java target 17, Spring Boot 4.1.1, Spring MVC, Maven Wrapper |
+| Frontend | Thymeleaf, JavaScript, CSS, Leaflet |
+| Security | Spring Security, Session, CSRF, BCrypt, Google OAuth2 |
+| Persistence | Spring Data JPA / Hibernate, PostgreSQL, Flyway |
+| Image Storage | Local storage หรือ Cloudinary ตาม configuration |
+| Email | SMTP หรือ Brevo ตาม configuration |
+| Testing | JUnit, Mockito, Spring Boot Test, H2, Node test runner, Playwright |
+| Container / CI | Docker, Docker Compose, GitHub Actions |
 
-# 🍱 FoodShare
+### ฟีเจอร์ในโค้ดปัจจุบัน
 
-FoodShare คือเว็บแอปพลิเคชันสำหรับแบ่งปันอาหารส่วนเกิน ช่วยให้ผู้ที่มีอาหารสามารถส่งต่อให้ผู้ที่ต้องการ และช่วยลดปริมาณอาหารที่ถูกทิ้ง
+| กลุ่มฟีเจอร์ | ความสามารถ |
+|---|---|
+| สมาชิก | สมัครสมาชิก ล็อกอินอีเมล/Google รีเซ็ตรหัสผ่าน โปรไฟล์ รูปโปรไฟล์ และ onboarding |
+| โพสต์อาหาร | สร้าง แก้ไข ปิดโพสต์ แนบหลายรูป กำหนดจำนวน เวลา จุดรับ และขีดจำกัดการจอง |
+| ค้นหาและแผนที่ | ค้นหา/กรอง/เรียงรายการ ค้นหาจุดรับ เลือกพิกัด และเปิดลิงก์นำทาง |
+| การจองและรับอาหาร | จอง ยกเลิก QR/รหัสรับ ยืนยันส่งมอบ และปรับสต็อก walk-in |
+| ชุมชน | ความคิดเห็น/คำตอบ บันทึกโพสต์ รายงานโพสต์หรือความคิดเห็น |
+| การแจ้งเตือน | กระดิ่ง การตั้งค่าความสนใจ และงานเตือนรับอาหาร/โพสต์ที่บันทึก |
+| ผู้ดูแล | จัดการรายงาน ปิดโพสต์ ระงับสมาชิก และเก็บ audit events |
 
-## 📌 สถานะโครงการ
+Google login, email และ cloud image storage ต้องตั้งค่าบริการที่เลือกก่อนใช้งาน ผลทดสอบของ providers ไม่แทนการตรวจ credentials จริงในระบบ deploy
 
-โปรเจกต์มีระบบบัญชีผู้ใช้ หน้าเว็บหลัก Dashboard และแผนที่แสดงรายการอาหารบางส่วนแล้ว ขณะนี้ยังอยู่ระหว่างพัฒนา กระบวนการหลักอย่างการสร้างโพสต์และการขอรับอาหารให้ครบวงจรยังต้องทำต่อ
+## System Architecture
 
-> สถานะนี้สรุปจากโค้ดที่มีในโปรเจกต์ อาจมีงานเพิ่มเติมอยู่ใน branch อื่นที่ยังไม่ได้รวมเข้ามา
+ระบบใช้ **Layered Architecture** แยกการรับ HTTP กฎธุรกิจ และการเข้าถึงฐานข้อมูล ส่วนหน้าเว็บใช้ **MVC** ผ่าน Thymeleaf
 
-## ✅ สิ่งที่ทำแล้ว
+```mermaid
+flowchart TD
+    C[Controller] --> S[Service interface / implementation]
+    S --> R[Repository]
+    R --> D[Entity / Database]
+    S --> M[DTO / Mapper]
+```
 
-- วางโครงสร้าง Backend แยกเป็น Controller, Service, Repository, Entity, DTO และ Mapper
-- สร้างหน้า Landing Page, สมัครสมาชิก, เข้าสู่ระบบ, ลืมรหัสผ่าน และ Dashboard
-- รองรับการสมัครสมาชิกด้วยอีเมลและรหัสผ่าน พร้อมตรวจสอบข้อมูลและเข้ารหัสรหัสผ่าน
-- รองรับการเข้าสู่ระบบด้วยอีเมลและ Google OAuth2
-- ทำระบบรีเซ็ตรหัสผ่านผ่านอีเมล โดยใช้ token ที่มีวันหมดอายุ
-- แสดงข้อมูลโปรไฟล์ผู้ใช้บน Dashboard
-- ทำ API สำหรับอ่านข้อมูลโพสต์อาหารเพื่อแสดงบนแผนที่
-- ใช้ Leaflet แสดงตำแหน่งอาหารบนแผนที่
-- มีชุดทดสอบสำหรับ Controller, Service, Repository, Mapper, Entity และ Security บางส่วน
+| ชั้น | หน้าที่ |
+|---|---|
+| Controller | รับคำขอ ตรวจรูปแบบข้อมูล และเรียก Service |
+| Service | ตรวจสิทธิ์ กฎธุรกิจ และ transaction |
+| Repository | อ่าน/บันทึกข้อมูลผ่าน Spring Data JPA |
+| Domain / Entity | โครงสร้างข้อมูลและกฎของสถานะ/จำนวน |
+| DTO / Mapper | กำหนดข้อมูลที่ส่งออกและแปลงจาก Entity |
 
-## 🛠️ สิ่งที่ยังต้องทำ
+Controller ใช้ Service interface และ constructor injection API ส่ง DTO แทน Entity การโหลดข้อมูลประกอบโพสต์อยู่ใน `PostViewService` ส่วน Mapper แปลงข้อมูลโดยไม่เรียก Repository
 
-- ทำระบบโพสต์อาหารให้ครบ: สร้าง ดูรายละเอียด แก้ไข และลบ
-- เพิ่มการอัปโหลดรูปภาพอาหาร
-- เพิ่มระบบค้นหาและกรองรายการอาหาร
-- ทำระบบคำขอรับอาหาร ตั้งแต่ส่งคำขอจนถึงอนุมัติหรือปฏิเสธ
-- จัดการจำนวนอาหารและป้องกันการจองซ้ำ
-- เพิ่มการยืนยันว่ารับอาหารสำเร็จ
-- เพิ่มประวัติการแบ่งปันและประวัติการรับอาหาร
-- เพิ่มระบบรีวิว คะแนน และรายงานปัญหา
-- เพิ่มเครื่องมือสำหรับผู้ดูแลระบบตามขอบเขตที่ทีมตกลง
-- เพิ่ม Global Exception Handler, Pagination และ Swagger/OpenAPI
-- เพิ่ม Database migration เพื่อควบคุมการเปลี่ยนแปลงโครงสร้างฐานข้อมูล
-- ทดสอบระบบตั้งแต่ต้นจนจบ และเตรียมการ Deploy
+- [SOLID Analysis](doc/solid-analysis.md) — ตัวอย่างทั้ง 5 หลักการพร้อมไฟล์และบรรทัด
+- [Design Patterns](doc/design-patterns.md) — Enterprise patterns 6 แบบ และ Behavioral patterns
+- [Diagrams](doc/diagrams/README.md) — ภาพรวมระบบและลำดับการทำงาน
+- [Use Case Descriptions](doc/diagrams/use-case-descriptions.md)
 
-## 💻 เทคโนโลยีที่ใช้
+Behavioral patterns ได้แก่ **Strategy** สำหรับการค้นหา, **Observer** ผ่าน Spring events และ **State** แบบ enum behavior/guard ของสถานะการจอง การ transition และปรับ stock ยังอยู่ใน Service
 
-- Java 17
-- Spring Boot
-- Spring MVC และ Thymeleaf
-- Spring Security
-- Spring Data JPA
-- PostgreSQL
-- Google OAuth2
-- SMTP สำหรับส่งอีเมล
-- Leaflet สำหรับแผนที่
-- JUnit และ Mockito สำหรับทดสอบ
+## Database Design (ER Diagram)
 
-## 📂 โครงสร้างโปรเจกต์
+ระบบใช้ PostgreSQL และมี **12 ตารางแอป** แบ่งตามข้อมูลดังนี้:
 
-```text
-foodshare/
-├── README.md
-└── code/
-    ├── pom.xml
-    └── src/
-        ├── main/
-        │   ├── java/com/kku/foodshare/
-        │   │   ├── config/
-        │   │   ├── controller/
-        │   │   ├── domain/
-        │   │   ├── dto/
-        │   │   ├── mapper/
-        │   │   ├── repository/
-        │   │   ├── security/
-        │   │   └── service/
-        │   └── resources/
-        │       ├── static/
-        │       └── templates/
-        └── test/
-            └── java/com/kku/foodshare/
+| กลุ่มข้อมูล | ตาราง |
+|---|---|
+| สมาชิก | `users`, `user_profile_images`, `password_reset_tokens` |
+| โพสต์ | `food_posts`, `food_post_images` |
+| การจอง | `reservations` |
+| แจ้งเตือน | `notifications`, `notification_preferences` |
+| ชุมชนและประวัติ | `post_comments`, `saved_posts`, `reports`, `audit_events` |
 
+ภาพต่อไปนี้แสดง **ความสัมพันธ์หลัก** ของระบบ:
 
+```mermaid
+erDiagram
+    USERS ||--o{ FOOD_POSTS : shares
+    USERS ||--o{ RESERVATIONS : reserves
+    FOOD_POSTS ||--o{ RESERVATIONS : receives
+    FOOD_POSTS ||--o{ FOOD_POST_IMAGES : contains
+    FOOD_POSTS ||--o{ POST_COMMENTS : contains
+    USERS ||--o{ SAVED_POSTS : saves
+    FOOD_POSTS ||--o{ SAVED_POSTS : appears_in
+```
 
-## 🗄️ ตั้งค่า PostgreSQL
+- **One-to-One:** สมาชิกกับรูปโปรไฟล์/การตั้งค่าแจ้งเตือน
+- **One-to-Many:** สมาชิกกับโพสต์/การจอง และโพสต์กับรูป/การจอง/ความคิดเห็น
+- [ER Diagram ครบทุกตาราง](doc/diagrams/README.md#er)
+- [Data Dictionary, FK, Index, Fetch และ Cascade](doc/data-dictionary.md)
 
-### 1. สร้างฐานข้อมูล
+Migration อยู่ใน `code/src/main/resources/db/migration/` รุ่นปัจจุบันมี V1–V10 ระบบใช้ **Flyway migration และ Hibernate validate** ไม่ใช้ Hibernate เปลี่ยน schema อัตโนมัติ และไม่แก้ migration ที่ใช้กับฐานข้อมูลจริงไปแล้ว
 
-เปิด pgAdmin หรือ `psql` แล้วสร้างฐานข้อมูลชื่อ `foodshare_db`:
+## Installation & Setup
+
+### เครื่องมือที่ใช้
+
+| วิธีใช้งาน | เครื่องมือ |
+|---|---|
+| รันด้วย container | Docker Desktop/Engine และ Docker Compose |
+| รันด้วย Maven | JDK 17 และ PostgreSQL |
+| JavaScript / Browser tests | Node.js และ Playwright สำหรับ browser tests |
+
+### ตั้งค่า environment สำหรับ Docker
+
+เปิด PowerShell ที่โฟลเดอร์ `kku-foodshare`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-env.ps1
+```
+
+macOS/Linux:
+
+```bash
+bash scripts/setup-env.sh
+```
+
+สคริปต์สร้าง `.env` พร้อมรหัสผ่านฐานข้อมูลและ `APP_SECRET` แบบสุ่ม หากมี `.env` อยู่แล้วจะคงไฟล์เดิมไว้
+
+| Variable | การใช้งาน |
+|---|---|
+| `DATABASE_PASSWORD` | รหัสผ่าน PostgreSQL |
+| `APP_SECRET` | secret ของแอป อย่างน้อย 32 ตัวอักษร |
+| `APP_PORT` | พอร์ตเว็บบนเครื่อง เช่น `8080` หรือ `8081` |
+| `APP_BASE_URL` | URL ของแอป ใช้กับลิงก์รีเซ็ตรหัสผ่าน |
+| `IMAGE_STORAGE_PROVIDER` | `local` หรือ `cloudinary` |
+| `MAIL_PROVIDER` | `smtp` หรือ `brevo` |
+
+### PostgreSQL สำหรับการรันด้วย Maven
+
+ถ้าใช้ PostgreSQL ในเครื่อง สามารถสร้างฐานข้อมูลใหม่ด้วย `psql` หรือ pgAdmin:
 
 ```sql
-CREATE DATABASE foodshare_db;
+CREATE DATABASE foodshare;
 ```
 
-ค่าเริ่มต้นใน `application.properties` ใช้การเชื่อมต่อดังนี้:
+ค่าเริ่มต้นใน configuration คือ `jdbc:postgresql://localhost:5432/foodshare` และ username `foodshare` หากใช้ชื่อฐานข้อมูลหรือบัญชีต่างกัน ให้ตั้ง `DATABASE_URL` และ `DATABASE_USER` ให้ตรงเครื่องของคุณ
 
-| รายการ | ค่า |
-|---|---|
-| Host | `localhost` |
-| Port | `5432` |
-| Database | `foodshare_db` |
-| Username | `postgres` |
-| Password | รหัสผ่าน PostgreSQL ของคุณ |
-
-ถ้าใช้ username หรือ port ต่างจากตัวอย่าง ให้แก้ `spring.datasource.url` และ `spring.datasource.username` ในไฟล์ `src/main/resources/application.properties` ให้ตรงกับเครื่องของคุณ
-
-### 2. ตั้งค่ารหัสผ่านฐานข้อมูล
-
-โปรเจกต์อ่านรหัสผ่านจาก Environment Variable ชื่อ `DB_PASSWORD` อย่าใส่รหัสผ่านจริงลง Git
-
-**Windows PowerShell** — ใช้ได้ในหน้าต่าง Terminal ปัจจุบัน:
+ตัวอย่าง PowerShell สำหรับบัญชี PostgreSQL ชื่อ `postgres`:
 
 ```powershell
-$env:DB_PASSWORD="รหัสผ่าน PostgreSQL ของคุณ"
-```
-
-**macOS/Linux:**
-
-```bash
-export DB_PASSWORD="รหัสผ่าน PostgreSQL ของคุณ"
-```
-
-เมื่อตั้งค่าถูกต้อง Spring Boot จะเชื่อมต่อฐานข้อมูล และ Hibernate จะสร้างหรือปรับตารางตาม Entity ในโปรเจกต์
-
-## 🔐 ตั้งค่า Google OAuth2
-
-หากต้องการเข้าสู่ระบบด้วย Google ต้องสร้าง OAuth Client ของตัวเองใน Google Cloud Console ก่อน Google Login จะใช้งานไม่ได้หากยังไม่ได้ตั้งค่า Client ID และ Client Secret
-
-### 1. สร้าง OAuth Client
-
-1. เปิด [Google Cloud Console](https://console.cloud.google.com/)
-2. สร้างหรือเลือก Google Cloud Project
-3. ตั้งค่า OAuth consent screen ตามขั้นตอนของ Google
-4. ไปที่ **Credentials** แล้วสร้าง OAuth Client ID
-5. เลือกประเภทแอปเป็น **Web application**
-6. เพิ่ม Authorized redirect URI สำหรับการรันในเครื่อง:
-
-```text
-http://localhost:8080/login/oauth2/code/google
-```
-
-7. บันทึก **Client ID** และ **Client Secret** ไว้เป็นความลับ
-
-ชื่อเมนูใน Google Cloud Console อาจเปลี่ยนแปลงได้ตามเวอร์ชันของ Google
-
-### 2. ตั้งค่า Environment Variables
-
-กำหนดค่าต่อไปนี้ใน Terminal ก่อนเปิดแอป:
-
-**Windows PowerShell:**
-
-```powershell
-$env:GOOGLE_CLIENT_ID="Client ID ของคุณ"
-$env:GOOGLE_CLIENT_SECRET="Client Secret ของคุณ"
-```
-
-**macOS/Linux:**
-
-```bash
-export GOOGLE_CLIENT_ID="Client ID ของคุณ"
-export GOOGLE_CLIENT_SECRET="Client Secret ของคุณ"
-```
-
-## ✉️ ตั้งค่าอีเมลสำหรับ Password Reset
-
-ระบบลืมรหัสผ่านใช้ SMTP ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ ต้องตั้งค่าบัญชีอีเมลของตัวเองก่อน มิฉะนั้นการส่งอีเมลรีเซ็ตรหัสผ่านจะไม่ทำงาน
-
-ตัวอย่างนี้ใช้ Gmail:
-
-1. เปิดการยืนยันแบบ 2 ขั้นตอน (2-Step Verification) ให้บัญชี Google
-2. สร้าง **App Password** สำหรับแอป อย่าใช้รหัสผ่าน Gmail ปกติ
-3. เก็บอีเมลและ App Password ไว้เป็นความลับ
-
-กำหนด Environment Variables:
-
-**Windows PowerShell:**
-
-```powershell
-$env:MAIL_USERNAME="อีเมล Gmail ของคุณ"
-$env:MAIL_PASSWORD="App Password ของคุณ"
+$env:DATABASE_URL="jdbc:postgresql://localhost:5432/foodshare"
+$env:DATABASE_USER="postgres"
+$env:DATABASE_PASSWORD="YOUR_DB_PASSWORD"
+$env:APP_SECRET=([guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N"))
 $env:APP_BASE_URL="http://localhost:8080"
 ```
 
-**macOS/Linux:**
+กำหนดค่าใน Terminal เดียวกับที่รัน Maven การมี `.env` ไม่ได้ทำให้ Maven โหลด environment ให้อัตโนมัติ
 
-```bash
-export MAIL_USERNAME="อีเมล Gmail ของคุณ"
-export MAIL_PASSWORD="App Password ของคุณ"
-export APP_BASE_URL="http://localhost:8080"
-```
+### Google OAuth2 และอีเมล
 
-`APP_BASE_URL` ใช้สร้างลิงก์รีเซ็ตรหัสผ่าน เมื่อนำระบบขึ้นใช้งานจริง ให้เปลี่ยนเป็น URL ของระบบที่ Deploy แล้ว
+ตั้งค่าตามบริการที่ต้องการใช้ โดยอ่านค่าจาก `.env` สำหรับ Docker หรือ environment variables สำหรับ Maven:
 
-> อย่าใส่ Client Secret, App Password หรือรหัสผ่านฐานข้อมูลลงใน Repository
+| บริการ | ค่าที่ต้องตั้ง |
+|---|---|
+| Google login | เปิด profile `google` ผ่าน `SPRING_PROFILES_ACTIVE` และตั้ง `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| SMTP | เปิด profile `mail`, ตั้ง `MAIL_PROVIDER=smtp`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` |
+| Brevo | ตั้ง `MAIL_ENABLED=true`, `MAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `MAIL_FROM` |
+| Cloudinary | ตั้ง `IMAGE_STORAGE_PROVIDER=cloudinary`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
 
-## ▶️ วิธีรันโปรเจกต์
+หากเปิด Google และ SMTP พร้อมกัน ใช้ `SPRING_PROFILES_ACTIVE=google,mail` Google OAuth Client ต้องกำหนด redirect URI ให้ตรง URL ที่ใช้งาน เช่น `http://localhost:8080/login/oauth2/code/google` หรือเปลี่ยนพอร์ตเป็น `8081` ตาม environment
 
-ตั้งค่า PostgreSQL และ Environment Variables สำหรับบริการที่ต้องการใช้ก่อน จากนั้นเปิด Terminal ในโฟลเดอร์ `code`
+ดู [รายละเอียด configuration และ deployment](doc/deployment.md)
 
-**Windows PowerShell:**
+> เก็บ `.env`, Client Secret, API keys และรหัสผ่านไว้นอก Git เมื่ออัปเกรดระบบเดิม ให้รักษา `.env`, `APP_SECRET` และ Compose project เดิมเพื่อใช้งานต่อ
+
+## How to Run
+
+### Docker Compose
+
+จากโฟลเดอร์ `kku-foodshare`:
 
 ```powershell
+docker compose -p kku-foodshare-phase1 -f docker-compose.yml up --build -d
+docker compose -p kku-foodshare-phase1 -f docker-compose.yml ps
+docker compose -p kku-foodshare-phase1 -f docker-compose.yml logs -f app
+```
+
+เปิดเว็บตาม `APP_PORT` ใน `.env`:
+
+| พอร์ต | URL |
+|---|---|
+| `8080` | [http://localhost:8080](http://localhost:8080) |
+| `8081` | [http://localhost:8081](http://localhost:8081) |
+
+หยุดระบบโดยเก็บข้อมูลฐานข้อมูลไว้:
+
+```powershell
+docker compose -p kku-foodshare-phase1 -f docker-compose.yml down
+```
+
+ไม่เติม `-v` เมื่อต้องการเก็บ database volume
+
+### Maven Wrapper
+
+ตั้ง PostgreSQL และ environment variables ก่อน แล้วรัน:
+
+**Windows PowerShell**
+
+```powershell
+cd code
 .\mvnw.cmd spring-boot:run
 ```
 
-**macOS/Linux:**
+**macOS/Linux**
 
 ```bash
-./mvnw spring-boot:run
+cd code
+bash ./mvnw spring-boot:run
 ```
 
-เปิดเว็บไซต์ที่ [http://localhost:8080/](http://localhost:8080/)
+Maven ใช้พอร์ต `8080` ตามค่าเริ่มต้น หากต้องการ `8081` ให้ตั้ง `PORT=8081` และ `APP_BASE_URL` ให้ตรง URL ก่อนรัน กล้องและ GPS ต้องได้รับสิทธิ์ผู้ใช้ และใช้ HTTPS หรือ localhost
+
+## API Documentation
+
+| รายการ | Path |
+|---|---|
+| Swagger UI | `/swagger-ui/index.html` หรือ `/swagger-ui.html` |
+| OpenAPI specification | `/v3/api-docs` |
+| Health check | `/actuator/health` |
+
+ตัวอย่างเมื่อรันพอร์ต 8081: [Swagger UI](http://localhost:8081/swagger-ui/index.html)
+
+ดู [REST API และ Endpoint Inventory](doc/api.md) สำหรับ HTTP methods, status codes, validation, error responses และ pagination
+
+CRUD หลักคือโพสต์อาหารและการจอง การปิดโพสต์/ยกเลิกการจองรักษาประวัติของรายการ คำขอที่เปลี่ยนข้อมูลต้องมี session และ CSRF token ตาม configuration ของระบบ
+
+## How to Run Tests
+
+### Java — JUnit, Mockito และ Spring Boot Test
+
+จากโฟลเดอร์โปรเจกต์:
+
+```powershell
+New-Item -ItemType Directory -Force test/reports/java, test/reports/javascript
+cd code
+.\mvnw.cmd clean verify 2>&1 | Tee-Object ../test/reports/java/java-run.txt
+```
+
+หลัง `BUILD SUCCESS` ให้เก็บ Surefire reports:
+
+```powershell
+Copy-Item -Recurse -Force target/surefire-reports ../test/reports/java/
+cd ..
+```
+
+macOS/Linux ใช้ `bash ./mvnw clean verify` จากโฟลเดอร์ `code` Java tests ใช้ H2 ในหน่วยความจำตาม test configuration
+
+### JavaScript — Node test runner
+
+จากโฟลเดอร์โปรเจกต์:
+
+```powershell
+$jsTests = @(Get-ChildItem code/src/test/js/*.test.mjs | ForEach-Object { $_.FullName })
+node --test $jsTests 2>&1 | Tee-Object test/reports/javascript/javascript-run.txt
+```
+
+macOS/Linux:
+
+```bash
+node --test code/src/test/js/*.test.mjs
+```
+
+### ผลทดสอบที่มีหลักฐาน
+
+ผลรันบนเครื่องผู้จัดทำวันที่ **8 ตุลาคม 2026**:
+
+| ชุดทดสอบ | ทั้งหมด | ผ่าน | ไม่ผ่าน / Errors | ข้าม |
+|---|---:|---:|---:|---:|
+| Java | 116 | 116 | 0 | 0 |
+| JavaScript | 123 | 123 | 0 | 0 |
+| **รวม** | **239** | **239** | **0** | **0** |
+
+Java แสดง `BUILD SUCCESS` และสร้าง executable JAR สำเร็จบน Java 26.0.2 ของผู้จัดทำ ส่วน `pom.xml` กำหนด Java target 17
+
+- [Test Report](test/reports/test-report.md)
+- [คู่มือ Browser และ PostgreSQL checks](test/README.md)
+- [สถานะผลตรวจและหลักฐาน](test/reports/verification.md)
+
+ก่อนส่งให้เติม commit ที่ทดสอบ หากแก้ source ให้รันใหม่และปรับรายงานตามผลจริง ยังไม่มีหลักฐาน browser journeys, PostgreSQL/Flyway และ public deployment ของรุ่นนี้ การมี GitHub Actions workflow ไม่แทนหลักฐานว่า CI ผ่านแล้ว
+
+## Deployment URL
+
+| รายการ | URL ที่เอกสารเดิมระบุ |
+|---|---|
+| เว็บไซต์ | [https://kku-foodshare.onrender.com](https://kku-foodshare.onrender.com) |
+| Swagger UI | [https://kku-foodshare.onrender.com/swagger-ui/index.html](https://kku-foodshare.onrender.com/swagger-ui/index.html) |
+
+> **รอยืนยันรุ่นส่ง:** ทีมต้องตรวจว่าเว็บและ Swagger เปิดได้จริง และใช้ source/commit ที่ส่งงาน หากเปลี่ยน URL ให้แก้ตารางนี้ตามระบบจริง
+
+ดู [Deployment Guide](doc/deployment.md) สำหรับการตั้งค่าฐานข้อมูล รูปภาพ และอีเมล ระบบมี `Dockerfile` และ `docker-compose.yml` ส่วน workflow ปัจจุบันยังไม่มีขั้น deploy อัตโนมัติ
+
+## Project Structure
+
+| ตำแหน่ง | เนื้อหา |
+|---|---|
+| `README.md` | ภาพรวม สมาชิก วิธีติดตั้ง รัน ทดสอบ และ deployment |
+| `code/pom.xml` | Dependencies และ Maven build configuration |
+| `code/src/main/java/com/kku/foodshare/` | Production Java: config, controller, domain, dto, exception, mapper, repository, security, service |
+| `code/src/main/resources/templates/` | หน้าเว็บ Thymeleaf |
+| `code/src/main/resources/static/` | JavaScript, CSS, รูปภาพ, fonts และ vendor assets |
+| `code/src/main/resources/db/migration/` | Flyway migrations V1–V10 |
+| `code/src/test/java/` | Java test sources |
+| `code/src/test/js/` | JavaScript test sources |
+| `code/src/test/resources/` | Java test configuration |
+| `test/browser/` | Browser journeys และ UI/fixture checks |
+| `test/reports/java/` | Maven console log และ Surefire XML/TXT |
+| `test/reports/javascript/` | Node test runner log |
+| `test/reports/source-review/` | หลักฐานตรวจโครงสร้างระหว่างพัฒนา |
+| `test/reports/test-report.md` | รายงานสรุปผลทดสอบ |
+| `doc/` | SOLID, Patterns, API, Data Dictionary และ Deployment |
+| `doc/diagrams/` | Use Case, Domain, Class, Sequence, Activity, ER, Component, Deployment และ State |
+| `doc/slide/` | โฟลเดอร์สไลด์นำเสนอของทีม ยังต้องเพิ่มไฟล์สไลด์จริง |
+| `img/` | ภาพประกอบและหลักฐานภาพของระบบ |
+| `scripts/` | ตั้งค่า environment และ backup/restore |
+| `.github/workflows/` | GitHub Actions verification |
+| `Dockerfile`, `docker-compose.yml` | Build และรันระบบด้วย container |
+
+[Third-party notices](doc/third-party.md) · [รายการ source changes จากต้นฉบับ](test/reports/source-review/source-changes.csv)
