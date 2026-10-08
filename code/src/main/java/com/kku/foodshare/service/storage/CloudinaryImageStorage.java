@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CloudinaryImageStorage implements ImageStorage {
   private static final String CLOUD_NAME = "[A-Za-z0-9_-]{1,80}";
   private static final String CLOUD_FILE = "cld-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.jpg";
-  private final LocalImageStorage local;
+  private final ImageStorage local;
   private final String cloudName;
   private final String apiKey;
   private final String apiSecret;
@@ -32,7 +32,7 @@ public class CloudinaryImageStorage implements ImageStorage {
   private final URI endpoint;
 
   @Autowired
-  public CloudinaryImageStorage(LocalImageStorage local,
+  public CloudinaryImageStorage(@Qualifier("localImageStorage") ImageStorage local,
       @Value("${app.images.cloudinary.cloud-name:}") String cloudName,
       @Value("${app.images.cloudinary.api-key:}") String apiKey,
       @Value("${app.images.cloudinary.api-secret:}") String apiSecret, Clock clock) {
@@ -42,7 +42,7 @@ public class CloudinaryImageStorage implements ImageStorage {
             + (cloudName.trim().matches(CLOUD_NAME) ? cloudName.trim() : "unconfigured") + "/image/"));
   }
 
-  CloudinaryImageStorage(LocalImageStorage local, String cloudName, String apiKey,
+  CloudinaryImageStorage(ImageStorage local, String cloudName, String apiKey,
       String apiSecret, Clock clock, HttpClient client, URI endpoint) {
     this.local = local; this.cloudName = cloudName.trim(); this.apiKey = apiKey.trim();
     this.apiSecret = apiSecret.trim(); this.clock = clock; this.client = client; this.endpoint = endpoint;

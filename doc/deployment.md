@@ -1,3 +1,36 @@
+# Deployment
+
+## Existing cloud configuration (Render + Neon)
+
+The uploaded phase notes name `https://kku-foodshare.onrender.com`; this package does not certify its current commit or availability. Keep the current DATABASE_URL/DATABASE_USER/DATABASE_PASSWORD, APP_SECRET and Google credentials when updating source. Do not replace the production database or secret while moving files.
+
+Food image provider settings:
+
+| Key | Value / meaning |
+|---|---|
+| IMAGE_STORAGE_PROVIDER | cloudinary to use cloud images, local for persistent local volume |
+| CLOUDINARY_CLOUD_NAME | your cloud name |
+| CLOUDINARY_API_KEY | your provider key |
+| CLOUDINARY_API_SECRET | your provider secret |
+
+Password-reset email provider settings:
+
+| Key | Value / meaning |
+|---|---|
+| MAIL_ENABLED | true when mail is configured |
+| MAIL_PROVIDER | brevo for HTTPS API; smtp for SMTP |
+| BREVO_API_KEY | your API key, never committed |
+| MAIL_FROM | verified sender |
+| APP_BASE_URL | your actual public HTTPS URL |
+
+Brevo does not require the SMTP mail profile. Google login uses the `google` profile and existing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET. Authorized redirect URI must match the public hostname and `/login/oauth2/code/google`. SMTP uses the existing `mail` profile/settings instead of Brevo. Configure only providers you actually use.
+
+After deploying the submitted commit, check health and Swagger, register/login, profile, create/edit a post with images/location, reserve/cancel/collect, owner stock, comments and reminders. Test upload persistence across redeploy and reset-email delivery using your accounts. Provider fixture tests do not prove real delivery. Public camera/GPS require HTTPS and permission.
+
+## VPS / Docker alternative and backup/restore
+
+The remainder preserves the existing optional VPS deployment and data migration instructions. Choose this only if the project uses a VPS instead of its existing Render/Neon configuration.
+
 # Deployment and database operations
 
 ## Production layout

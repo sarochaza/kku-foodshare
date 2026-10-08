@@ -1,44 +1,64 @@
-> ผลและคำสั่งของรุ่นล่าสุด: [PHASE5-VERIFICATION.md](PHASE5-VERIFICATION.md)
-
 # Tests
 
-## JUnit / Mockito / H2
+## Phase 12 — Comment CRUD
 
-```bash
-cd code
-./mvnw clean verify
+จาก `kku-foodshare` รัน `powershell -ExecutionPolicy Bypass -File .\scripts\test-phase12.ps1`
+เพื่อทดสอบ Java/H2, JavaScript และ Comment/ระบบเดิมบน PostgreSQL ทดสอบแยกจากฐานข้อมูลของแอป
+ไม่ต้องติดตั้ง Java/Maven/Node บน Windows เมื่อใช้ Docker Desktop
+รายละเอียดคำสั่งและการตรวจหน้าเว็บอยู่ที่ [Comment CRUD](../doc/comment-crud.md)
+`CommentCrudJourneyTest` ใช้ API, service และฐานข้อมูลจริงใน test context เพื่อตรวจ CRUD, validation,
+สิทธิ์ผู้เขียน, CSRF, soft delete, ความสัมพันธ์การตอบกลับ และ OpenAPI
+
+## Java — JUnit 5, Mockito และ Spring Boot Test
+
+จาก `kku-foodshare/code`:
+
+```powershell
+.\mvnw.cmd clean verify
 ```
 
-ผลอยู่ใน `code/target/surefire-reports`. H2 ใช้เฉพาะ tests และปิด Flyway โดย test properties; application runtime ใช้ PostgreSQL + Flyway + ddl validation
+Linux/macOS ใช้ `./mvnw clean verify`; reports อยู่ใน `code/target/surefire-reports`
+H2 ใช้สำหรับ tests; runtime ใช้ PostgreSQL + Flyway
 
-## PostgreSQL จริง
+SubmissionContractTest ตรวจ Layer, dependencies, API profile contract และ storage/รูป local เดิม
+SubmissionContractChecks เป็น core checks เดียวกันที่รันแยกได้โดยไม่ต้องมี JUnit runner หรือ database
+Tests เดิมครอบคลุม booking/stock/concurrency, QR, comments, notifications, reminder, onboarding และ password reset
+Provider tests ใช้ fixture ในเครื่อง ไม่ส่งอีเมลออกไปจริง
 
-CI `.github/workflows/verify.yml` รัน migration และ integration tests กับ PostgreSQL 17 รวมการจองพร้อมกัน เพื่อแยกจาก H2. หากทดสอบด้วยตนเอง ให้ใช้ database ทดสอบว่างเท่านั้น แล้ว override datasource, `spring.flyway.enabled=true`, `spring.jpa.hibernate.ddl-auto=validate` ตามคำสั่งใน workflow
+## JavaScript
 
-## Browser journey
-
-ใช้ Node.js 20+ และแอปที่กำลังรันกับ **ฐานข้อมูลทดสอบเท่านั้น** สคริปต์สร้างสมาชิกและรายการที่ระบุว่าเป็นข้อมูลทดสอบ ไม่ใช้กับ production
+จากโฟลเดอร์โปรเจกต์หลัก:
 
 ```bash
+node --test code/src/test/js/*.test.mjs
+```
+
+## PostgreSQL
+
+.github/workflows/verify.yml มี PostgreSQL 17 และคำสั่งรัน migration/schema validation กับ integration tests
+ใช้ฐานข้อมูลทดสอบว่างเท่านั้น CI configuration ไม่ใช่หลักฐานว่ารุ่นนี้รัน CI ผ่านแล้ว
+
+## Browser
+
+ติดตั้ง Node.js/Playwright แล้วเปิดแอปกับฐานข้อมูลทดสอบ:
+
+```powershell
 cd test
 npm install
 npx playwright install chromium
-npm run browser
+$env:TEST_BASE_URL="http://127.0.0.1:8081"
+node browser-journey.cjs
+node quick-actions-journey.cjs
+$env:NODE_PATH=(Resolve-Path .\node_modules).Path
+node onboarding-check.cjs
+node pickup-reminder-check.cjs
 ```
 
-ค่าเริ่มต้น `http://127.0.0.1:8080`. เปลี่ยนผ่าน `TEST_BASE_URL`. Linux/macOS ใช้ `TEST_BASE_URL=http://... npm run browser`; PowerShell ใช้ `$env:TEST_BASE_URL='http://...'; npm run browser`
+onboarding-check ใช้ frontend fixture/mock HTTP boundary; Java integration ตรวจ API/DB แยก
+บาง scripts สร้างสมาชิกและโพสต์ทดสอบ ห้ามรันกับ production database
+ดู scripts อื่นในโฟลเดอร์ test ตามฟีเจอร์
 
-ทดสอบสมัคร/เข้าสู่ระบบสองบัญชี → โพสต์รูปและ pin → ค้นหาและแผนที่ → จอง/แก้จำนวน → รหัสรับและส่งมอบ → โปรไฟล์/การแจ้งเตือน → map/GPS failure recovery → responsive 4 ขนาด สคริปต์ปิด test food post เมื่อสำเร็จ แต่คงประวัติไว้เป็นหลักฐาน
+## Results
 
-ภาพและผลอยู่ใน `img/`. ปรับ `BROWSER_EXECUTABLE` เฉพาะเมื่อใช้ Chromium ที่ติดตั้งไว้ต่างจากค่าเริ่มต้น
-
-## Coverage ที่มีความหมาย
-
-- Stock / authorization / idempotency / parallel bookings: `FoodJourneyTest`
-- Stale user update ไม่เปิดบัญชีที่ถูกระงับกลับ: `ReviewRegressionTest`
-- Disabled SMTP / SMTP outage ไม่เปิดเผยสมาชิก: `ReviewRegressionTest`, `PasswordResetProtectionTest`
-- Token cooldown และ IP limiter: `PasswordResetProtectionTest`
-- Public page rendering, CSRF และ guest redirect: `WebPagesTest`
-- Mapper, repository, OAuth และ controller unit tests เดิมที่ยังเกี่ยวข้องคงไว้
-
-เทสต์เดิมที่ตรวจชื่อ CSS หรือข้อความ source HTML แบบตายตัวถูกแทนที่ด้วยการ render HTTP และ browser behavior ไม่ใช้จำนวนเทสต์เป็นหลักฐานว่าไม่มีบั๊ก
+[ผลตรวจชุด source นี้](reports/verification.md) แยกผลที่รันจริงจาก Maven/JUnit/browser/PostgreSQL ที่ยังต้องรัน
+ไม่มีการนำรายงาน Java ของ Phase เก่ามาอ้างเป็นผลรุ่นนี้

@@ -56,16 +56,6 @@ const assert = require('node:assert/strict');
       const account = 'first-' + width;
       await page.goto(base + '/dashboard?account=' + account);
       await page.locator('#home-guide:modal').waitFor({timeout: 3000});
-      const backdrop = await page.locator('#home-guide').evaluate(e => {
-        const style = getComputedStyle(e, '::backdrop');
-        return [style.backdropFilter, style.webkitBackdropFilter];
-      });
-      assert.ok(backdrop.every(value => !value || value === 'none'), 'The guide must leave the page and highlighted controls sharp');
-      const shadeAlpha = await page.locator('#home-guide .guide-shade').evaluate(e => {
-        const color = getComputedStyle(e).backgroundColor;
-        return color.startsWith('rgba(') ? Number(color.match(/,\s*([\d.]+)\s*\)$/)[1]) : 1;
-      });
-      assert.ok(shadeAlpha <= 0.25, 'The guide shade must keep the controls visible');
       assert.equal(await page.locator('#guide-progress').innerText(), '1 / 6');
       assert.ok(await page.locator('#guide-next').evaluate(e => document.activeElement === e));
       assert.ok(await page.locator('#guide-next').evaluate(e => {

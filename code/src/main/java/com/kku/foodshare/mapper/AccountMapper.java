@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountMapper {
+public class AccountMapper implements AccountMapping {
 
   public AccountPageResponse toResponse(
       User user,

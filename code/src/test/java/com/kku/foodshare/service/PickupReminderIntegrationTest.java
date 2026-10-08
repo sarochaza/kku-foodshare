@@ -9,7 +9,7 @@ import com.kku.foodshare.domain.entity.*;
 import com.kku.foodshare.dto.request.FoodPostRequest;
 import com.kku.foodshare.dto.response.ReservationView;
 import com.kku.foodshare.repository.*;
-import com.kku.foodshare.service.impl.PickupReminderService;
+import com.kku.foodshare.service.PickupReminderService;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;

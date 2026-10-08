@@ -2,31 +2,17 @@ package com.kku.foodshare.mapper;
 
 import com.kku.foodshare.domain.entity.*;
 import com.kku.foodshare.dto.response.PostView;
-import com.kku.foodshare.repository.FoodPostImageRepository;
-import com.kku.foodshare.repository.PostCommentRepository;
-import com.kku.foodshare.repository.SavedPostRepository;
-import com.kku.foodshare.repository.UserRepository;
+import com.kku.foodshare.dto.response.PostViewContext;
 import java.time.*;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostViewMapper {
-  private final FoodPostImageRepository images;
-  private final PostCommentRepository comments;
-  private final SavedPostRepository savedPosts;
-  private final UserRepository users;
+public class PostViewMapper implements PostViewMapping {
   private final Clock clock;
 
-  public PostViewMapper(FoodPostImageRepository images, PostCommentRepository comments, SavedPostRepository savedPosts, UserRepository users, Clock clock) {
-    this.images = images;
-    this.comments = comments;
-    this.savedPosts = savedPosts;
-    this.users = users;
-    this.clock = clock;
-  }
+  public PostViewMapper(Clock clock) { this.clock = clock; }
 
-  public PostView map(FoodPost p, String email, Double lat, Double lng) {
+  public PostView map(FoodPost p, String email, Double lat, Double lng, PostViewContext context) {
     String state = p.getStatus().name();
     if (!p.getAvailableUntil().isAfter(LocalDateTime.now(clock))
         && !state.equals("CANCELLED")
@@ -36,12 +22,10 @@ public class PostViewMapper {
         state = p.getCollectedQuantity() + p.getOfflineQuantity() == p.getQuantity() ? "CLAIMED" : "FULL";
       else if (p.getAvailableFrom().isAfter(LocalDateTime.now(clock))) state = "SCHEDULED";
     }
-    List<com.kku.foodshare.dto.response.PostImageView> gallery = images.findAllByPostIdOrderBySortOrderAscIdAsc(p.getId()).stream()
-        .map(i -> new com.kku.foodshare.dto.response.PostImageView(i.id, "/media/" + i.filename, i.sortOrder)).toList();
+    var gallery = context.gallery();
     String image = gallery.isEmpty() ? null : gallery.get(0).url();
     Double distance = null;
-    boolean saved = email != null && users.findByEmailIgnoreCase(email)
-        .map(user -> savedPosts.existsByUserIdAndPostId(user.getId(), p.getId())).orElse(false);
+    boolean saved = context.saved();
     if (lat != null && lng != null) {
       double a =
           Math.pow(Math.sin(Math.toRadians(lat - p.getLatitude().doubleValue()) / 2), 2)
@@ -71,7 +55,7 @@ public class PostViewMapper {
         p.getAllergens(),
         image,
         gallery,
-        (int) comments.countByPostIdAndDeletedAtIsNull(p.getId()),
+        context.commentCount(),
         p.getCreatedAt(),
         email != null && p.getOwner().getEmail().equalsIgnoreCase(email),
         distance,

@@ -188,3 +188,116 @@ test('switching posts ignores the old request and blank or overlong input makes 
   }
   assert.equal(h.calls.filter(c => c.options?.method === 'POST').length, 0);
 });
+
+test('edit menu follows author permission independently from moderation deletion', () => {
+  assert.match(renderComments([comment(1, {canEdit: true, canDelete: true})], 1), /data-edit-comment="1"/);
+  assert.doesNotMatch(renderComments([comment(2, {canEdit: false, canDelete: true})], 1), /data-edit-comment/);
+});
+
+test('editing saves with PUT, replaces the row, and preserves count and reply thread', async () => {
+  const original = comment(2, {canEdit: true, parentCommentId: 1, replyToCommentId: 1});
+  const h = harness({request: async (_url, opts) => opts?.method === 'PUT'
+    ? {...original, body: 'รับได้ถึงกี่โมง'}
+    : {items: [comment(1), original], page: 0, totalPages: 1, totalElements: 2}});
+  await h.manager.open(post);
+  await h.click('[data-edit-comment]', {editComment: '2'});
+  assert.equal(h.node('[data-comment-input]').value, 'ยังมีอาหารไหม');
+  assert.equal(h.node('[data-comment-send]').textContent, 'บันทึก');
+  h.node('[data-comment-input]').value = ' รับได้ถึงกี่โมง ';
+  await h.node('[data-comments-form]').fire('submit');
+  assert.equal(h.calls.at(-1).url, '/api/v1/comments/2');
+  assert.equal(h.calls.at(-1).options.method, 'PUT');
+  assert.deepEqual(h.calls.at(-1).options.body, {body: 'รับได้ถึงกี่โมง'});
+  assert.equal(h.node('[data-comments-count]').textContent, '2 ข้อความ');
+  const html = h.node('[data-comments-list]').innerHTML;
+  assert.equal((html.match(/data-comment-id="2"/g) || []).length, 1);
+  assert.match(html, /รับได้ถึงกี่โมง/);
+  assert.match(html, /data-thread="1" open/);
+  assert.equal(h.node('[data-comment-reply]').hidden, true);
+  assert.equal(h.node('[data-comment-send]').textContent, 'ส่ง');
+});
+
+test('failed edits preserve draft and edit mode; cancelling returns to root creation', async () => {
+  const h = harness({request: async (_url, opts) => {
+    if (opts?.method === 'PUT') throw Error('บันทึกไม่ได้');
+    if (opts?.method === 'POST') return comment(3);
+    return {items: [comment(1, {canEdit: true})], page: 0, totalPages: 1, totalElements: 1};
+  }});
+  await h.manager.open(post);
+  await h.click('[data-edit-comment]', {editComment: '1'});
+  h.node('[data-comment-input]').value = 'ร่างแก้ไข';
+  await h.node('[data-comments-form]').fire('submit');
+  assert.equal(h.node('[data-comment-input]').value, 'ร่างแก้ไข');
+  assert.equal(h.node('[data-comment-send]').textContent, 'บันทึก');
+  assert.equal(h.node('[data-comment-send]').disabled, false);
+  assert.equal(h.notices.at(-1).error, true);
+  await h.node('[data-comment-cancel-reply]').fire('click');
+  assert.equal(h.node('[data-comment-input]').value, '');
+  assert.equal(h.node('[data-comment-reply]').hidden, true);
+  h.node('[data-comment-input]').value = 'ความคิดเห็นใหม่';
+  await h.node('[data-comments-form]').fire('submit');
+  assert.equal(h.calls.at(-1).options.method, 'POST');
+  assert.deepEqual(h.calls.at(-1).options.body, {body: 'ความคิดเห็นใหม่'});
+});
+
+test('switching from edit to reply sends a reply instead of changing the old comment', async () => {
+  const h = harness({request: async (_url, opts) => opts?.method === 'POST'
+    ? comment(3, {parentCommentId: 2})
+    : {items: [comment(1, {canEdit: true}), comment(2)], page: 0, totalPages: 1, totalElements: 2}});
+  await h.manager.open(post);
+  await h.click('[data-edit-comment]', {editComment: '1'});
+  await h.click('[data-reply-comment]', {replyComment: '2'});
+  assert.equal(h.node('[data-comment-send]').textContent, 'ส่ง');
+  h.node('[data-comment-input]').value = 'ตอบกลับ';
+  await h.node('[data-comments-form]').fire('submit');
+  assert.equal(h.calls.at(-1).options.method, 'POST');
+  assert.deepEqual(h.calls.at(-1).options.body, {body: 'ตอบกลับ', parentCommentId: 2});
+});
+
+test('pagination cannot fetch stale comment data while an edit is being saved', async () => {
+  let finish;
+  const original = comment(1, {canEdit: true});
+  const h = harness({request: async (_url, opts) => opts?.method === 'PUT'
+    ? new Promise(resolve => {finish = resolve;})
+    : {items: [original], page: 0, totalPages: 2, totalElements: 31}});
+  await h.manager.open(post);
+  await h.click('[data-edit-comment]', {editComment: '1'});
+  h.node('[data-comment-input]').value = 'ข้อความที่แก้แล้ว';
+  const save = h.node('[data-comments-form]').fire('submit');
+  await h.node('[data-comments-more]').fire('click');
+  assert.equal(h.calls.filter(c => c.url.includes('page=1')).length, 0);
+  await h.node('[data-comments-form]').fire('submit');
+  assert.equal(h.calls.filter(c => c.options?.method === 'PUT').length, 1);
+  finish({...original, body: 'ข้อความที่แก้แล้ว'}); await save;
+  assert.match(h.node('[data-comments-list]').innerHTML, /ข้อความที่แก้แล้ว/);
+});
+
+test('an old edit response cannot change another post or erase its draft', async () => {
+  let finish;
+  const original = comment(1, {canEdit: true});
+  const h = harness({request: async (url, opts) => opts?.method === 'PUT'
+    ? new Promise(resolve => {finish = resolve;})
+    : {items: url.includes('/10/') ? [original] : [comment(9)], page: 0, totalPages: 1, totalElements: 1}});
+  await h.manager.open(post);
+  await h.click('[data-edit-comment]', {editComment: '1'});
+  h.node('[data-comment-input]').value = 'แก้โพสต์เก่า';
+  const save = h.node('[data-comments-form]').fire('submit');
+  await h.manager.open({...post, id: 11});
+  h.node('[data-comment-input]').value = 'ร่างโพสต์ใหม่';
+  finish({...original, body: 'แก้โพสต์เก่า'}); await save;
+  assert.match(h.node('[data-comments-list]').innerHTML, /data-comment-id="9"/);
+  assert.doesNotMatch(h.node('[data-comments-list]').innerHTML, /แก้โพสต์เก่า/);
+  assert.equal(h.node('[data-comment-input]').value, 'ร่างโพสต์ใหม่');
+  assert.equal(h.node('[data-comment-input]').disabled, false);
+});
+
+test('blank and overlong edits make no PUT and keep editing available', async () => {
+  const h = harness({request: async () => ({items: [comment(1, {canEdit: true})], page: 0, totalPages: 1, totalElements: 1})});
+  await h.manager.open(post); await h.click('[data-edit-comment]', {editComment: '1'});
+  for (const draft of ['   ', 'a'.repeat(801)]) {
+    h.node('[data-comment-input]').value = draft;
+    await h.node('[data-comments-form]').fire('submit');
+  }
+  assert.equal(h.calls.filter(c => c.options?.method === 'PUT').length, 0);
+  assert.equal(h.node('[data-comment-send]').textContent, 'บันทึก');
+});

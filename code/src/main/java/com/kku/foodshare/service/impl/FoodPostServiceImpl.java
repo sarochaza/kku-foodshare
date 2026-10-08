@@ -2,7 +2,7 @@ package com.kku.foodshare.service.impl;
 
 import com.kku.foodshare.domain.entity.FoodPostStatus;
 import com.kku.foodshare.dto.response.MapFoodPostResponse;
-import com.kku.foodshare.mapper.FoodPostMapper;
+import com.kku.foodshare.mapper.FoodPostMapping;
 import com.kku.foodshare.repository.FoodPostRepository;
 import com.kku.foodshare.service.FoodPostService;
 import java.time.Clock;
@@ -18,10 +18,10 @@ public class FoodPostServiceImpl implements FoodPostService {
       List.of(FoodPostStatus.AVAILABLE, FoodPostStatus.LOW_STOCK);
 
   private final FoodPostRepository repository;
-  private final FoodPostMapper mapper;
+  private final FoodPostMapping mapper;
   private final Clock clock;
 
-  public FoodPostServiceImpl(FoodPostRepository repository, FoodPostMapper mapper, Clock clock) {
+  public FoodPostServiceImpl(FoodPostRepository repository, FoodPostMapping mapper, Clock clock) {
     this.repository = repository;
     this.mapper = mapper;
     this.clock = clock;

@@ -1,0 +1,15 @@
+flowchart TD
+  Choose["เลือกอาหาร"] --> Login{"เข้าสู่ระบบแล้ว?"}
+  Login -->|ยัง| SignIn["เข้าสู่ระบบ"]
+  SignIn --> Quantity["ระบุจำนวน"]
+  Login -->|แล้ว| Quantity
+  Quantity --> Validate{"จำนวน เวลา และสิทธิ์ผ่าน?"}
+  Validate -->|ไม่ผ่าน| Error["แสดงสาเหตุ"]
+  Validate -->|ผ่าน| Reserve["บันทึกจองและกัน stock"]
+  Reserve --> Pending{"การจองยังรอรับ"}
+  Pending -->|ยกเลิก| Cancel["คืน stock และ CANCELLED"]
+  Pending -->|หมดเวลา| Expire["คืน stock และ EXPIRED"]
+  Pending -->|มารับ| Code{"เจ้าของตรวจรหัส"}
+  Code -->|ถูก| Collect["ส่งมอบและ COLLECTED"]
+  Code -->|ผิด| Retry["แจ้งรหัสผิดหรือจำกัดการลอง"]
+  Retry --> Pending

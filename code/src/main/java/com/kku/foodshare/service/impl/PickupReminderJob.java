@@ -1,5 +1,6 @@
 package com.kku.foodshare.service.impl;
 
+import com.kku.foodshare.service.PickupReminderService;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;

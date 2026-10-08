@@ -2,7 +2,7 @@ package com.kku.foodshare.service.impl;
 
 import com.kku.foodshare.domain.entity.User;
 import com.kku.foodshare.dto.response.UserProfileResponse;
-import com.kku.foodshare.mapper.UserProfileMapper;
+import com.kku.foodshare.mapper.UserProfileMapping;
 import com.kku.foodshare.repository.UserRepository;
 import com.kku.foodshare.service.UserProfileService;
 import org.springframework.stereotype.Service;
@@ -12,10 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserProfileServiceImpl implements UserProfileService {
 
   private final UserRepository userRepository;
-  private final UserProfileMapper userProfileMapper;
+  private final UserProfileMapping userProfileMapper;
 
   public UserProfileServiceImpl(
-      UserRepository userRepository, UserProfileMapper userProfileMapper) {
+      UserRepository userRepository, UserProfileMapping userProfileMapper) {
 
     this.userRepository = userRepository;
 
