@@ -1069,4 +1069,1170 @@ input {
     .impact-stats strong {
         font-size: 18px;
     }
+
+}
+/* ========================================
+   Account Dropdown
+======================================== */
+
+.account-menu {
+    position: relative;
+}
+
+
+/* ปุ่มบัญชีบน Navbar */
+
+.account-menu-button {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    min-height: 44px;
+
+    padding:
+        5px
+        11px
+        5px
+        6px;
+
+    border:
+        1px solid
+        transparent;
+
+    border-radius: 999px;
+
+    color: var(--navy);
+
+    background: transparent;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.account-menu-button:hover,
+.account-menu-button[aria-expanded="true"] {
+    border-color: #dceaff;
+
+    color: var(--blue-dark);
+
+    background: #f2f7ff;
+
+    box-shadow:
+        0 8px 20px
+        rgba(47, 111, 212, 0.08);
+}
+
+.nav-account-avatar {
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    color: #5b3aa5;
+
+    background:
+        linear-gradient(
+            145deg,
+            #edf4ff,
+            #e3ebff
+        );
+
+    font-size: 16px;
+}
+
+.nav-account-label {
+    white-space: nowrap;
+}
+
+.account-menu-chevron {
+    color: #8da0b8;
+
+    font-size: 11px;
+
+    transition:
+        transform 0.25s ease;
+}
+
+.account-menu.is-open
+.account-menu-chevron {
+    transform: rotate(180deg);
+}
+
+
+/* ตัว Dropdown */
+
+.account-dropdown {
+    position: absolute;
+    z-index: 300;
+
+    top: calc(100% + 15px);
+    right: 0;
+
+    width: 350px;
+
+    padding: 13px;
+
+    border:
+        1px solid
+        rgba(191, 213, 239, 0.75);
+
+    border-radius: 23px;
+
+    color: var(--navy);
+
+    background:
+        linear-gradient(
+            155deg,
+            rgba(255, 255, 255, 0.99),
+            rgba(248, 252, 255, 0.98)
+        );
+
+    box-shadow:
+        0 24px 65px
+        rgba(35, 65, 110, 0.18),
+        0 6px 18px
+        rgba(35, 65, 110, 0.08);
+
+    transform-origin: top right;
+
+    animation:
+        accountDropdownEntrance
+        0.22s ease-out;
+}
+
+.account-dropdown[hidden] {
+    display: none;
+}
+
+
+/* ลูกศรชี้ไปยังปุ่ม */
+
+.account-dropdown-pointer {
+    position: absolute;
+
+    top: -7px;
+    right: 36px;
+
+    width: 14px;
+    height: 14px;
+
+    border-top:
+        1px solid
+        rgba(191, 213, 239, 0.75);
+
+    border-left:
+        1px solid
+        rgba(191, 213, 239, 0.75);
+
+    background: #ffffff;
+
+    transform: rotate(45deg);
+}
+
+
+/* ส่วนข้อมูลโปรไฟล์ */
+
+.account-summary {
+    position: relative;
+
+    display: grid;
+    grid-template-columns:
+        58px
+        minmax(0, 1fr);
+    align-items: center;
+    gap: 13px;
+
+    min-height: 96px;
+
+    padding:
+        14px
+        12px;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(222, 235, 249, 0.9);
+
+    border-radius: 18px;
+
+    background:
+        radial-gradient(
+            circle at 92% 12%,
+            rgba(105, 185, 139, 0.13),
+            transparent 35%
+        ),
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f6faff
+        );
+}
+
+.account-summary-avatar {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    width: 58px;
+    height: 58px;
+
+    border:
+        5px solid
+        rgba(255, 255, 255, 0.85);
+
+    border-radius: 50%;
+
+    color: #56349c;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eaf3ff,
+            #dceaff
+        );
+
+    box-shadow:
+        0 7px 18px
+        rgba(79, 143, 247, 0.16);
+
+    font-size: 24px;
+}
+
+.account-online-dot {
+    position: absolute;
+
+    right: -1px;
+    bottom: 1px;
+
+    width: 13px;
+    height: 13px;
+
+    border:
+        3px solid
+        #ffffff;
+
+    border-radius: 50%;
+
+    background: #35bf78;
+}
+
+.account-summary-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    min-width: 0;
+}
+
+.account-summary-name {
+    max-width: 100%;
+
+    overflow: hidden;
+
+    color: #213657;
+
+    font-size: 15px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-summary-email {
+    max-width: 100%;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color: #8392a6;
+
+    font-size: 11px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ป้าย Google / FoodShare */
+
+.account-provider-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 8px;
+    padding:
+        4px
+        8px;
+
+    border:
+        1px solid
+        #e3ebf5;
+
+    border-radius: 999px;
+
+    color: #56677d;
+
+    background: #ffffff;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.provider-icon {
+    display: grid;
+    place-items: center;
+
+    width: 16px;
+    height: 16px;
+
+    border-radius: 50%;
+
+    color: #ffffff;
+
+    background:
+        conic-gradient(
+            #4285f4,
+            #34a853,
+            #fbbc05,
+            #ea4335,
+            #4285f4
+        );
+
+    font-size: 9px;
+    font-weight: 900;
+}
+
+
+/* ตกแต่งมุมเล็ก ๆ */
+
+.account-mascot-peek {
+    position: absolute;
+
+    top: 8px;
+    right: 9px;
+
+    color: #5eaf7f;
+
+    font-size: 18px;
+
+    transform: rotate(10deg);
+}
+
+
+/* รายการเมนู */
+
+.account-dropdown-links {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    margin-top: 9px;
+}
+
+.account-dropdown-link {
+    display: grid;
+    grid-template-columns:
+        39px
+        minmax(0, 1fr)
+        auto;
+    align-items: center;
+    gap: 11px;
+
+    min-height: 57px;
+
+    padding:
+        8px
+        10px;
+
+    border:
+        1px solid
+        transparent;
+
+    border-radius: 15px;
+
+    color: #334760;
+
+    transition:
+        color 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.account-dropdown-link:hover {
+    border-color: #e1ebf8;
+
+    color: var(--blue-dark);
+
+    background: #f5f9ff;
+
+    transform: translateX(2px);
+}
+
+.account-dropdown-link-main {
+    border-color: #e0ebfb;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f3f8ff,
+            #f8fbff
+        );
+}
+
+.account-link-icon {
+    display: grid;
+    place-items: center;
+
+    width: 39px;
+    height: 39px;
+
+    border-radius: 13px;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.account-link-icon-blue {
+    color: #347be2;
+    background: #e9f2ff;
+}
+
+.account-link-icon-green {
+    color: #279865;
+    background: #e8f8ef;
+}
+
+.account-link-icon-orange {
+    color: #e99520;
+    background: #fff4df;
+}
+
+.account-link-icon-red {
+    color: #e4495a;
+    background: #fff0f2;
+}
+
+.account-link-content {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.account-link-content strong {
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.account-link-content small {
+    margin-top: 2px;
+
+    color: #93a0b1;
+
+    font-size: 10px;
+}
+
+.account-link-arrow {
+    color: #4f8ff7;
+
+    font-size: 19px;
+
+    transition:
+        transform 0.2s ease;
+}
+
+.account-dropdown-link:hover
+.account-link-arrow {
+    transform: translateX(4px);
+}
+
+
+/* Logout */
+
+.account-dropdown-divider {
+    height: 1px;
+
+    margin:
+        9px
+        7px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #dfe8f3,
+            transparent
+        );
+}
+
+.account-logout-form {
+    margin: 0;
+}
+
+.account-logout-button {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    width: 100%;
+    min-height: 52px;
+
+    padding:
+        6px
+        10px;
+
+    border:
+        1px solid
+        transparent;
+
+    border-radius: 15px;
+
+    color: #db4356;
+
+    background: transparent;
+
+    font-size: 13px;
+    font-weight: 750;
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.account-logout-button:hover {
+    border-color: #ffe1e5;
+
+    background: #fff6f7;
+
+    transform: translateX(2px);
+}
+
+
+/* Animation */
+
+@keyframes accountDropdownEntrance {
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(-9px)
+            scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+/* Tablet and Mobile */
+
+@media (max-width: 650px) {
+    .nav-actions {
+        gap: 8px;
+    }
+
+    .nav-account-label,
+    .account-menu-chevron {
+        display: none;
+    }
+
+    .account-menu-button {
+        padding: 4px;
+
+        border-radius: 50%;
+    }
+
+    .account-dropdown {
+        position: fixed;
+
+        top: 68px;
+        right: 4%;
+        left: 4%;
+
+        width: auto;
+        max-height:
+            calc(100vh - 84px);
+
+        overflow-y: auto;
+    }
+
+    .account-dropdown-pointer {
+        right: 24px;
+    }
+}
+
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+    .account-dropdown {
+        animation: none;
+    }
+
+    .account-menu-button,
+    .account-menu-chevron,
+    .account-dropdown-link,
+    .account-link-arrow,
+    .account-logout-button {
+        transition: none;
+    }
+}
+/* Default profile image */
+
+img.nav-account-avatar {
+    display: block;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 2px;
+
+    border: 1px solid
+        rgba(37, 99, 235, 0.15);
+
+    border-radius: 50%;
+
+    object-fit: cover;
+    object-position: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eff6ff,
+            #ecfdf5
+        );
+
+    box-sizing: border-box;
+}
+
+.account-summary-avatar-image {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+    object-position: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eff6ff,
+            #ecfdf5
+        );
+}
+/* Real food map */
+
+.food-map-shell {
+    position: relative;
+    isolation: isolate;
+
+    width: 100%;
+
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 25px;
+
+    overflow: hidden;
+
+    background: #eef7f2;
+
+    box-shadow:
+        0 18px 45px
+        rgba(30, 64, 175, 0.12);
+}
+
+.food-map {
+    width: 100%;
+    height: 360px;
+
+    border-radius: 25px;
+}
+
+.locate-user-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 700;
+
+    padding: 11px 16px;
+
+    border: 1px solid
+        rgba(37, 99, 235, 0.18);
+    border-radius: 999px;
+
+    color: #1d4ed8;
+    background: rgba(255, 255, 255, 0.94);
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px
+        rgba(15, 23, 42, 0.14);
+
+    backdrop-filter: blur(10px);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.locate-user-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 14px 30px
+        rgba(37, 99, 235, 0.2);
+}
+
+.locate-user-button:focus-visible {
+    outline: 3px solid
+        rgba(59, 130, 246, 0.3);
+    outline-offset: 3px;
+}
+
+.map-status {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    z-index: 700;
+
+    max-width: calc(100% - 32px);
+    margin: 0;
+    padding: 9px 14px;
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+
+    color: #334155;
+    background: rgba(255, 255, 255, 0.92);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    box-shadow:
+        0 8px 22px
+        rgba(15, 23, 42, 0.12);
+
+    backdrop-filter: blur(10px);
+}
+
+
+@media (max-width: 700px) {
+
+    .food-map {
+        height: 430px;
+    }
+
+    .locate-user-button {
+        top: 12px;
+        right: 12px;
+
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .map-status {
+        left: 12px;
+        bottom: 12px;
+
+        max-width: calc(100% - 24px);
+    }
+}
+/* ===== Dashboard visual refresh ===== */
+
+body {
+    background:
+        radial-gradient(circle at 8% 12%, #e7f3ff 0, transparent 28%),
+        radial-gradient(circle at 94% 30%, #eaf9ef 0, transparent 24%),
+        #f7fbff;
+}
+
+.dashboard {
+    width: min(1280px, 92%);
+    margin-top: 28px;
+}
+
+/* แถบด้านบน */
+.navbar {
+    background: rgba(255, 255, 255, 0.93);
+    box-shadow: 0 5px 25px rgba(42, 93, 148, 0.05);
+}
+
+.logo {
+    letter-spacing: -0.5px;
+}
+
+.nav-links a,
+.account-menu-button {
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-links a:hover {
+    transform: translateY(-2px);
+}
+
+/* ภาพต้อนรับ */
+.dashboard-hero {
+    min-height: 410px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 32px;
+    box-shadow:
+        0 24px 55px rgba(58, 112, 169, 0.13),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.dashboard-hero-bg {
+    object-position: center 45%;
+    transform: scale(1.015);
+}
+
+.dashboard-hero-overlay {
+    background: linear-gradient(
+        90deg,
+        rgba(239, 248, 255, 0.99) 0%,
+        rgba(239, 248, 255, 0.96) 32%,
+        rgba(239, 248, 255, 0.69) 54%,
+        rgba(239, 248, 255, 0.02) 100%
+    );
+}
+
+.dashboard-hero::after {
+    content: "";
+    position: absolute;
+    right: -90px;
+    bottom: -170px;
+    width: 420px;
+    height: 420px;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.dashboard-hero-content {
+    width: 56%;
+}
+
+.welcome-badge {
+    padding: 9px 17px;
+    color: #31845c;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid #d9efe2;
+    box-shadow: 0 7px 20px rgba(51, 119, 91, 0.08);
+}
+
+.dashboard-hero-content h1 {
+    max-width: 660px;
+    font-size: clamp(38px, 4vw, 60px);
+    line-height: 1.14;
+    letter-spacing: -1.8px;
+    text-wrap: balance;
+}
+
+.dashboard-hero-content h1 span {
+    color: #417fe5;
+}
+
+.dashboard-hero-content p {
+    max-width: 460px;
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+.hero-button,
+.hero-share-button {
+    min-height: 52px;
+    padding: 0 24px;
+    border-radius: 15px;
+    box-shadow: 0 10px 24px rgba(61, 113, 195, 0.12);
+}
+
+.hero-button {
+    background: linear-gradient(135deg, #5796f8, #3978e3);
+}
+
+.hero-share-button {
+    border-color: #d3e2f8;
+    backdrop-filter: blur(8px);
+}
+
+.dashboard-hero-mascot {
+    right: 4%;
+    height: 355px;
+}
+
+.dashboard-hero-mascot img {
+    filter: drop-shadow(0 20px 20px rgba(36, 69, 105, 0.16));
+}
+
+/* ค้นหาและตัวกรอง */
+.search-section {
+    position: relative;
+    z-index: 1;
+    align-items: stretch;
+    gap: 14px;
+    margin-top: -20px;
+    padding: 13px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e1ebf8;
+    border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(65, 112, 167, 0.12);
+}
+
+.search-box {
+    border: 1px solid #e1eaf6;
+    border-radius: 15px;
+    background: #f8fbff;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box:focus-within {
+    border-color: #77aaf4;
+    box-shadow: 0 0 0 4px rgba(79, 143, 247, 0.12);
+}
+
+.search-box input {
+    height: 56px;
+}
+
+.share-button {
+    border-radius: 15px;
+    background: linear-gradient(135deg, #5897f7, #3778e3);
+    box-shadow: 0 10px 22px rgba(55, 120, 227, 0.22);
+}
+
+.filters {
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.filter {
+    min-height: 42px;
+    padding: 9px 17px;
+    border-color: #e0eaf6;
+    color: #61728a;
+    box-shadow: 0 4px 12px rgba(65, 112, 167, 0.04);
+}
+
+.filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 17px rgba(65, 112, 167, 0.09);
+}
+
+.filter.active {
+    background: #eaf3ff;
+    border-color: #bcd9ff;
+    color: #286bcc;
+    box-shadow: 0 6px 16px rgba(79, 143, 247, 0.12);
+}
+
+/* หัวข้อและแผนที่ */
+.map-section,
+.nearby-food-section {
+    margin-top: 58px;
+}
+
+.section-label {
+    display: inline-block;
+    margin-bottom: 5px;
+    color: #32895f;
+    letter-spacing: 2px;
+}
+
+.section-heading h2 {
+    margin-top: 3px;
+    font-size: clamp(23px, 2.2vw, 30px);
+    letter-spacing: -0.6px;
+}
+
+.section-heading > a {
+    padding: 9px 13px;
+    border-radius: 11px;
+    transition: background 0.2s ease;
+}
+
+.section-heading > a:hover {
+    background: #e9f3ff;
+}
+
+.food-map-shell {
+    border: 7px solid white;
+    border-radius: 29px;
+    box-shadow:
+        0 22px 48px rgba(49, 101, 146, 0.14),
+        0 0 0 1px #e0eaf5;
+}
+
+.food-map {
+    height: 390px;
+    border-radius: 22px;
+}
+
+/* การ์ดอาหาร */
+.food-grid {
+    gap: 20px;
+}
+
+.food-card {
+    border: 1px solid #e1ebf5;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(56, 103, 148, 0.08);
+}
+
+.food-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 23px 44px rgba(56, 103, 148, 0.16);
+}
+
+.food-image {
+    height: 190px;
+    overflow: hidden;
+}
+
+.food-image::after {
+    content: "";
+    position: absolute;
+    right: -35px;
+    bottom: -80px;
+    width: 185px;
+    height: 185px;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+}
+
+.food-emoji {
+    transition: transform 0.25s ease;
+}
+
+.food-card:hover .food-emoji {
+    transform: scale(1.12) rotate(-6deg);
+}
+
+.food-status {
+    z-index: 1;
+    padding: 8px 13px;
+    box-shadow: 0 6px 15px rgba(50, 80, 100, 0.08);
+}
+
+.food-content {
+    padding: 23px;
+}
+
+.food-content h3 {
+    font-size: 18px;
+}
+
+.food-detail-button {
+    padding: 12px;
+    border-radius: 12px;
+}
+
+/* ส่วนท้าย */
+.impact-section {
+    margin-top: 65px;
+    border: 1px solid #d9ecdf;
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at 95% 10%, #d9f3e3, transparent 35%),
+        linear-gradient(120deg, #effaf3, #edf5ff);
+    box-shadow: 0 14px 34px rgba(71, 126, 103, 0.08);
+}
+
+/* หน้าจอเล็ก */
+@media (max-width: 900px) {
+    .dashboard-hero-content {
+        width: 65%;
+    }
+
+    .dashboard-hero-mascot {
+        width: 260px;
+        height: 270px;
+    }
+}
+
+@media (max-width: 650px) {
+    .dashboard {
+        width: 92%;
+    }
+
+    .dashboard-hero {
+        min-height: 510px;
+        padding: 30px 24px;
+    }
+
+    .dashboard-hero-content {
+        width: 100%;
+    }
+
+    .dashboard-hero-content h1 {
+        font-size: 36px;
+    }
+
+    .dashboard-hero-overlay {
+        background: linear-gradient(
+            180deg,
+            rgba(239, 248, 255, 0.99) 0%,
+            rgba(239, 248, 255, 0.95) 45%,
+            rgba(239, 248, 255, 0.45) 100%
+        );
+    }
+
+    .dashboard-hero-mascot {
+        width: 205px;
+        height: 205px;
+    }
+
+    .search-section {
+        flex-direction: column;
+        margin-top: 18px;
+        padding: 10px;
+    }
+
+    .share-button {
+        min-height: 52px;
+    }
+
+    .food-map {
+        height: 400px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .food-card,
+    .food-emoji,
+    .filter {
+        transition: none;
+    }
 }

@@ -3291,4 +3291,1077 @@ body {
         scroll-behavior: auto;
     }
 }
+/* ========================================
+   FoodShare Footer
+======================================== */
 
+.foodshare-footer {
+    position: relative;
+    overflow: hidden;
+
+    padding:
+        72px
+        clamp(24px, 7vw, 120px)
+        0;
+
+    color: #ffffff;
+
+    background:
+        radial-gradient(
+            circle at 12% 18%,
+            rgba(96, 165, 250, 0.2),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 88% 72%,
+            rgba(52, 211, 153, 0.12),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            #071c46 0%,
+            #0c2d68 48%,
+            #103d80 100%
+        );
+
+    isolation: isolate;
+}
+
+
+/* เส้นแสงด้านบน */
+
+.foodshare-footer::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 50%;
+
+    width: min(86%, 1180px);
+    height: 1px;
+
+    transform: translateX(-50%);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(147, 197, 253, 0.85),
+            transparent
+        );
+}
+
+
+/* แสงพื้นหลัง */
+
+.foodshare-footer::after {
+    content: "";
+
+    position: absolute;
+    top: -180px;
+    left: 50%;
+
+    width: 520px;
+    height: 320px;
+
+    transform: translateX(-50%);
+
+    border-radius: 50%;
+
+    background:
+        rgba(59, 130, 246, 0.16);
+
+    filter: blur(90px);
+
+    z-index: -1;
+}
+
+
+/* ของตกแต่งขนาดเล็ก */
+
+.footer-decoration {
+    position: absolute;
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 3px;
+
+    background: #4ade80;
+
+    opacity: 0.65;
+
+    transform: rotate(45deg);
+
+    animation:
+        footerDecorationFloat
+        5s ease-in-out infinite;
+}
+
+.footer-decoration-one {
+    top: 70px;
+    left: 7%;
+}
+
+.footer-decoration-two {
+    right: 8%;
+    bottom: 105px;
+
+    width: 7px;
+    height: 7px;
+
+    background: #93c5fd;
+
+    animation-delay: 1.5s;
+}
+
+
+/* เนื้อหาหลัก */
+
+.footer-content {
+    position: relative;
+
+    display: grid;
+    grid-template-columns:
+        minmax(260px, 1.5fr)
+        minmax(140px, 0.65fr)
+        minmax(240px, 1fr);
+
+    gap: clamp(40px, 7vw, 100px);
+
+    max-width: 1180px;
+
+    margin: 0 auto;
+    padding-bottom: 58px;
+}
+
+
+/* ส่วนแบรนด์ */
+
+.footer-brand {
+    max-width: 400px;
+}
+
+.footer-logo {
+    display: block;
+
+    width: 178px;
+    height: auto;
+
+    margin-bottom: 22px;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(
+            0 10px 24px
+            rgba(0, 0, 0, 0.2)
+        );
+}
+
+.footer-description {
+    margin: 0 0 18px;
+
+    color: rgba(226, 232, 240, 0.82);
+
+    font-size: 15px;
+    line-height: 1.9;
+}
+
+.footer-slogan {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 8px 13px;
+
+    border:
+        1px solid
+        rgba(147, 197, 253, 0.18);
+
+    border-radius: 999px;
+
+    color: #bfdbfe;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+
+/* หัวข้อ */
+
+.footer-heading {
+    position: relative;
+
+    margin:
+        6px
+        0
+        25px;
+
+    color: #ffffff;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.footer-heading::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+
+    width: 28px;
+    height: 3px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #60a5fa,
+            #4ade80
+        );
+}
+
+
+/* เมนู */
+
+.footer-navigation {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-navigation a {
+    position: relative;
+
+    margin-bottom: 14px;
+
+    color: rgba(226, 232, 240, 0.78);
+
+    font-size: 14px;
+    text-decoration: none;
+
+    transition:
+        color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.footer-navigation a::before {
+    content: "";
+
+    position: absolute;
+    top: 50%;
+    left: -14px;
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #60a5fa;
+
+    opacity: 0;
+
+    transform:
+        translateY(-50%)
+        scale(0);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+
+.footer-navigation a:hover {
+    color: #ffffff;
+
+    transform: translateX(8px);
+}
+
+.footer-navigation a:hover::before {
+    opacity: 1;
+
+    transform:
+        translateY(-50%)
+        scale(1);
+}
+
+
+/* ข้อมูลติดต่อ */
+
+.footer-contact p {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 0 0 14px;
+
+    color: rgba(226, 232, 240, 0.8);
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.footer-contact-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    width: 34px;
+    height: 34px;
+
+    border:
+        1px solid
+        rgba(147, 197, 253, 0.18);
+
+    border-radius: 11px;
+
+    color: #bfdbfe;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+}
+
+.footer-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 14px;
+    padding:
+        11px
+        16px;
+
+    border:
+        1px solid
+        rgba(147, 197, 253, 0.22);
+
+    border-radius: 12px;
+
+    color: #ffffff;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.footer-contact-link:hover {
+    border-color:
+        rgba(147, 197, 253, 0.5);
+
+    background:
+        rgba(255, 255, 255, 0.14);
+
+    transform: translateY(-2px);
+}
+
+
+/* แถบล่าง */
+
+.footer-bottom {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    max-width: 1180px;
+
+    margin: 0 auto;
+    padding: 22px 0;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.1);
+}
+
+.footer-bottom p {
+    margin: 0;
+
+    color: rgba(191, 219, 254, 0.66);
+
+    font-size: 12px;
+}
+
+
+/* Animation */
+
+@keyframes footerDecorationFloat {
+    0%,
+    100% {
+        transform:
+            translateY(0)
+            rotate(45deg);
+    }
+
+    50% {
+        transform:
+            translateY(-12px)
+            rotate(65deg);
+    }
+}
+
+
+/* Tablet */
+
+@media (max-width: 900px) {
+    .foodshare-footer {
+        padding-top: 58px;
+    }
+
+    .footer-content {
+        grid-template-columns:
+            minmax(250px, 1.4fr)
+            minmax(150px, 0.8fr);
+
+        gap: 46px;
+    }
+
+    .footer-contact {
+        grid-column: 1 / -1;
+
+        max-width: 420px;
+    }
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .foodshare-footer {
+        padding:
+            50px
+            24px
+            0;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+
+        gap: 38px;
+
+        padding-bottom: 40px;
+    }
+
+    .footer-brand {
+        max-width: none;
+    }
+
+    .footer-logo {
+        width: 155px;
+    }
+
+    .footer-contact {
+        grid-column: auto;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+
+        padding: 20px 0 24px;
+    }
+}
+
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+    .footer-decoration {
+        animation: none;
+    }
+
+    .footer-navigation a,
+    .footer-contact-link {
+        transition: none;
+    }
+}
+/* ========================================
+   Premium Footer Enhancement
+======================================== */
+
+/* ลดพื้นที่ว่างท้ายรายการอาหาร */
+
+.available-section {
+    padding-bottom: 95px;
+}
+
+
+/* ปรับ Footer ให้รองรับกล่องลอย */
+
+.foodshare-footer {
+    overflow: visible;
+
+    padding-top: 0;
+
+    background:
+        radial-gradient(
+            circle at 8% 25%,
+            rgba(96, 165, 250, 0.18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 92% 80%,
+            rgba(52, 211, 153, 0.11),
+            transparent 26%
+        ),
+        linear-gradient(
+            135deg,
+            #071a3d 0%,
+            #0b2c65 52%,
+            #0d467e 100%
+        );
+}
+
+
+/* ========================================
+   Floating CTA
+======================================== */
+
+.footer-cta {
+    position: relative;
+    z-index: 5;
+
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.35fr)
+        minmax(240px, 0.65fr);
+    align-items: center;
+
+    width: calc(100% - 48px);
+    max-width: 1180px;
+    min-height: 250px;
+
+    margin:
+        0 auto
+        -88px;
+
+    padding:
+        42px
+        54px;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.92);
+
+    border-radius: 30px;
+
+    background:
+        radial-gradient(
+            circle at 88% 20%,
+            rgba(96, 165, 250, 0.22),
+            transparent 34%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.98),
+            rgba(239, 246, 255, 0.96)
+        );
+
+    box-shadow:
+        0 28px 70px
+        rgba(3, 18, 48, 0.24),
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.9);
+
+    transform: translateY(-50%);
+}
+
+
+/* เส้นสีด้านบนของกล่อง */
+
+.footer-cta::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 8%;
+
+    width: 84%;
+    height: 4px;
+
+    border-radius:
+        0
+        0
+        999px
+        999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #3b82f6,
+            #34d399,
+            transparent
+        );
+
+    opacity: 0.8;
+}
+
+
+/* ลายวงกลมบาง ๆ */
+
+.footer-cta::after {
+    content: "";
+
+    position: absolute;
+    top: -90px;
+    right: -65px;
+
+    width: 260px;
+    height: 260px;
+
+    border:
+        1px solid
+        rgba(59, 130, 246, 0.13);
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 35px
+        rgba(59, 130, 246, 0.035),
+        0 0 0 72px
+        rgba(59, 130, 246, 0.025);
+}
+
+
+/* ข้อความ CTA */
+
+.footer-cta-content {
+    position: relative;
+    z-index: 3;
+
+    max-width: 610px;
+}
+
+.footer-cta-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 12px;
+    padding:
+        7px
+        12px;
+
+    border:
+        1px solid
+        rgba(37, 99, 235, 0.12);
+
+    border-radius: 999px;
+
+    color: #2563eb;
+
+    background:
+        rgba(219, 234, 254, 0.65);
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.footer-cta-label::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #34d399;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(52, 211, 153, 0.14);
+}
+
+.footer-cta h2 {
+    margin:
+        0
+        0
+        10px;
+
+    color: #102a5e;
+
+    font-size:
+        clamp(
+            26px,
+            3vw,
+            40px
+        );
+
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.footer-cta p {
+    max-width: 570px;
+
+    margin:
+        0
+        0
+        25px;
+
+    color: #6b7f9f;
+
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+
+/* ปุ่ม CTA */
+
+.footer-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 13px;
+}
+
+.footer-cta-primary,
+.footer-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+
+    min-height: 48px;
+
+    padding:
+        0
+        21px;
+
+    border-radius: 13px;
+
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.footer-cta-primary {
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2559dc,
+            #3989fb
+        );
+
+    box-shadow:
+        0 12px 26px
+        rgba(37, 89, 220, 0.24);
+}
+
+.footer-cta-primary:hover {
+    color: #ffffff;
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 17px 32px
+        rgba(37, 89, 220, 0.31);
+}
+
+.footer-cta-primary span:last-child {
+    font-size: 18px;
+
+    transition:
+        transform 0.25s ease;
+}
+
+.footer-cta-primary:hover span:last-child {
+    transform: translateX(5px);
+}
+
+.footer-cta-secondary {
+    border:
+        1px solid
+        rgba(37, 99, 235, 0.16);
+
+    color: #285796;
+
+    background:
+        rgba(255, 255, 255, 0.65);
+}
+
+.footer-cta-secondary:hover {
+    border-color:
+        rgba(37, 99, 235, 0.32);
+
+    background: #ffffff;
+
+    transform: translateY(-3px);
+}
+
+
+/* มาสคอต */
+
+.footer-cta-visual {
+    position: relative;
+    z-index: 2;
+
+    align-self: stretch;
+
+    min-height: 180px;
+}
+
+.footer-cta-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 210px;
+    height: 130px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(96, 165, 250, 0.2);
+
+    filter: blur(30px);
+
+    transform:
+        translate(-50%, -40%);
+}
+
+.footer-cta-mascot {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: -54px;
+
+    width: min(235px, 100%);
+    height: auto;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(
+            0 18px 20px
+            rgba(22, 60, 120, 0.2)
+        );
+
+    transform: translateX(-50%);
+
+    animation:
+        footerMascotFloat
+        3.8s ease-in-out infinite;
+}
+
+.footer-cta-leaf {
+    position: absolute;
+    z-index: 3;
+
+    color: #34a973;
+
+    font-size: 20px;
+}
+
+.footer-cta-leaf-one {
+    top: 18px;
+    right: 15%;
+}
+
+.footer-cta-leaf-two {
+    top: 54px;
+    left: 15%;
+
+    color: #4b8cf7;
+
+    font-size: 16px;
+}
+
+
+/* กระชับเนื้อหา Footer เดิม */
+
+.footer-content {
+    padding-top: 38px;
+    padding-bottom: 44px;
+}
+
+.footer-logo {
+    width: 155px;
+
+    margin-bottom: 16px;
+}
+
+.footer-description {
+    max-width: 370px;
+
+    margin-bottom: 14px;
+}
+
+.footer-heading {
+    margin-top: 2px;
+}
+
+.footer-bottom {
+    padding:
+        18px
+        0
+        22px;
+}
+
+
+/* Animation */
+
+@keyframes footerMascotFloat {
+    0%,
+    100% {
+        transform:
+            translateX(-50%)
+            translateY(0)
+            rotate(-1deg);
+    }
+
+    50% {
+        transform:
+            translateX(-50%)
+            translateY(-8px)
+            rotate(1deg);
+    }
+}
+
+
+/* Tablet */
+
+@media (max-width: 900px) {
+    .available-section {
+        padding-bottom: 105px;
+    }
+
+    .footer-cta {
+        grid-template-columns:
+            minmax(0, 1fr)
+            210px;
+
+        min-height: 235px;
+
+        padding:
+            36px
+            38px;
+
+        border-radius: 26px;
+    }
+
+    .footer-cta-mascot {
+        bottom: -38px;
+
+        width: 195px;
+    }
+
+    .footer-content {
+        padding-top: 46px;
+    }
+}
+
+
+/* Mobile */
+
+@media (max-width: 650px) {
+    .available-section {
+        padding-bottom: 125px;
+    }
+
+    .foodshare-footer {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .footer-cta {
+        grid-template-columns: 1fr;
+
+        width: 100%;
+        min-height: auto;
+
+        margin-bottom: -95px;
+        padding:
+            32px
+            26px
+            150px;
+
+        border-radius: 24px;
+
+        transform: translateY(-38%);
+    }
+
+    .footer-cta h2 {
+        font-size: 28px;
+    }
+
+    .footer-cta-visual {
+        position: absolute;
+        right: 14px;
+        bottom: 0;
+
+        width: 150px;
+        min-height: 120px;
+    }
+
+    .footer-cta-mascot {
+        right: 0;
+        bottom: -34px;
+        left: auto;
+
+        width: 145px;
+
+        transform: none;
+
+        animation: none;
+    }
+
+    .footer-cta-actions {
+        position: relative;
+        z-index: 4;
+
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .footer-cta-primary,
+    .footer-cta-secondary {
+        min-width: 170px;
+    }
+
+    .footer-content {
+        padding-top: 62px;
+    }
+}
+
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+    .footer-cta-mascot {
+        animation: none;
+    }
+
+    .footer-cta-primary,
+    .footer-cta-secondary,
+    .footer-cta-primary span:last-child {
+        transition: none;
+    }
+}

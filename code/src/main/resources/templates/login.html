@@ -1,242 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th" xmlns:th="http://www.thymeleaf.org">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>เข้าสู่ระบบ | KKU FoodShare</title>
-
-    <link rel="stylesheet" th:href="@{/css/login.css}">
-</head>
-
-<body>
-
-<main class="login-page">
-    <!-- Animated decoration -->
-    <div class="login-atmosphere" aria-hidden="true">
-
-        <span class="login-bubble bubble-one"></span>
-        <span class="login-bubble bubble-two"></span>
-        <span class="login-bubble bubble-three"></span>
-
-        <span class="login-floating-leaf login-leaf-one">◆</span>
-        <span class="login-floating-leaf login-leaf-two">◆</span>
-        <span class="login-floating-leaf login-leaf-three">◆</span>
-
-    </div>
-
-    <section class="login-card">
-
-        <!-- Logo -->
-        <a th:href="@{/}" class="logo-link">
-            <img
-                th:src="@{/images/foodshare-logo.png}"
-                alt="KKU FoodShare"
-                class="login-logo">
-        </a>
-
-        <!-- Welcome -->
-        <div class="login-header">
-            <h1>ยินดีต้อนรับ</h1>
-
-            <p>
-                เข้าสู่ระบบเพื่อร่วมแบ่งปันอาหาร<br>
-                และสร้างชุมชนที่ยั่งยืนไปด้วยกัน 🌱
-            </p>
+  <head th:replace="~{fragments :: head('เข้าสู่ระบบ')}"></head>
+  <body data-page="login" class="auth-page">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container auth-layout">
+      <aside class="auth-art">
+        <div class="auth-orb auth-orb-blue" aria-hidden="true"></div><div class="auth-orb auth-orb-green" aria-hidden="true"></div>
+        <div class="auth-art-copy">
+        <span class="eyebrow">A COMMUNITY THAT CARES</span>
+        <h2>มื้อเล็ก ๆ ของเรา<br /><span>ความสุขใหญ่ ๆ ของใคร</span></h2>
+        <p>เริ่มต้นเรื่องราวดี ๆ ด้วยการแบ่งปัน</p>
         </div>
-
-        <!-- Login Error -->
-        <div class="alert alert-error" th:if="${param.error}">
-            อีเมลหรือรหัสผ่านไม่ถูกต้อง
+        <div class="auth-image-stage"><span class="auth-art-ring" aria-hidden="true"></span><img src="/images/register-mascot.webp" alt="มาสคอต FoodShare โบกมือต้อนรับ" /><span class="auth-float-note"><svg class="icon" aria-hidden="true"><use href="#i-heart"></use></svg><span>อิ่มท้อง อิ่มใจ<small>ส่งต่อมื้อดี ๆ ให้กัน</small></span></span></div>
+        <div class="auth-art-bottom">
+          <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          KKU FOODSHARE COMMUNITY
         </div>
-
-        <!-- Logout Success -->
-        <div class="alert alert-success" th:if="${param.logout}">
-            ออกจากระบบเรียบร้อยแล้ว
+      </aside>
+      <section class="auth-form-panel">
+        <span class="auth-card-kicker">YOUR COMMUNITY, YOUR NEXT MEAL</span>
+        <span class="auth-symbol"
+          ><svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg
+        ></span>
+        <h1>ยินดีต้อนรับกลับมา</h1>
+        <p class="auth-subtitle">มื้อดี ๆ และเพื่อนในชุมชนรอคุณอยู่</p>
+        <div class="form-error" th:if="${param.error}">
+          อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง
         </div>
-
-        <!-- Login Form -->
-        <form
-            th:action="@{/login}"
-            method="post"
-            class="login-form">
-
-            <!-- Email -->
-            <div class="form-group">
-
-                <label for="email">
-                    อีเมล
-                    <span>*</span>
-                </label>
-
-                <div class="input-wrapper">
-
-                    <div class="input-icon">✉</div>
-
-                    <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        placeholder="example@kku.ac.th"
-                        autocomplete="email"
-                        required>
-
-                </div>
-
-            </div>
-
-            <!-- Password -->
-            <div class="form-group">
-
-                <label for="password">
-                    รหัสผ่าน
-                    <span>*</span>
-                </label>
-
-                <div class="input-wrapper">
-
-                    <div class="input-icon">🔒</div>
-
-                    <input
-                        id="password"
-                        type="password"
-                        name="password"
-                        placeholder="กรอกรหัสผ่าน"
-                        autocomplete="current-password"
-                        required>
-
-                </div>
-
-                <div class="forgot-password">
-                    <a href="#">
-                        ลืมรหัสผ่านเหรอ?
-                    </a>
-                </div>
-
-            </div>
-
-            <!-- Login Button -->
-            <button
-                type="submit"
-                class="login-button">
-
-                เข้าสู่ระบบ
-
-                <span>→</span>
-
-            </button>
-
+        <div class="form-error" th:if="${param.disabled}">
+          บัญชีนี้ถูกระงับ กรุณาติดต่อผู้ดูแล
+        </div>
+        <div class="success-note" th:if="${param.registered}">
+          สมัครสำเร็จ เข้าสู่ระบบเพื่อเริ่มแบ่งปันได้เลย
+        </div>
+        <div class="success-note" th:if="${param.resetSuccess}">ตั้งรหัสผ่านใหม่สำเร็จแล้ว เข้าสู่ระบบด้วยรหัสผ่านใหม่ได้เลย</div>
+        <form th:action="@{/login}" method="post" class="auth-form">
+          <label for="login-email"><span class="auth-field-label">อีเมล</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-mail"></use></svg><input
+              id="login-email"
+              type="email"
+              name="email"
+              autocomplete="username"
+              required
+              placeholder="your@email.com" /></span></label>
+          <label for="login-password"><span class="auth-field-label">รหัสผ่าน</span><span class="auth-input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><input
+              id="login-password"
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              required
+              placeholder="กรอกรหัสผ่านของคุณ" /><button type="button" class="password-toggle" data-password-toggle="login-password" aria-controls="login-password" aria-pressed="false" aria-label="แสดงรหัสผ่าน">แสดง</button></span></label
+          ><a href="/forgot-password" class="forgot-link">ลืมรหัสผ่าน?</a
+          ><button class="btn btn-primary btn-lg full" type="submit">
+            เข้าสู่ระบบ
+            <svg class="icon" aria-hidden="true"><use href="#i-leaf"></use></svg>
+          </button>
         </form>
-
-        <!-- Register -->
-        <div class="register-area">
-
-            <span>
-                ยังไม่มีบัญชีผู้ใช้ใช่ไหม?
-            </span>
-
-            <a th:href="@{/register}">
-                สมัครสมาชิก
-            </a>
-
+        <div th:if="${googleEnabled}" class="google-section">
+          <div class="or-divider"><span>หรือ</span></div>
+          <a href="/oauth2/authorization/google" class="btn btn-white full"
+            ><img src="/images/logo_gg.webp" width="20" height="20" alt="" />
+            เข้าสู่ระบบด้วย Google</a
+          >
         </div>
-
-    </section>
-        <!-- Student Scooter -->
-    <div class="login-scooter-scene" aria-hidden="true">
-
-        <div class="scooter-speed-lines">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-
-        <img
-            class="login-scooter"
-            th:src="@{/images/login-student-scooter.png}"
-            alt=""
-        >
-
-        <div class="scooter-shadow"></div>
-
-    </div>
-
-    <!-- Footer -->
-    <footer class="login-footer">
-
-        <strong>KKU FoodShare</strong>
-
-        <span>
-            Share Food · Brighter Tomorrow
-        </span>
-
-    </footer>
-
-</main>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        const loginPage =
-            document.querySelector(".login-page");
-
-        const loginCard =
-            document.querySelector(".login-card");
-
-        const reduceMotion =
-            window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
-            ).matches;
-
-        if (
-            !loginPage ||
-            !loginCard ||
-            reduceMotion
-        ) {
-            return;
-        }
-
-        loginPage.addEventListener(
-            "pointermove",
-            function (event) {
-
-                const mouseX =
-                    event.clientX /
-                    window.innerWidth - 0.5;
-
-                const mouseY =
-                    event.clientY /
-                    window.innerHeight - 0.5;
-
-                loginPage.style.setProperty(
-                    "--mouse-x",
-                    mouseX * 2
-                );
-
-                loginPage.style.setProperty(
-                    "--mouse-y",
-                    mouseY * 2
-                );
-            }
-        );
-
-        loginPage.addEventListener(
-            "pointerleave",
-            function () {
-
-                loginPage.style.setProperty(
-                    "--mouse-x",
-                    0
-                );
-
-                loginPage.style.setProperty(
-                    "--mouse-y",
-                    0
-                );
-            }
-        );
-
-    });
-</script>
-</body>
+        <p class="auth-bottom">
+          เพิ่งมาเป็นครั้งแรก? <a href="/register">สร้างบัญชีฟรี</a>
+        </p>
+        <a class="auth-explore-link" href="/explore">ดูอาหารในชุมชนก่อน</a>
+      </section>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
 </html>

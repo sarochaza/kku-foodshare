@@ -1,0 +1,1 @@
+{"private":true,"scripts":{"browser":"node browser-journey.cjs"},"devDependencies":{"playwright":"1.51.1"}}

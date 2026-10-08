@@ -12,34 +12,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class RegisterController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    public RegisterController(UserService userService) {
-        this.userService = userService;
+  public RegisterController(UserService userService) {
+    this.userService = userService;
+  }
+
+  @GetMapping("/register")
+  public String showRegisterForm(Model model) {
+    model.addAttribute("registerRequest", new RegisterRequest());
+    return "register";
+  }
+
+  @PostMapping("/register")
+  public String register(
+      @Valid RegisterRequest registerRequest, BindingResult bindingResult, Model model) {
+
+    if (bindingResult.hasErrors()) {
+      return "register";
     }
 
-    @GetMapping("/register")
-    public String showRegisterForm(Model model) {
-        model.addAttribute("registerRequest", new RegisterRequest());
-        return "register";
+    try {
+      userService.register(registerRequest);
+      return "redirect:/login";
+    } catch (IllegalArgumentException e) {
+      model.addAttribute("error", e.getMessage());
+      return "register";
     }
-
-    @PostMapping("/register")
-    public String register(
-            @Valid RegisterRequest registerRequest,
-            BindingResult bindingResult,
-            Model model) {
-
-        if (bindingResult.hasErrors()) {
-            return "register";
-        }
-
-        try {
-            userService.register(registerRequest);
-            return "redirect:/login";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            return "register";
-        }
-    }
+  }
 }
