@@ -10,31 +10,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+  public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
+
+  @Override
+  public User register(RegisterRequest request) {
+
+    request.setEmail(request.getEmail().trim().toLowerCase(java.util.Locale.ROOT));
+    if (request.getPassword().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+      throw new IllegalArgumentException("รหัสผ่านยาวเกินไป");
+    if (userRepository.findByEmailIgnoreCase(request.getEmail()).isPresent()) {
+      throw new IllegalArgumentException("อีเมลนี้ถูกใช้งานแล้ว");
     }
 
-    @Override
-    public User register(RegisterRequest request) {
+    User user = new User();
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
+    user.setEmail(request.getEmail());
+    // ผ่าน BCrypt ก่อน แล้วกลายเป็นค่าประมาณ
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setDisplayName(request.getDisplayName().trim());
 
-        User user = new User();
-
-        user.setEmail(request.getEmail());
-        //ผ่าน BCrypt ก่อน แล้วกลายเป็นค่าประมาณ
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setDisplayName(request.getDisplayName());
-
-        return userRepository.save(user);
-    }
+    return userRepository.save(user);
+  }
 }

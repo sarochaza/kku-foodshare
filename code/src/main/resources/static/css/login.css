@@ -1313,3 +1313,102 @@ body {
         animation: none;
     }
 }
+/* ========================================
+   COMPACT LOGIN - DESKTOP 100%
+======================================== */
+
+@media (min-width: 701px) {
+
+    .login-page {
+        padding:
+            24px
+            20px
+            68px;
+    }
+
+    .login-card {
+        max-width: 480px;
+
+        padding:
+            22px
+            38px
+            28px;
+
+        border-radius: 28px;
+    }
+
+    .login-card::before,
+    .login-card::after {
+        border-radius: 28px;
+    }
+
+    .login-logo {
+        width: 155px;
+
+        margin-bottom: 4px;
+    }
+
+    .logo-link::before {
+        width: 190px;
+        height: 75px;
+    }
+
+    .login-header {
+        margin-bottom: 19px;
+    }
+
+    .login-header h1 {
+        margin-bottom: 5px;
+
+        font-size: 31px;
+    }
+
+    .login-header p {
+        font-size: 14px;
+
+        line-height: 1.55;
+    }
+
+    .login-form {
+        gap: 16px;
+    }
+
+    .form-group label {
+        margin-bottom: 7px;
+
+        font-size: 14px;
+    }
+
+    .input-wrapper input {
+        height: 52px;
+
+        font-size: 14px;
+    }
+
+    .input-icon {
+        width: 29px;
+        height: 29px;
+
+        font-size: 15px;
+    }
+
+    .forgot-password {
+        margin-top: 7px;
+    }
+
+    .login-button {
+        height: 54px;
+
+        font-size: 16px;
+    }
+
+    .register-area {
+        margin-top: 18px;
+
+        font-size: 13px;
+    }
+
+    .login-footer {
+        bottom: 14px;
+    }
+}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments :: head('จัดการชุมชน')}"></head>
+  <body data-page="admin">
+    <header th:replace="~{fragments :: header('account')}"></header>
+    <main class="container page-main">
+      <div class="page-heading">
+        <span class="section-kicker">COMMUNITY CARE</span>
+        <h1>ดูแลชุมชน FoodShare</h1>
+        <p>ตรวจสอบรายงานอย่างเป็นธรรม ทุกการดำเนินการมีการบันทึก</p>
+      </div>
+      <div class="chips admin-tabs">
+        <button class="chip active" data-admin-tab="posts">โพสต์ทั้งหมด</button
+        ><button class="chip" data-admin-tab="reports">รายงานโพสต์ <span id="admin-pending-count" class="badge" hidden></span></button
+        ><button class="chip" data-admin-tab="users">สมาชิก</button>
+      </div>
+      <form id="admin-post-filters" class="admin-post-filters panel">
+        <label>ค้นหาโพสต์ ผู้โพสต์ หรือจุดรับ<input id="admin-post-query" type="search" maxlength="120" placeholder="พิมพ์คำค้นหา"></label>
+        <label>สถานะ<select id="admin-post-status"><option value="">ทุกสถานะ</option><option value="AVAILABLE">พร้อมแบ่งปัน</option><option value="LOW_STOCK">เหลือน้อย</option><option value="CLAIMED">หมดแล้ว</option><option value="EXPIRED">หมดเวลา</option><option value="CANCELLED">ปิดโพสต์</option></select></label>
+        <button class="btn btn-primary" type="submit">ค้นหา</button>
+      </form>
+      <p id="admin-result-count" class="field-note" role="status"></p>
+      <div id="admin-content" class="admin-content"></div>
+      <nav id="pagination" class="pagination"></nav>
+    </main>
+    <footer th:replace="~{fragments :: footer}"></footer>
+  </body>
+</html>
