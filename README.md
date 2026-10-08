@@ -13,10 +13,6 @@
 ## LINK : https://kku-foodshare.onrender.com/
 
 
-<p align="center">
-  <img src="code/src/main/resources/static/images/foodshare-about-community.png" alt="ภาพประกอบชุมชน KKU FoodShare" width="760" />
-</p>
-
 ## สมาชิกกลุ่ม
 
 | ลำดับ | ชื่อ-นามสกุล | รหัสนักศึกษา | Section | Branch | หน้าที่รับผิดชอบ | Email |
