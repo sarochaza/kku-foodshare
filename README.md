@@ -9,6 +9,8 @@
 ผู้แบ่งปันสร้างโพสต์ ระบุจำนวน เวลา จุดรับ และแนบรูปภาพ ส่วนผู้รับค้นหาและจองอาหารได้  
 เจ้าของยืนยันการรับด้วย QR หรือรหัสรับอาหาร พร้อมจัดการสต็อกและรายการแจกนอกเว็บ  
 ระบบรองรับความคิดเห็น บันทึกโพสต์ โปรไฟล์ และการแจ้งเตือน โดยออกแบบตามหลัก Software Design
+LINK : https://kku-foodshare.onrender.com/
+
 
 <p align="center">
   <img src="code/src/main/resources/static/images/foodshare-about-community.png" alt="ภาพประกอบชุมชน KKU FoodShare" width="760" />
