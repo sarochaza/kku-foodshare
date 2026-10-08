@@ -176,11 +176,14 @@ class FoodJourneyTest {
   void ownerCanExtendAnExpiredPostWithFoodRemaining() throws Exception {
     long id = createPost();
     expirePost(id);
-    String until = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok")).plusHours(2).toString();
-    mvc.perform(post("/api/v1/food-posts/" + id + "/extend").with(user("owner@test.local")).with(csrf())
+    String until = java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Bangkok"))
+        .plusHours(2).withNano(120_000_000).toString();
+    String response = mvc.perform(post("/api/v1/food-posts/" + id + "/extend").with(user("owner@test.local")).with(csrf())
             .contentType("application/json").content("{\"availableUntil\":\"" + until + "\"}"))
         .andExpect(status().isOk()).andExpect(jsonPath("status").value("AVAILABLE"))
-        .andExpect(jsonPath("availableUntil").value(until));
+        .andReturn().getResponse().getContentAsString();
+    String returnedUntil = com.jayway.jsonpath.JsonPath.read(response, "$.availableUntil");
+    Assertions.assertEquals(java.time.LocalDateTime.parse(until), java.time.LocalDateTime.parse(returnedUntil));
   }
 
   @Test

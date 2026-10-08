@@ -31,6 +31,9 @@ public class User {
   @Column(nullable = false)
   private Boolean active = true;
 
+  @Column(name = "onboarding_completed", nullable = false)
+  private boolean onboardingCompleted;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private UserRole role = UserRole.USER;
@@ -80,6 +83,10 @@ public class User {
 
   public void setActive(Boolean active) {
     this.active = active;
+  }
+
+  public boolean isOnboardingCompleted() {
+    return onboardingCompleted;
   }
 
   public UserRole getRole() {

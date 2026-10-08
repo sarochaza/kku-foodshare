@@ -23,12 +23,14 @@ public class NotificationServiceImpl implements NotificationService {
   private final MemberService members;
   private final NotificationPreferenceRepository preferences;
   private final Clock clock;
+  private final PickupReminderService pickupReminders;
 
-  public NotificationServiceImpl(NotificationRepository repo, MemberService members, NotificationPreferenceRepository preferences, Clock clock) {
+  public NotificationServiceImpl(NotificationRepository repo, MemberService members, NotificationPreferenceRepository preferences, Clock clock, PickupReminderService pickupReminders) {
     this.repo = repo;
     this.members = members;
     this.preferences = preferences;
     this.clock = clock;
+    this.pickupReminders = pickupReminders;
   }
 
   @EventListener
@@ -47,6 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Transactional(readOnly = true)
   public PageView<View> list(String email, int page) {
     Long uid = members.require(email).getId();
+    pickupReminders.remindDue(uid);
     return PageView.of(
         repo.findByUserIdOrderByCreatedAtDesc(uid, PageRequest.of(Math.max(0, page), 20))
             .map(n -> new View(n.id, n.title, n.message, n.href, type(n), n.actorUserId, n.actorName, n.createdAt, n.readAt != null)));
@@ -69,7 +72,9 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Transactional(readOnly = true)
   public long unread(String email) {
-    return repo.countByUserIdAndReadAtIsNull(members.require(email).getId());
+    Long uid = members.require(email).getId();
+    pickupReminders.remindDue(uid);
+    return repo.countByUserIdAndReadAtIsNull(uid);
   }
 
   @Transactional(readOnly = true)

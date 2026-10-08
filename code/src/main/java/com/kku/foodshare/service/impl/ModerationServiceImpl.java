@@ -42,6 +42,37 @@ public class ModerationServiceImpl implements ModerationService {
     this.clock = clock;
   }
 
+  @Transactional(readOnly = true)
+  public long pendingReports(String email) { members.admin(email); return reports.countByStatus("OPEN"); }
+
+  @Transactional(readOnly = true)
+  public PageView<PostView> posts(String email, int page, String query, String status) {
+    members.admin(email);
+    FoodPostStatus filter = null;
+    if (status != null && !status.isBlank()) {
+      try { filter = FoodPostStatus.valueOf(status); }
+      catch (IllegalArgumentException invalid) { throw new Problem(400, "สถานะโพสต์ไม่ถูกต้อง"); }
+    }
+    final FoodPostStatus selected = filter;
+    String term = query == null ? "" : query.trim().toLowerCase(java.util.Locale.ROOT);
+    if (term.length() > 120) throw new Problem(400, "คำค้นหาต้องไม่เกิน 120 ตัวอักษร");
+    String like = "%" + term.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+    org.springframework.data.jpa.domain.Specification<FoodPost> criteria = (root, q, cb) -> {
+      var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+      if (selected != null) predicates.add(cb.equal(root.get("status"), selected));
+      if (!term.isEmpty()) predicates.add(cb.or(
+          cb.like(cb.lower(root.get("title")), like, '!'),
+          cb.like(cb.lower(root.get("owner").get("displayName")), like, '!'),
+          cb.like(cb.lower(root.get("pickupLocationName")), like, '!')));
+      return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+    };
+    return PageView.of(posts.findAll(criteria, PageRequest.of(Math.max(0, page), 20,
+        Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"))))
+        .map(p -> new PostView(p.getId(), p.getTitle(), p.getOwner().getDisplayName(),
+            p.getStatus().name(), p.getAvailableQuantity(), p.getReservedQuantity(),
+            p.getUnit(), p.getPickupLocationName(), p.getAvailableUntil())));
+  }
+
   private ReportView view(Report r) {
     return new ReportView(
         r.id,

@@ -54,7 +54,7 @@ class WebPagesTest {
   }
 
   @Test
-  void signedInHomeAndDashboardOpenFoodDiscoveryWithoutLandingHero() throws Exception {
+  void signedInRootKeepsLandingAndDashboardOpensFoodDiscovery() throws Exception {
     User member = new User();
     member.setEmail("signed-in-home@test.local");
     member.setPassword("unused");
@@ -62,8 +62,8 @@ class WebPagesTest {
     users.saveAndFlush(member);
 
     mvc.perform(get("/").with(user(member.getEmail()).roles("USER")))
-        .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/explore"));
+        .andExpect(status().isOk())
+        .andExpect(view().name("home"));
     mvc.perform(get("/home").with(user(member.getEmail()).roles("USER")))
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("มื้อดี ๆ"))))

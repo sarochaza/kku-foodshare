@@ -39,7 +39,7 @@ class CommentRepliesTest {
   private void setup(User member) {
     when(members.require(member.getEmail())).thenReturn(member);
     when(posts.findById(10L)).thenReturn(Optional.of(post));
-    when(comments.save(any())).thenAnswer(call -> {PostComment c = call.getArgument(0); c.id = 99L; return c;});
+    doAnswer(call -> {PostComment c = call.getArgument(0); c.id = 99L; return c;}).when(comments).save(any(PostComment.class));
   }
 
   @Test void existingRootCommentPayloadStillWorksAndNotifiesOwnerWithActor() {

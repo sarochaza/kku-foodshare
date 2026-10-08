@@ -61,6 +61,7 @@
 .welcome-page .steps-grid article { background: #ffffffc9; border: 1px solid #deeceb; padding: 25px 20px; border-radius: 24px; box-shadow: 0 8px 24px #29526909; }
 .welcome-page .share-banner { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr); align-items: center; border: 1px solid #dcebe3; border-radius: 30px; background: linear-gradient(120deg, #eaf7f1, #eef8ff); }
 .welcome-page .share-banner > img { width: 100%; height: clamp(220px, 25vw, 300px); object-fit: cover; object-position: 70% center; border-radius: 20px; mix-blend-mode: normal; box-shadow: 0 12px 28px #26516b18; }
+.welcome-page .share-banner > img.share-banner-image { height: auto; aspect-ratio: 3 / 2; object-fit: contain; object-position: center; }
 .welcome-faq { max-width: 860px; padding-top: 12px; padding-bottom: 58px; }
 .welcome-faq-list { display: grid; gap: 12px; }
 .welcome-faq details { border: 1px solid #deebe8; border-radius: 18px; background: white; box-shadow: 0 5px 20px #294f6506; overflow: hidden; }

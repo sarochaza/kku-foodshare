@@ -39,6 +39,9 @@ import { sharingMapUrl, mapFeedRequest, focusFoodMap, hasLocation } from "./map-
 import { initAuthUI } from "./auth.mjs";
 import { drawPass, parsePass } from "./pickup.mjs";
 import { setDefaultOrigin, fetchRoadDistances, formatMetres } from "./routes.mjs";
+import { initNotificationBadge } from './notification-badge.mjs';
+import { initHomeGuide } from './onboarding.mjs';
+
 const page = document.body.dataset.page;
 async function hydrateRoadDistances(posts, origin, isCurrent = () => true) {
   const unique = [...new Map(posts.filter(p => p?.latitude != null && p?.longitude != null).map(p => [p.id, p])).values()].slice(0, 50);
@@ -56,48 +59,6 @@ async function hydrateRoadDistances(posts, origin, isCurrent = () => true) {
     if (!isCurrent()) return;
     unique.forEach(post => $$(`[data-road-distance="${post.id}"]`).forEach(node => { node.textContent = "ระยะทางถนนไม่พร้อม"; }));
   }
-}
-function homeGuide() {
-  const shell = $("#home-guide");
-  if (!shell) return;
-  const key = "foodshare-guide-v2";
-  const replay = new URLSearchParams(location.search).has("guide");
-  if (!signedIn() && !replay) return;
-  try { if (!replay && localStorage.getItem(key)) return; } catch { /* private browsing */ }
-  const steps = [
-    ["#home-search", "ค้นหามื้อที่ถูกใจ", "พิมพ์ชื่ออาหารหรือจุดรับ แล้วดูรายการที่เพื่อน ๆ แบ่งปัน"],
-    ["#home-category-filters", "เลือกสิ่งที่อยากรับ", "กรองอาหาร เครื่องดื่ม ของว่าง หรือเฉพาะรายการที่รับได้ตอนนี้"],
-    ["#home-map", "ดูอาหารบนแผนที่สด", "แตะหมุดเพื่อเปิดการ์ดอาหารและดูจุดนัดรับได้ทันที"],
-    ["#home-locate", "หามื้อที่ใกล้คุณ", "อนุญาตตำแหน่งเมื่อพร้อม แล้วระบบจะเรียงอาหารตามระยะทางให้"],
-    ["#home-food", "เลือกและจองอาหาร", "แตะการ์ดเพื่ออ่านรายละเอียด จำนวนคงเหลือ และเวลานัดรับ"],
-    [matchMedia("(max-width: 600px)").matches ? '.mobile-nav a[href="/posts/new"]' : '.hero-buttons a[href="/posts/new"]', "ส่งต่ออาหารดี ๆ", "กดปุ่มบวกเพื่อปักหมุด ถ่ายรูป และแบ่งปันอาหาร"],
-  ];
-  let index = 0, target;
-  const escapeGuide = (event) => { if (event.key === "Escape") close(); };
-  const close = () => {
-    target?.classList.remove("guide-target"); shell.hidden = true;
-    document.removeEventListener("keydown", escapeGuide);
-    try { localStorage.setItem(key, "done"); } catch { /* private browsing */ }
-  };
-  const show = () => {
-    target?.classList.remove("guide-target");
-    const [selector, title, copy] = steps[index];
-    target = $(selector) || (index === 2 ? $("#home-food") : null);
-    if (target && getComputedStyle(target).display !== "none" && target.getClientRects().length) {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-      target.classList.add("guide-target");
-    }
-    $("#guide-title").textContent = title;
-    $("#guide-copy").textContent = copy;
-    $("#guide-progress").textContent = `${index + 1} / ${steps.length}`;
-    $("#guide-back").hidden = index === 0;
-    $("#guide-next").textContent = index === steps.length - 1 ? "เสร็จสิ้น" : "ถัดไป";
-  };
-  $("#guide-skip").onclick = close;
-  $("#guide-back").onclick = () => { index--; show(); };
-  $("#guide-next").onclick = () => { if (++index === steps.length) close(); else show(); };
-  shell.hidden = false; document.addEventListener("keydown", escapeGuide); show();
-  $("#guide-next").focus();
 }
 async function home() {
   const el = $("#home-food"),
@@ -254,7 +215,6 @@ async function home() {
   $("#home-locate").onclick = () => busy($("#home-locate"), () => useLocation({fresh:true}));
   if (signedIn()) void useLocation({silent:true});
   await load();
-  homeGuide();
 }
 function reportPost(postId, commentId = null) {
   return ask("แจ้งปัญหาให้ผู้ดูแล", "เลือกเหตุผล เช่น โพสต์เล่น, ข้อมูลไม่ถูกต้อง, ไม่เหมาะสม, สแปม หรืออื่น ๆ", {label:"เหตุผล", maxLength:1000, confirm:"ส่งรายงาน"}).then(async (reason) => {
@@ -668,7 +628,7 @@ function reservationCard(r) {
   const p = r.post,
     active = r.status === "RESERVED";
   const maximum = Math.min(p.availableQuantity + r.quantity, p.maxPerPerson || 10000);
-  return `<article class="reservation-card panel pickup-pass" data-reservation-status="${r.status}"><div class="pass-heading"><span>KKU FOODSHARE · PICKUP PASS</span><span>FS-${r.id}</span></div><div class="reservation-main"><a href="/posts/${p.id}" class="reservation-thumb">${photo(p)}</a><div class="reservation-summary">${badge(r.status)}<h2>${escape(p.title)}</h2><p>${icon("pin")}${escape(p.pickupLocationName)}</p><p>${icon("clock")}${escape(pickupWindow(p))}</p><p>ผู้แบ่งปัน: ${escape(p.ownerName)}</p></div><div class="reservation-quantity"><strong>${r.quantity}</strong>${escape(p.unit)}</div></div>${active && r.pickupCode ? `<div class="pass-ticket"><div class="pass-qr-wrap"><svg class="pass-qr" data-pass-id="${r.id}" data-pass-code="${escape(r.pickupCode)}"></svg><span>ให้เจ้าของโพสต์สแกน QR</span></div><div class="pass-code-wrap"><span class="section-kicker">SCAN & SHARE</span><h3>บัตรรับอาหารของคุณ</h3><p>แสดง QR นี้ให้เจ้าของโพสต์สแกนเมื่อมาถึงจุดรับ หรือแจ้งรหัส 6 หลักแทน</p><div class="pickup-code">รหัสสำรอง<strong>${escape(r.pickupCode)}</strong></div></div></div>` : ""}<div class="reservation-bottom">${!active ? `<span class="field-note">เลขอ้างอิง FS-${r.id}</span>` : `<span class="field-note">ใช้ได้เฉพาะการจองนี้ • อย่าแชร์ให้คนอื่น</span>`}<div class="row-actions">${active ? `<a class="btn btn-primary btn-sm" href="/posts/${p.id}">${icon("map")} เส้นทาง / เวลาเดินทาง</a><button class="btn btn-white btn-sm" data-change="${r.id}" data-quantity="${r.quantity}" data-max="${maximum}">แก้จำนวน</button><button class="btn btn-white btn-sm" data-cancel="${r.id}">ยกเลิก</button>` : ""}</div></div></article>`;
+  return `<article id="reservation-${r.id}" class="reservation-card panel pickup-pass" data-reservation-status="${r.status}"><div class="pass-heading"><span>KKU FOODSHARE · PICKUP PASS</span><span>FS-${r.id}</span></div><div class="reservation-main"><a href="/posts/${p.id}" class="reservation-thumb">${photo(p)}</a><div class="reservation-summary">${badge(r.status)}<h2>${escape(p.title)}</h2><p>${icon("pin")}${escape(p.pickupLocationName)}</p><p>${icon("clock")}${escape(pickupWindow(p))}</p><p>ผู้แบ่งปัน: ${escape(p.ownerName)}</p></div><div class="reservation-quantity"><strong>${r.quantity}</strong>${escape(p.unit)}</div></div>${active && r.pickupCode ? `<div class="pass-ticket"><div class="pass-qr-wrap"><svg class="pass-qr" data-pass-id="${r.id}" data-pass-code="${escape(r.pickupCode)}"></svg><span>ให้เจ้าของโพสต์สแกน QR</span></div><div class="pass-code-wrap"><span class="section-kicker">SCAN & SHARE</span><h3>บัตรรับอาหารของคุณ</h3><p>แสดง QR นี้ให้เจ้าของโพสต์สแกนเมื่อมาถึงจุดรับ หรือแจ้งรหัส 6 หลักแทน</p><div class="pickup-code">รหัสสำรอง<strong>${escape(r.pickupCode)}</strong></div></div></div>` : ""}<div class="reservation-bottom">${!active ? `<span class="field-note">เลขอ้างอิง FS-${r.id}</span>` : `<span class="field-note">ใช้ได้เฉพาะการจองนี้ • อย่าแชร์ให้คนอื่น</span>`}<div class="row-actions">${active ? `<a class="btn btn-primary btn-sm" href="/posts/${p.id}">${icon("map")} เส้นทาง / เวลาเดินทาง</a><button class="btn btn-white btn-sm" data-change="${r.id}" data-quantity="${r.quantity}" data-max="${maximum}">แก้จำนวน</button><button class="btn btn-white btn-sm" data-cancel="${r.id}">ยกเลิก</button>` : ""}</div></div></article>`;
 }
 async function reservations(page = 0) {
   const el = $("#reservation-list");
@@ -686,17 +646,35 @@ async function reservations(page = 0) {
   });
   try {
     const d = await api("/api/v1/me/reservations?page=" + page);
-    el.innerHTML = d.items.length
-      ? d.items.map(reservationCard).join("")
+    const target = page === 0 ? /^#reservation-([1-9]\d*)$/.exec(location.hash) : null;
+    const targetId = target && Number.isSafeInteger(Number(target[1])) ? Number(target[1]) : null;
+    const items = [...d.items];
+    let fromReminder = false;
+    if (targetId && !items.some(r => r.id === targetId)) {
+      try {
+        const focused = await api(`/api/v1/reservations/${targetId}`);
+        if (focused.id === targetId) {items.unshift(focused); fromReminder = true;}
+      } catch {toast("การจองนี้ไม่พร้อมแล้ว กรุณาตรวจสอบรายการด้านล่าง", true);}
+    }
+    el.innerHTML = items.length
+      ? (fromReminder ? '<p class="field-note">การจองจากการแจ้งเตือนอยู่ด้านบน</p>' : '') + items.map(reservationCard).join("")
       : empty("ยังไม่มีมื้อที่จองไว้", "ไปเลือกอาหารดี ๆ จากเพื่อนในชุมชนกัน");
     applyFilter();
     $$("[data-pass-id]", el).forEach(svg => {
       try { drawPass(svg, Number(svg.dataset.passId), svg.dataset.passCode); }
       catch { svg.replaceWith(document.createTextNode("ใช้รหัส 6 หลักด้านข้างแทน")); }
     });
+    if (targetId) {
+      const focused = document.getElementById(`reservation-${targetId}`);
+      if (focused) {
+        focused.classList.add("pickup-reminder-target"); focused.tabIndex = -1;
+        focused.focus({preventScroll: true});
+        focused.scrollIntoView({behavior: "smooth", block: "start"});
+      }
+    }
     $$('[data-trip-reservation]', el).forEach(button => {
       button.onclick = () => {
-        const reservation = d.items.find(r => r.id === Number(button.dataset.tripReservation));
+        const reservation = items.find(r => r.id === Number(button.dataset.tripReservation));
         if (!reservation) return;
         const card = button.closest('.reservation-card');
         let panel = card.querySelector('.reservation-trip');
@@ -1194,7 +1172,7 @@ async function notifications(page = 0) {
       ? items
           .map(
             (n) =>
-              `<article class="notification-card ${n.read ? "" : "unread"}" data-type="${escape(n.type || "UPDATE")}"><img class="notification-avatar" src="${n.actorId ? `/api/v1/members/${n.actorId}/photo` : "/images/default-profile.png"}" alt=""><div class="notification-copy"><div class="notification-heading"><h3>${escape(n.actorName || n.title)}</h3><span class="notification-type-label">${escape(notificationLabels[n.type] || notificationLabels.UPDATE)}</span></div><p>${escape(n.actorName ? n.message : n.title + " · " + n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}" aria-label="เปิดการแจ้งเตือน">เปิด</a></article>`,
+              `<article class="notification-card ${n.read ? "" : "unread"}" data-type="${escape(n.type || "UPDATE")}"><img class="notification-avatar" src="${n.actorId ? `/api/v1/members/${n.actorId}/photo` : "/images/default-profile.png"}" alt=""><div class="notification-copy"><div class="notification-heading"><h3>${escape(n.actorName || n.title)}</h3><span class="notification-type-label">${escape(notificationLabels[n.type] || notificationLabels.UPDATE)}</span></div><p>${escape(n.actorName ? n.message : n.title + " · " + n.message)}</p><time>${escape(dateTime(n.createdAt))}</time></div><a href="${escape(n.href)}" data-read="${n.id}" aria-label="เปิดการแจ้งเตือน">${n.href?.startsWith("/reservations#reservation-") ? "ดูการจอง" : "เปิด"}</a></article>`,
           ).join("")
       : empty(
           selectedType === "ALL" ? "ยังไม่มีการแจ้งเตือน" : "ยังไม่มีรายการประเภทนี้",
@@ -1237,11 +1215,36 @@ function account() {
   };
 }
 async function admin() {
-  let tab = "reports";
+  let tab = "posts";
+  let requestId = 0;
+  async function refreshPending() {
+    try {
+      const summary = await api("/api/v1/admin/pending-reports");
+      const badge = $("#admin-pending-count");
+      badge.textContent = summary.count;
+      badge.hidden = summary.count === 0;
+    } catch { /* The listing remains usable if the summary cannot load. */ }
+  }
+  refreshPending();
   async function load(page = 0) {
     const el = $("#admin-content");
+    const current = ++requestId;
+    const selectedTab = tab;
+    $("#admin-post-filters").hidden = tab !== "posts";
     try {
-      const d = await api("/api/v1/admin/" + tab + "?page=" + page);
+      const params = new URLSearchParams({page});
+      if (tab === "posts") {
+        params.set("q", $("#admin-post-query").value.trim());
+        params.set("status", $("#admin-post-status").value);
+      }
+      const d = await api("/api/v1/admin/" + selectedTab + "?" + params);
+      if (current !== requestId) return;
+      $("#admin-result-count").textContent = `พบ ${d.totalElements} รายการ`;
+      if (tab === "posts") {
+        el.innerHTML = d.items.length ? d.items.map(p =>
+          `<article class="panel admin-card">${badge(p.status)}<h3>${escape(p.title)}</h3><p>ผู้โพสต์: ${escape(p.owner)}</p><p class="field-note">${escape(p.pickupLocationName)} · หมดเวลารับ ${escape(dateTime(p.availableUntil))}</p><p>คงเหลือ ${p.availableQuantity} ${escape(p.unit)} · จองอยู่ ${p.reservedQuantity} ${escape(p.unit)}</p><a class="btn btn-white btn-sm" href="/posts/${p.id}">ดูรายละเอียดโพสต์</a></article>`
+        ).join("") : empty("ไม่พบโพสต์", "ลองเปลี่ยนคำค้นหาหรือสถานะ", null);
+      } else
       if (tab === "reports") {
         el.innerHTML = d.items.length
           ? d.items
@@ -1270,6 +1273,7 @@ async function admin() {
                   { method: "PATCH", body: { reason, closePost: close } },
                 );
                 toast("บันทึกผลการตรวจแล้ว");
+                refreshPending();
                 load(page);
               })),
         );
@@ -1304,6 +1308,7 @@ async function admin() {
       }
       paginate(d, load);
     } catch (e) {
+      if (current !== requestId) return;
       errorBox(el, e, () => load(page));
     }
   }
@@ -1317,6 +1322,8 @@ async function admin() {
         load();
       }),
   );
+  $("#admin-post-filters").onsubmit = (event) => { event.preventDefault(); load(); };
+  $("#admin-post-status").onchange = () => load();
   await load();
 }
 const boot = {
@@ -1338,5 +1345,7 @@ initNavigation();
 initImageViewer();
 initComments();
 initAuthUI();
+initNotificationBadge();
+initHomeGuide({complete: () => api("/api/v1/me/onboarding", {method: "POST"}), onError: message => toast(message, true)});
 if (boot[page])
   Promise.resolve(boot[page]()).catch((e) => toast(e.message, true));

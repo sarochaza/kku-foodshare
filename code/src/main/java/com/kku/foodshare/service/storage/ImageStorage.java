@@ -9,4 +9,8 @@ public interface ImageStorage {
   Resource load(String name);
 
   void remove(String name);
+
+  default java.net.URI publicUrl(String name) {
+    return null;
+  }
 }

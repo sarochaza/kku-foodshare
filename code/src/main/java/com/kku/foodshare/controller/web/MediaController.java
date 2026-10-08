@@ -17,6 +17,12 @@ public class MediaController {
   @GetMapping("/media/{name}")
   public ResponseEntity<Resource> image(@PathVariable String name) {
     try {
+      var publicUrl = storage.publicUrl(name);
+      if (publicUrl != null)
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .location(publicUrl)
+            .cacheControl(CacheControl.maxAge(java.time.Duration.ofDays(7)))
+            .build();
       return ResponseEntity.ok()
           .contentType(MediaType.IMAGE_JPEG)
           .cacheControl(CacheControl.maxAge(java.time.Duration.ofDays(7)))

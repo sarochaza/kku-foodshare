@@ -38,7 +38,6 @@ test('notification comment link opens the dialog at post detail', () => {
   assert.match(app, /location.hash === "#post-comments"\) openPostComments/);
 });
 
-test('automatic tour and location do not interrupt guest landing', () => {
-  assert.match(app, /if \(!signedIn\(\) && !replay\) return/);
+test('automatic location does not interrupt guest landing', () => {
   assert.match(app, /if \(signedIn\(\)\) void useLocation\(\{silent:true\}\)/);
 });

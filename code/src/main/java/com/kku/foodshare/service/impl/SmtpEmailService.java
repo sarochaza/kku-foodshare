@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
+@org.springframework.boot.autoconfigure.condition.ConditionalOnExpression("'${app.mail.provider:smtp}' == 'smtp'")
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
     name = "app.mail.enabled",
     havingValue = "true")

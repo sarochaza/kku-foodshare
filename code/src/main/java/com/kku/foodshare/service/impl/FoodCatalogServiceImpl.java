@@ -151,7 +151,8 @@ public class FoodCatalogServiceImpl implements FoodCatalogService {
   public PostView get(long id, String email) {
     FoodPost p = posts.findById(id).orElseThrow(Problem::missing);
     if (p.getStatus() == FoodPostStatus.CANCELLED
-        && (email == null || !p.getOwner().getEmail().equalsIgnoreCase(email)))
+        && (email == null || (!p.getOwner().getEmail().equalsIgnoreCase(email)
+            && members.require(email).getRole() != com.kku.foodshare.domain.enums.UserRole.ADMIN)))
       throw Problem.missing();
     return mapper.map(p, email, null, null);
   }

@@ -23,4 +23,10 @@ public class ProfileSettingsController {
     service.rename(CurrentIdentity.email(a), n.name());
     return ResponseEntity.noContent().build();
   }
+
+  @PostMapping("/api/v1/me/onboarding")
+  public ResponseEntity<Void> completeOnboarding(Authentication a) {
+    service.completeOnboarding(CurrentIdentity.email(a));
+    return ResponseEntity.noContent().build();
+  }
 }

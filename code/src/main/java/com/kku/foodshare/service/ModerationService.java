@@ -17,6 +17,13 @@ public interface ModerationService {
 
   record UserView(Long id, String name, String email, boolean active, String role) {}
 
+  record PostView(Long id, String title, String owner, String status, int availableQuantity,
+      int reservedQuantity, String unit, String pickupLocationName, LocalDateTime availableUntil) {}
+
+  long pendingReports(String email);
+
+  PageView<PostView> posts(String email, int page, String query, String status);
+
   ReportView report(String email, long postId, Long commentId, String reason);
 
   PageView<ReportView> reports(String email, int page);

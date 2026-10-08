@@ -40,9 +40,11 @@ public class PageAdvice {
 
   @ModelAttribute
   public void common(Authentication a, Model m) {
+    m.addAttribute("onboardingNeeded", false);
     String email = CurrentIdentity.email(a);
     if (email != null) {
       var u = members.require(email);
+      m.addAttribute("onboardingNeeded", !u.isOnboardingCompleted());
       m.addAttribute(
           "viewer", new Viewer(u.getId(), u.getDisplayName(), u.getEmail(), u.getRole().name()));
       m.addAttribute("unreadCount", notifications.unread(email));

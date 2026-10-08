@@ -14,6 +14,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Optional<User> findByEmailIgnoreCase(String email);
 
+  @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true, flushAutomatically = true)
+  @org.springframework.data.jpa.repository.Query(
+      "update User u set u.onboardingCompleted = true, u.version = u.version + 1 "
+          + "where u.id = :id and u.onboardingCompleted = false")
+  int completeOnboarding(@org.springframework.data.repository.query.Param("id") Long id);
+
   @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
   @org.springframework.data.jpa.repository.Query(
       "select u from User u where lower(u.email) = lower(:email)")

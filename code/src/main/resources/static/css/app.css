@@ -3258,11 +3258,14 @@ dialog p {
 .scan-success p { font-size: 10px; }
 
 /* Coach marks point at live controls and remain reversible. */
-.home-guide { position: fixed; inset: 0; z-index: 300; pointer-events: none; }
-.guide-shade { position: absolute; inset: 0; background: #092b3bba; pointer-events: auto; }
+.home-guide { position: fixed; inset: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; z-index: 300; }
+.home-guide::backdrop { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.home-guide[open] { display: block; }
+html.guide-open, html.guide-open body { overflow: hidden; }
+.guide-shade { position: absolute; inset: 0; background: rgba(9, 43, 59, 0.16); pointer-events: auto; }
 .guide-target { position: relative !important; z-index: 302 !important; box-shadow: 0 0 0 5px #fff, 0 0 0 10px #91dab8 !important; border-radius: 16px; pointer-events: auto; }
 .site-header:has(.guide-target) { z-index: 302; }
-.guide-card { position: absolute; bottom: max(102px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 30px)); padding: 22px; background: white; border-radius: 22px; box-shadow: 0 16px 55px #0b344a47; pointer-events: auto; z-index: 304; }
+.guide-card { position: absolute; bottom: max(102px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 30px)); max-height: calc(100dvh - 125px); overflow-y: auto; padding: 22px; background: white; color: #183b48; border-radius: 22px; box-shadow: 0 16px 55px #0b344a47; pointer-events: auto; z-index: 304; }
 .guide-card h2 { font-size: 20px; margin: 8px 0; }
 .guide-card p { font-size: 13px; }
 .guide-progress { color: var(--green); font-size: 12px; font-weight: 700; }
@@ -3970,8 +3973,8 @@ dialog p {
 .home-categories-compact { gap:6px; }
 .home-categories-compact .home-category { min-height:38px; padding:7px 10px; font-size:13px; }
 .home-categories-compact .home-category span { font-size:15px; }
-.home-now-compact { display:flex; align-items:center; min-height:38px; padding:7px 10px; border:1px solid var(--line); border-radius:10px; color:var(--ink); font-size:13px; white-space:nowrap; background:#fff; cursor:pointer; }
-.home-now-compact input { accent-color:var(--green); margin:0 6px 0 0; }
+.home-now-compact { display:flex; flex-direction:row; align-items:center; min-height:38px; margin:0; padding:7px 10px; border:1px solid var(--line); border-radius:10px; color:var(--ink); font-size:13px; white-space:nowrap; background:#fff; cursor:pointer; }
+.home-now-compact input { flex:none; width:16px; height:16px; min-height:0; padding:0; accent-color:var(--green); margin:0; }
 .food-feed-card { max-width:760px; }
 .food-content-block { background:#fff; }
 .food-feed-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; padding:15px 16px 10px; }
@@ -4176,6 +4179,7 @@ body.auth-page .site-footer { padding-block: 12px; }
 .home-discovery-toolbar > .home-sort,
 .home-discovery-toolbar > .home-now-compact,
 .home-discovery-toolbar > .home-sharing-map-icon { align-self: end; box-sizing: border-box; }
+.home-discovery-toolbar > .home-sort { margin: 0; }
 .home-discovery-toolbar > .home-sort select { min-height: 54px; }
 .home-discovery-toolbar > .home-now-compact { min-height: 54px; }
 .home-discovery-toolbar > .home-sharing-map-icon { width: 54px; min-height: 54px; flex-basis: 54px; }
@@ -4247,4 +4251,32 @@ body.auth-page .site-footer { padding-block: 8px; }
   .filter-selects > .filter-select:first-child { grid-column: 1; grid-row: 1; }
   .filter-selects > .filter-select:last-child { grid-column: 2; grid-row: 1; }
   .filter-selects > .check-chip { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
+}
+
+.admin-post-filters { display:flex; align-items:end; gap:12px; padding:18px; margin-block:18px; }
+.admin-post-filters label { flex:1; min-width:0; margin:0; }
+.admin-post-filters label:first-child { flex:2; }
+.admin-post-filters input, .admin-post-filters select { width:100%; min-height:44px; margin-top:6px; }
+.admin-card h3 { margin:12px 0; overflow-wrap:anywhere; }
+.admin-tabs { flex-wrap:wrap; }
+@media(max-width:600px) {
+  .admin-post-filters { flex-wrap:wrap; padding:14px; }
+  .admin-post-filters label:first-child { flex:1 0 100%; }
+  .admin-post-filters .btn { min-height:44px; }
+}
+body[data-page="admin"] .page-heading h1 { font-size:clamp(26px,4vw,40px); overflow-wrap:anywhere; }
+
+/* Keep the reminder target below the sticky header without changing pickup controls. */
+.reservation-card.pickup-reminder-target {
+  scroll-margin-top: 160px;
+  outline: 2px solid var(--blue, #4b78ef);
+  outline-offset: 3px;
+}
+.home-guide::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.home-guide .guide-shade {
+  background: rgba(9, 43, 59, 0.16);
 }

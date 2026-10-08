@@ -31,6 +31,19 @@ public class ModerationController {
         .body(service.report(CurrentIdentity.email(a), r.postId(), r.commentId(), r.reason()));
   }
 
+  @GetMapping("/admin/pending-reports")
+  public java.util.Map<String, Long> pendingReports(Authentication a) {
+    return java.util.Map.of("count", service.pendingReports(CurrentIdentity.email(a)));
+  }
+
+  @GetMapping("/admin/posts")
+  public PageView<ModerationService.PostView> posts(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "") @Size(max = 120) String q,
+      @RequestParam(defaultValue = "") String status, Authentication a) {
+    return service.posts(CurrentIdentity.email(a), page, q, status);
+  }
+
   @GetMapping("/admin/reports")
   public PageView<ModerationService.ReportView> reports(
       @RequestParam(defaultValue = "0") int page, Authentication a) {

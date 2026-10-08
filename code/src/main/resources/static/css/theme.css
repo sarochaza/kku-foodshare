@@ -498,3 +498,117 @@ html[data-theme="dark"] .about-contact-card:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Shared controls must follow the background theme, including their wrappers. */
+html[data-theme="dark"] .search-input,
+html[data-theme="dark"] .chip,
+html[data-theme="dark"] .owner-filter,
+html[data-theme="dark"] .owner-filters button,
+html[data-theme="dark"] .view-switch,
+html[data-theme="dark"] .icon-button,
+html[data-theme="dark"] .auth-input-wrap,
+html[data-theme="dark"] .comment-input,
+html[data-theme="dark"] .feed-comments-entry {
+  background: #303238;
+  border-color: #474a52;
+  color: #e4e6eb;
+}
+html[data-theme="dark"] .search-input input {
+  background: transparent;
+  color: #e4e6eb;
+}
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .loading-box,
+html[data-theme="dark"] .modal-box,
+html[data-theme="dark"] .food-feed-head,
+html[data-theme="dark"] .food-feed-body,
+html[data-theme="dark"] .food-feed-footer {
+  background: #242526;
+  border-color: #3e4042;
+  color: #e4e6eb;
+}
+html[data-theme="dark"] .owner-filter button,
+html[data-theme="dark"] .view-switch button {
+  background: transparent;
+  color: #b0b3b8;
+}
+html[data-theme="dark"] .chip.active,
+html[data-theme="dark"] .owner-filter button.active,
+html[data-theme="dark"] .owner-filters button.active,
+html[data-theme="dark"] .view-switch button.active {
+  background: #2d4262;
+  color: #a8c9ff;
+  border-color: #6286b6;
+}
+html[data-theme="dark"] .empty-state p,
+html[data-theme="dark"] .field-note { color: #b0b3b8; }
+html[data-theme="dark"] .chip:hover,
+html[data-theme="dark"] .icon-button:hover { background: #3a3d43; }
+html[data-theme="dark"] .password-toggle { color: #a8c9ff; }
+html[data-theme="dark"] .success-note,
+html[data-theme="dark"] .info-note { background: #243749; color: #d1e4ff; }
+html[data-theme="dark"] .form-error { background: #462a30; color: #ffc1c8; }
+
+/* Landing FAQ and authentication artwork need themed surfaces as well as text. */
+html[data-theme="dark"] .welcome-faq details,
+html[data-theme="dark"] .welcome-faq details[open] {
+  background: #242526;
+  border-color: #3e4042;
+  color: #e4e6eb;
+  box-shadow: 0 5px 20px #00000020;
+}
+html[data-theme="dark"] .welcome-faq summary { color: #e4e6eb; }
+html[data-theme="dark"] .welcome-faq details p { color: #bfc3ca; }
+html[data-theme="dark"] .welcome-faq details[open] summary { background: #303238; }
+html[data-theme="dark"] .welcome-faq summary:hover { background: #303238; }
+html[data-theme="dark"] .welcome-faq summary:after { color: #a8c9ff; }
+html[data-theme="dark"] .home-sharing-map-icon {
+  background: #303238;
+  border-color: #474a52;
+  color: #a8c9ff;
+}
+html[data-theme="dark"] .home-sharing-map-icon:hover { background: #3a3d43; }
+html[data-theme="dark"] .auth-art {
+  background: #20252b linear-gradient(145deg, #252a32, #202d28);
+  border-color: #3e454c;
+  box-shadow: 0 12px 35px #00000030;
+}
+html[data-theme="dark"] .auth-art h2 { color: var(--ink); }
+html[data-theme="dark"] .auth-art h2 span { color: #a8c9ff; }
+html[data-theme="dark"] .auth-art p,
+html[data-theme="dark"] .auth-page .auth-subtitle,
+html[data-theme="dark"] .auth-page .auth-bottom { color: #bfc3ca; }
+html[data-theme="dark"] .auth-art .eyebrow {
+  background: #303b3a;
+  border-color: #4b605b;
+  color: #8be0bc;
+}
+html[data-theme="dark"] .auth-orb-blue { background: #34486270; }
+html[data-theme="dark"] .auth-orb-green { background: #36514470; }
+html[data-theme="dark"] .auth-art-ring {
+  background: #34473b45;
+  border-color: #536458;
+  box-shadow: 0 0 0 20px #52685716, 0 0 0 40px #5268570c;
+}
+html[data-theme="dark"] .auth-art img { mix-blend-mode: normal; }
+html[data-theme="dark"] .auth-art-bottom,
+html[data-theme="dark"] .auth-explore-link,
+html[data-theme="dark"] .auth-community-note { color: #8fcbb3; }
+html[data-theme="dark"] .auth-float-note {
+  background: #2d3433;
+  border-color: #48534f;
+  box-shadow: 0 8px 25px #00000030;
+}
+html[data-theme="dark"] .auth-float-note > span,
+html[data-theme="dark"] .auth-field-label { color: #e4e6eb; }
+html[data-theme="dark"] .auth-float-note small,
+html[data-theme="dark"] .auth-card-kicker { color: #b0b8be; }
+html[data-theme="dark"] .auth-float-note > .icon,
+html[data-theme="dark"] .auth-page .auth-symbol {
+  background: #273e35;
+  border-color: #405e51;
+  color: #86dcb5;
+}
+html[data-theme="dark"] .auth-page .auth-bottom a,
+html[data-theme="dark"] .auth-page .forgot-link { color: #a8c9ff; }
+html[data-theme="dark"] .auth-page .password-toggle:hover { background: #39424e; }

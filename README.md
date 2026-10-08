@@ -1,4 +1,5 @@
-> รุ่นล่าสุดในชุดนี้: Phase 9 UI polish — ดู [รายละเอียด Phase 9](PHASE9-VISUAL-POLISH-NOTES.md)
+> รุ่นล่าสุดในชุดนี้: Phase 11.1 — คำแนะนำอยู่หน้าสุดและจำการดูแยกตามบัญชี ดู [คู่มือรุ่นนี้](docs/phase-notes/PHASE11-1-ONBOARDING-NOTES.md)
+> คู่มือ Cloudinary/Brevo และการ Deploy: [Phase 11](docs/phase-notes/PHASE11-STORAGE-EMAIL-REMINDER-NOTES.md)
 > อัปเกรดจากรุ่นเดิมให้ใช้ `.env` เดิมและ `-p kku-foodshare-phase1` เพื่อใช้ฐานข้อมูลเดิม
 
 # KKU FoodShare

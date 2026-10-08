@@ -8,6 +8,7 @@
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <meta name="signed-in" th:content="${viewer != null}" />
+    <meta name="onboarding-needed" th:content="${onboardingNeeded == true}" />
     <meta name="tile-url" th:content="${tileUrl}" />
     <meta name="tile-attribution" th:content="${tileAttribution}" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
@@ -209,6 +210,13 @@
         >
       </nav>
     </header>
+    <dialog th:fragment="onboardingGuide" id="home-guide" class="home-guide" hidden aria-labelledby="guide-title" aria-describedby="guide-copy">
+      <div class="guide-shade" aria-hidden="true"></div>
+      <div class="guide-card">
+        <span id="guide-progress" class="guide-progress" aria-live="polite"></span><h2 id="guide-title"></h2><p id="guide-copy"></p>
+        <div class="guide-actions"><button type="button" id="guide-skip">ข้าม</button><button type="button" id="guide-back">ย้อนกลับ</button><button type="button" id="guide-next" class="btn btn-primary">ถัดไป</button></div>
+      </div>
+    </dialog>
     <footer th:fragment="footer" class="site-footer">
       <div class="container footer-inner">
         <a href="/" class="brand footer-brand"

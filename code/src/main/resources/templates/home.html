@@ -216,10 +216,11 @@
             >
           </div>
           <img
-            src="/images/foodshare-community-photo.png"
+            class="share-banner-image"
+            src="/images/foodshare-share-banner.png"
             width="1536"
             height="1024"
-            alt="การส่งต่ออาหารในบรรยากาศชุมชนมหาวิทยาลัย"
+            alt="นักศึกษา มข. ส่งต่อถุงอาหารให้กันริมสระในมหาวิทยาลัย"
             loading="lazy"
           />
         </div>
@@ -236,11 +237,6 @@
       </section>
     </main>
     <footer th:replace="~{fragments :: footer}"></footer>
-    <div id="home-guide" class="home-guide" hidden aria-live="polite">
-      <div class="guide-shade"></div><div class="guide-card" role="dialog" aria-label="แนะนำการใช้งาน">
-        <span id="guide-progress" class="guide-progress"></span><h2 id="guide-title"></h2><p id="guide-copy"></p>
-        <div class="guide-actions"><button type="button" id="guide-skip">ข้าม</button><button type="button" id="guide-back">ย้อนกลับ</button><button type="button" id="guide-next" class="btn btn-primary">ถัดไป</button></div>
-      </div>
-    </div>
+    <dialog th:replace="~{fragments :: onboardingGuide}"></dialog>
   </body>
 </html>
