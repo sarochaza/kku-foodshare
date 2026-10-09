@@ -97,21 +97,115 @@ Behavioral patterns ได้แก่ **Strategy** สำหรับการ�
 | แจ้งเตือน | `notifications`, `notification_preferences` |
 | ชุมชนและประวัติ | `post_comments`, `saved_posts`, `reports`, `audit_events` |
 
-ภาพต่อไปนี้แสดง **ความสัมพันธ์หลัก** ของระบบ:
+### ER Diagram — ภาพรวมฐานข้อมูลทั้งระบบ
+
+แสดง Entity ทั้ง 12 ตาราง พร้อม Primary Key และ Foreign Key หลัก
 
 ```mermaid
 erDiagram
+    USERS {
+        bigint id PK
+    }
+
+    USER_PROFILE_IMAGES {
+        bigint user_id PK, FK
+    }
+
+    NOTIFICATION_PREFERENCES {
+        bigint id PK
+        bigint user_id FK, UK
+    }
+
+    FOOD_POSTS {
+        bigint id PK
+        bigint owner_id FK
+    }
+
+    FOOD_POST_IMAGES {
+        bigint id PK
+        bigint post_id FK
+    }
+
+    RESERVATIONS {
+        bigint id PK
+        bigint post_id FK
+        bigint member_id FK
+    }
+
+    POST_COMMENTS {
+        bigint id PK
+        bigint post_id FK
+        bigint author_id FK
+        bigint parent_comment_id FK
+        bigint reply_to_comment_id FK
+        bigint deleted_by_id FK
+    }
+
+    SAVED_POSTS {
+        bigint id PK
+        bigint user_id FK
+        bigint post_id FK
+    }
+
+    NOTIFICATIONS {
+        bigint id PK
+        bigint user_id FK
+    }
+
+    REPORTS {
+        bigint id PK
+        bigint post_id FK
+        bigint reporter_id FK
+        bigint reviewer_id FK
+    }
+
+    AUDIT_EVENTS {
+        bigint id PK
+        bigint actor_id FK
+    }
+
+    PASSWORD_RESET_TOKENS {
+        bigint id PK
+        bigint user_id FK
+    }
+
+    USERS ||--o| USER_PROFILE_IMAGES : has_profile_image
+    USERS ||--o| NOTIFICATION_PREFERENCES : has_preferences
+
     USERS ||--o{ FOOD_POSTS : shares
     USERS ||--o{ RESERVATIONS : reserves
-    FOOD_POSTS ||--o{ RESERVATIONS : receives
-    FOOD_POSTS ||--o{ FOOD_POST_IMAGES : contains
-    FOOD_POSTS ||--o{ POST_COMMENTS : contains
+    USERS ||--o{ POST_COMMENTS : writes
+    USERS o|--o{ POST_COMMENTS : deletes
     USERS ||--o{ SAVED_POSTS : saves
-    FOOD_POSTS ||--o{ SAVED_POSTS : appears_in
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ REPORTS : reports
+    USERS o|--o{ REPORTS : reviews
+    USERS ||--o{ AUDIT_EVENTS : performs
+    USERS ||--o{ PASSWORD_RESET_TOKENS : requests_reset
+
+    FOOD_POSTS ||--o{ FOOD_POST_IMAGES : contains
+    FOOD_POSTS ||--o{ RESERVATIONS : receives
+    FOOD_POSTS ||--o{ POST_COMMENTS : contains
+    FOOD_POSTS ||--o{ SAVED_POSTS : saved_by
+    FOOD_POSTS ||--o{ REPORTS : receives
+
+    POST_COMMENTS o|--o{ POST_COMMENTS : parent_of
+    POST_COMMENTS o|--o{ POST_COMMENTS : replied_to_by
 ```
 
-- **One-to-One:** สมาชิกกับรูปโปรไฟล์/การตั้งค่าแจ้งเตือน
-- **One-to-Many:** สมาชิกกับโพสต์/การจอง และโพสต์กับรูป/การจอง/ความคิดเห็น
+### ประเภทความสัมพันธ์
+
+- **One-to-One:** สมาชิกกับรูปโปรไฟล์ และสมาชิกกับการตั้งค่าแจ้งเตือน สมาชิกมีข้อมูลแต่ละประเภทได้สูงสุดหนึ่งรายการ
+
+- **One-to-Many:** สมาชิกกับโพสต์ การจอง ความคิดเห็น รายการบันทึกโพสต์ การแจ้งเตือน รายงานปัญหา ประวัติการทำงาน และโทเคนรีเซ็ตรหัสผ่าน รวมถึงโพสต์กับรูปภาพ การจอง ความคิดเห็น รายการบันทึกโพสต์ และรายงานปัญหา
+
+- **Self-referencing:** ความคิดเห็นอ้างอิงความคิดเห็นในตารางเดียวกันผ่าน `parent_comment_id` และ `reply_to_comment_id` เพื่อรองรับการตอบกลับ
+
+- **Many-to-Many:** สมาชิกกับโพสต์ที่บันทึกไว้ ผ่านตารางเชื่อม `saved_posts` ซึ่งมี `user_id` และ `post_id` พร้อม Unique Constraint ของคู่นี้เพื่อป้องกันการบันทึกซ้ำ ใน Java ใช้ Entity `SavedPost` เชื่อมด้วย `@ManyToOne` สองด้าน
+
+PK = Primary Key, FK = Foreign Key, UK = Unique Key
+
+ภาพนี้แสดงคีย์และความสัมพันธ์หลัก ไม่ได้แสดงทุกคอลัมน์ รายละเอียดชนิดข้อมูล ข้อบังคับ และ Index ให้ดูใน ER Diagram ฉบับเต็มและ Data Dictionary ใน `doc/`
 - [ER Diagram ครบทุกตาราง](doc/diagrams/README.md#er)
 - [Data Dictionary, FK, Index, Fetch และ Cascade](doc/data-dictionary.md)
 
