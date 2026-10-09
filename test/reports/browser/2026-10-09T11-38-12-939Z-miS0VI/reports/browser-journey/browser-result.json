@@ -1,0 +1,125 @@
+{
+  "journey": [
+    "Register and login owner",
+    "Place suggestions (fixture), selection, hidden coordinates, real marker drag and current device location",
+    "Create post, click real Leaflet coordinate, upload image and read persisted data",
+    "Edit restores prior coordinates and name; mobile suggestions fit; edited position persists",
+    "Search returns this run's post and one matching map pin",
+    "Interactive home guide replay and account completion",
+    "Live home map, food-pin preview, category filter and current location",
+    "Automatic confirmed origin, walking/driving preview and Google Maps handoff (routing fixture)",
+    "Reserve through UI; scoped pickup code and stock deduction",
+    "Change reservation quantity and verify persisted stock",
+    "Owner confirms this reservation using receiver code",
+    "Edit profile and wait for the saved name after reload",
+    "Persistent notifications",
+    "Tile failure notice and manual coordinate fallback",
+    "Offline geocoder exposes manual fallback",
+    "Denied geolocation recovery",
+    "Accessible dialog cancellation with empty required field"
+  ],
+  "viewports": [
+    {
+      "width": 360,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/posts/34",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "route": "/account/posts",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/posts/34",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/account/posts",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/posts/34",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "route": "/account/posts",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/explore",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/posts/34",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "route": "/account/posts",
+      "overflow": false
+    }
+  ],
+  "javascriptErrors": [],
+  "result": "PASS"
+}
