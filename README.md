@@ -300,7 +300,7 @@ node --test code/src/test/js/*.test.mjs
 
 Java แสดง `BUILD SUCCESS` และสร้าง executable JAR สำเร็จบน Java 26.0.2 ของผู้จัดทำ ส่วน `pom.xml` กำหนด Java target 17
 
-- [Test Report](test/reports/test-report.md)
+- [Test Reports](https://github.com/sarochaza/kku-foodshare/tree/main/test/reports)
 - [คู่มือ Browser และ PostgreSQL checks](test/README.md)
 - [สถานะผลตรวจและหลักฐาน](test/reports/verification.md)
 
