@@ -1,0 +1,7 @@
+{
+  "journey": [],
+  "viewports": [],
+  "javascriptErrors": [],
+  "result": "FAIL",
+  "error": "response.text: Protocol error (Network.getResponseBody): No data found for resource with given identifier\n    at waitForApi (C:\\Users\\CHOMP2O\\OneDrive\\เดสก์ท็อป\\1\\Principle\\KKU-FoodShare-Phase12-Comment-CRUD\\kku-foodshare\\test\\browser-journey.cjs:27:87)\n    at async dismissGuide (C:\\Users\\CHOMP2O\\OneDrive\\เดสก์ท็อป\\1\\Principle\\KKU-FoodShare-Phase12-Comment-CRUD\\kku-foodshare\\test\\browser-journey.cjs:34:2)\n    at async account (C:\\Users\\CHOMP2O\\OneDrive\\เดสก์ท็อป\\1\\Principle\\KKU-FoodShare-Phase12-Comment-CRUD\\kku-foodshare\\test\\browser-journey.cjs:19:2)\n    at async C:\\Users\\CHOMP2O\\OneDrive\\เดสก์ท็อป\\1\\Principle\\KKU-FoodShare-Phase12-Comment-CRUD\\kku-foodshare\\test\\browser-journey.cjs:45:15"
+}

@@ -1,0 +1,10 @@
+name,scope,status,exitCode,log,error
+"quick-actions-journey","live","FAIL","1","logs/quick-actions-journey.log",""
+"home-overflow-check","live","PASS","0","logs/home-overflow-check.log",""
+"about-image-check","source","NOT_RUN","","",""
+"admin-posts-check","fixture","NOT_RUN","","",""
+"dark-surfaces-check","fixture","NOT_RUN","","",""
+"onboarding-check","fixture","NOT_RUN","","",""
+"phase10-ui-check","fixture","NOT_RUN","","",""
+"pickup-reminder-check","fixture","NOT_RUN","","",""
+"browser-journey","live","NOT_RUN","","",""

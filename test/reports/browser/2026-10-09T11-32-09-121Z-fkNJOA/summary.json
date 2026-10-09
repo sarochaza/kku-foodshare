@@ -1,0 +1,97 @@
+{
+  "baseUrl": "http://localhost:8081",
+  "generatedAt": "2026-10-09T11:32:49.949Z",
+  "counts": {
+    "pass": 0,
+    "fail": 1,
+    "notRun": 8
+  },
+  "results": [
+    {
+      "name": "quick-actions-journey",
+      "scope": "live",
+      "status": "FAIL",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:32:09.157Z",
+      "finishedAt": "2026-10-09T11:32:49.933Z",
+      "log": "logs/quick-actions-journey.log",
+      "screenshots": "screenshots/quick-actions-journey",
+      "report": "reports/quick-actions-journey"
+    },
+    {
+      "name": "about-image-check",
+      "scope": "source",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "admin-posts-check",
+      "scope": "fixture",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "dark-surfaces-check",
+      "scope": "fixture",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "onboarding-check",
+      "scope": "fixture",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "phase10-ui-check",
+      "scope": "fixture",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "pickup-reminder-check",
+      "scope": "fixture",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "browser-journey",
+      "scope": "live",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    },
+    {
+      "name": "home-overflow-check",
+      "scope": "live",
+      "status": "NOT_RUN",
+      "exitCode": null,
+      "log": null,
+      "error": null,
+      "reason": "Not selected for this run"
+    }
+  ],
+  "note": "PASS means this script exited successfully; source/fixture checks do not prove live API behavior."
+}

@@ -1,0 +1,129 @@
+{
+  "baseUrl": "http://localhost:8081",
+  "generatedAt": "2026-10-09T11:10:03.327Z",
+  "counts": {
+    "pass": 7,
+    "fail": 2,
+    "notRun": 0
+  },
+  "results": [
+    {
+      "name": "about-image-check",
+      "scope": "source",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:07:44.729Z",
+      "finishedAt": "2026-10-09T11:07:44.978Z",
+      "log": "logs/about-image-check.log",
+      "screenshots": "screenshots/about-image-check",
+      "report": "reports/about-image-check"
+    },
+    {
+      "name": "admin-posts-check",
+      "scope": "fixture",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:07:44.991Z",
+      "finishedAt": "2026-10-09T11:07:51.018Z",
+      "log": "logs/admin-posts-check.log",
+      "screenshots": "screenshots/admin-posts-check",
+      "report": "reports/admin-posts-check"
+    },
+    {
+      "name": "dark-surfaces-check",
+      "scope": "fixture",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:07:51.045Z",
+      "finishedAt": "2026-10-09T11:07:56.126Z",
+      "log": "logs/dark-surfaces-check.log",
+      "screenshots": "screenshots/dark-surfaces-check",
+      "report": "reports/dark-surfaces-check"
+    },
+    {
+      "name": "onboarding-check",
+      "scope": "fixture",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:07:56.140Z",
+      "finishedAt": "2026-10-09T11:08:14.493Z",
+      "log": "logs/onboarding-check.log",
+      "screenshots": "screenshots/onboarding-check",
+      "report": "reports/onboarding-check"
+    },
+    {
+      "name": "phase10-ui-check",
+      "scope": "fixture",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:08:14.504Z",
+      "finishedAt": "2026-10-09T11:08:28.239Z",
+      "log": "logs/phase10-ui-check.log",
+      "screenshots": "screenshots/phase10-ui-check",
+      "report": "reports/phase10-ui-check"
+    },
+    {
+      "name": "pickup-reminder-check",
+      "scope": "fixture",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:08:28.248Z",
+      "finishedAt": "2026-10-09T11:08:38.714Z",
+      "log": "logs/pickup-reminder-check.log",
+      "screenshots": "screenshots/pickup-reminder-check",
+      "report": "reports/pickup-reminder-check"
+    },
+    {
+      "name": "browser-journey",
+      "scope": "live",
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:08:38.722Z",
+      "finishedAt": "2026-10-09T11:09:35.044Z",
+      "log": "logs/browser-journey.log",
+      "screenshots": "screenshots/browser-journey",
+      "report": "reports/browser-journey"
+    },
+    {
+      "name": "quick-actions-journey",
+      "scope": "live",
+      "status": "FAIL",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:09:35.049Z",
+      "finishedAt": "2026-10-09T11:10:00.171Z",
+      "log": "logs/quick-actions-journey.log",
+      "screenshots": "screenshots/quick-actions-journey",
+      "report": "reports/quick-actions-journey"
+    },
+    {
+      "name": "home-overflow-check",
+      "scope": "live",
+      "status": "FAIL",
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "startedAt": "2026-10-09T11:10:00.175Z",
+      "finishedAt": "2026-10-09T11:10:03.322Z",
+      "log": "logs/home-overflow-check.log",
+      "screenshots": "screenshots/home-overflow-check",
+      "report": "reports/home-overflow-check"
+    }
+  ],
+  "note": "PASS means this script exited successfully; source/fixture checks do not prove live API behavior."
+}

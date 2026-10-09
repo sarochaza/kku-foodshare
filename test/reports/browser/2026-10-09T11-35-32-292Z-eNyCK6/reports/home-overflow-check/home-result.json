@@ -1,0 +1,210 @@
+{
+  "viewports": [
+    {
+      "width": 360,
+      "stage": "guide open",
+      "scroll": 360,
+      "checkbox": {
+        "x": 200.59375,
+        "y": 1875.890625,
+        "width": 16,
+        "height": 16,
+        "top": 1875.890625,
+        "right": 216.59375,
+        "bottom": 1891.890625,
+        "left": 200.59375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "stage": "filters scrolled and availability enabled",
+      "scroll": 360,
+      "checkbox": {
+        "x": 200.59375,
+        "y": 492.890625,
+        "width": 16,
+        "height": 16,
+        "top": 492.890625,
+        "right": 216.59375,
+        "bottom": 508.890625,
+        "left": 200.59375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 360,
+      "stage": "availability disabled",
+      "scroll": 360,
+      "checkbox": {
+        "x": 200.59375,
+        "y": 492.890625,
+        "width": 16,
+        "height": 16,
+        "top": 492.890625,
+        "right": 216.59375,
+        "bottom": 508.890625,
+        "left": 200.59375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "stage": "guide open",
+      "scroll": 390,
+      "checkbox": {
+        "x": 230.59375,
+        "y": 1818.90625,
+        "width": 16,
+        "height": 16,
+        "top": 1818.90625,
+        "right": 246.59375,
+        "bottom": 1834.90625,
+        "left": 230.59375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "stage": "filters scrolled and availability enabled",
+      "scroll": 390,
+      "checkbox": {
+        "x": 230.59375,
+        "y": 492.90625,
+        "width": 16,
+        "height": 16,
+        "top": 492.90625,
+        "right": 246.59375,
+        "bottom": 508.90625,
+        "left": 230.59375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "stage": "availability disabled",
+      "scroll": 390,
+      "checkbox": {
+        "x": 230.59375,
+        "y": 492.90625,
+        "width": 16,
+        "height": 16,
+        "top": 492.90625,
+        "right": 246.59375,
+        "bottom": 508.90625,
+        "left": 230.59375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "stage": "guide open",
+      "scroll": 768,
+      "checkbox": {
+        "x": 587.984375,
+        "y": 1826.609375,
+        "width": 16,
+        "height": 16,
+        "top": 1826.609375,
+        "right": 603.984375,
+        "bottom": 1842.609375,
+        "left": 587.984375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "stage": "filters scrolled and availability enabled",
+      "scroll": 768,
+      "checkbox": {
+        "x": 587.984375,
+        "y": 492.609375,
+        "width": 16,
+        "height": 16,
+        "top": 492.609375,
+        "right": 603.984375,
+        "bottom": 508.609375,
+        "left": 587.984375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "stage": "availability disabled",
+      "scroll": 768,
+      "checkbox": {
+        "x": 587.984375,
+        "y": 492.609375,
+        "width": 16,
+        "height": 16,
+        "top": 492.609375,
+        "right": 603.984375,
+        "bottom": 508.609375,
+        "left": 587.984375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "stage": "guide open",
+      "scroll": 1366,
+      "checkbox": {
+        "x": 1126.984375,
+        "y": 1510.53125,
+        "width": 16,
+        "height": 16,
+        "top": 1510.53125,
+        "right": 1142.984375,
+        "bottom": 1526.53125,
+        "left": 1126.984375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "stage": "filters scrolled and availability enabled",
+      "scroll": 1366,
+      "checkbox": {
+        "x": 1126.984375,
+        "y": 492.53125,
+        "width": 16,
+        "height": 16,
+        "top": 492.53125,
+        "right": 1142.984375,
+        "bottom": 508.53125,
+        "left": 1126.984375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    },
+    {
+      "width": 1366,
+      "stage": "availability disabled",
+      "scroll": 1366,
+      "checkbox": {
+        "x": 1126.984375,
+        "y": 492.53125,
+        "width": 16,
+        "height": 16,
+        "top": 492.53125,
+        "right": 1142.984375,
+        "bottom": 508.53125,
+        "left": 1126.984375
+      },
+      "offsetParent": "BODY",
+      "overflow": false
+    }
+  ],
+  "javascriptErrors": [],
+  "result": "PASS"
+}

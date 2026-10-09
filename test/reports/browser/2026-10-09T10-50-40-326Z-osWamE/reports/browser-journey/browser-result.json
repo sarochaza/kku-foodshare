@@ -1,0 +1,12 @@
+{
+  "journey": [
+    "Register and login owner",
+    "Place suggestions (fixture), selection, hidden coordinates, real marker drag and current device location",
+    "Create post, click real Leaflet coordinate, upload image and read persisted data",
+    "Edit restores prior coordinates and name; mobile suggestions fit; edited position persists"
+  ],
+  "viewports": [],
+  "javascriptErrors": [],
+  "result": "FAIL",
+  "error": "page.waitForResponse: Timeout 15000ms exceeded while waiting for event \"response\""
+}

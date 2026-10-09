@@ -1,0 +1,12 @@
+{
+  "journey": [
+    "Register and login owner",
+    "Place suggestions (fixture), selection, hidden coordinates, real marker drag and current device location",
+    "Create post, click real Leaflet coordinate, upload image and read persisted data",
+    "Edit restores prior coordinates and name; mobile suggestions fit; edited position persists"
+  ],
+  "viewports": [],
+  "javascriptErrors": [],
+  "result": "FAIL",
+  "error": "locator.waitFor: Error: strict mode violation: locator('#food-results .food-feed-card') resolved to 2 elements:\n    1) <article data-feed-post=\"23\" class=\"feed-card food-feed-card\">…</article> aka getByRole('article').filter({ hasText: 'อาหาร[ทดสอบ] ข้าวกะเพราไข่ดาว mv0uaswz' })\n    2) <article data-feed-post=\"24\" class=\"feed-card food-feed-card\">…</article> aka getByRole('article').filter({ hasText: 'อาหาร[ทดสอบ] ข้าวกะเพราไข่ดาว mv0udohh' })\n\nCall log:\n\u001b[2m  - waiting for locator('#food-results .food-feed-card') to be visible\u001b[22m\n"
+}

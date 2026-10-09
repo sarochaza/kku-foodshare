@@ -1,27 +1,19 @@
-# ผลการทดสอบ KKU FoodShare
+# Phase 12 — Comment CRUD verification
 
-ทดสอบบนเครื่องผู้พัฒนาด้วย Docker และเว็บที่ http://localhost:8081
+ตรวจจาก source รุ่น Phase 12 ที่ส่งใน ZIP นี้ วันที่ 9 ตุลาคม 2026 (Asia/Bangkok)
 
 | การตรวจ | ผล | หลักฐาน/ข้อจำกัด |
 |---|---|---|
-| JavaScript ทั้งชุด | PASS — 130 tests, 0 failures | `node-tests.txt` เป็นผลการตรวจรอบเดิม |
-| Comment UI tests | PASS — 20 tests, 0 failures | `phase12/comment-js-tests.txt` หรือ `backend-test-results/comment-js-tests.txt` หากเปลี่ยนชื่อโฟลเดอร์แล้ว |
-| Java 17 syntax parser | PASS — 6 ไฟล์ Java ที่แก้/เพิ่ม | ตรวจ syntax เท่านั้น ไม่ใช่การ compile/type-check application |
-| YAML test Compose | PASS — parse ได้ และใช้รันทดสอบผ่าน Docker แล้ว | `compose.test.yaml` และ Docker test logs |
-| ตรวจโค้ด Comment CRUD | แก้ findings แล้ว | ป้องกัน More/PUT race และใช้ `getId()` ของ lazy proxies ใน test |
-| Maven / JUnit ผ่าน Docker | PASS — 48 tests, 0 failures, 0 errors, 0 skipped; BUILD SUCCESS | `code/target/surefire-reports/` และ `java-tests-docker.log`; ยืนยันเฉพาะคำสั่ง Maven ที่สคริปต์เรียก |
-| Docker build และ PostgreSQL tests | PASS — All Docker test commands passed | Logs ของ `java-tests`, `js-tests` และ `postgres-tests` ในโฟลเดอร์รายงาน Backend |
-| Browser test suite | PASS — 9 ชุด, 0 failed, 0 not run | `test/reports/browser/<รอบล่าสุด>/summary.md`, `summary.json`, `summary.csv` พร้อม logs และภาพหน้าจอ |
-| การแสดงผลบนจอ 320px | PASS | ผ่าน `quick-actions-journey` หลังแก้ส่วนหัวที่ล้นหน้าจอ |
-| Git push และ public deployment verification | deployแล้ว | ตรวจโค้ดที่ push และ deploy แล้ว รวมถึง URL สาธารณะและ Swagger UI หลัง deploy |
+| JavaScript ทั้งชุด | PASS — 130 tests, 0 failures | `node-tests.txt` |
+| Comment UI tests | PASS — 20 tests, 0 failures | `phase12/comment-js-tests.txt` |
+| Java 17 syntax parser | PASS — 6 ไฟล์ Java ที่แก้/เพิ่ม | ตรวจ parse เท่านั้น ไม่ใช่การ compile/type-check application |
+| YAML test Compose | PASS — parse ได้ | services/command/volumes ถูกอ่านได้; ยังไม่ได้ตรวจด้วย Docker Compose |
+| ตรวจโค้ด Comment CRUD | แก้ findings แล้ว | ป้องกัน More/PUT race และใช้ getId() ของ lazy proxies ใน test |
+| Maven `verify` / JUnit | BLOCKED ก่อน compile | ไม่สามารถ resolve DNS ของ repo.maven.apache.org เพื่อโหลด Spring Boot parent; `phase12/maven-attempt.txt` |
+| Docker build + PostgreSQL tests | ยังไม่ได้รัน | ไม่มี Docker runtime ในสภาพแวดล้อมตรวจ |
+| Browser journey | ยังไม่ได้รัน | Chromium executable ไม่มีในสภาพแวดล้อมตรวจ; ตรวจหน้าเว็บตาม doc/comment-crud.md |
+| Git push / public deployment verification | ต้องทำหลัง Docker ผ่านบนเครื่องคุณ | ไม่มีการอ้างว่า ZIP รุ่นนี้ deploy แล้ว |
 
-## ขอบเขตของผลการทดสอบ
-
-- Browser suite มีทั้งการตรวจ source, การใช้ fixtures และการทดสอบกับเว็บ local
-- ผลที่ใช้ fixtures ไม่ได้ยืนยันการเชื่อมต่อบริการภายนอกจริง เช่น Google Login, Cloudinary และ Brevo
-- รายงาน Backend อยู่ใน `test/reports/phase12/` หรือ `test/reports/backend-test-results/` หากเปลี่ยนชื่อแล้ว
-- รายงาน Browser ใช้โฟลเดอร์รอบล่าสุดที่ได้ `PASS 9 / FAIL 0 / NOT_RUN 0`
-- ผลการทดสอบ local ไม่ได้ยืนยันว่าโค้ดรุ่นล่าสุด deploy บนเว็บสาธารณะแล้ว
 ## Tests ที่เพิ่ม
 
 `CommentCrudJourneyTest` มี 8 integration test methods สำหรับครบ CRUD/status/Location,

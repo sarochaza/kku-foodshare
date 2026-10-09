@@ -1,1 +1,9 @@
-{"private":true,"scripts":{"browser":"node browser-journey.cjs"},"devDependencies":{"playwright":"1.51.1"}}
+{
+    "private":  true,
+    "scripts":  {
+                    "browser":  "node browser-tests/browser-journey.cjs"
+                },
+    "devDependencies":  {
+                            "playwright":  "1.51.1"
+                        }
+}

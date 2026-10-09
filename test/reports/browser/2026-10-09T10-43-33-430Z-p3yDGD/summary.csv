@@ -1,0 +1,10 @@
+name,scope,status,exitCode,log,error
+"browser-journey","live","FAIL","1","logs/browser-journey.log",""
+"about-image-check","source","NOT_RUN","","",""
+"admin-posts-check","fixture","NOT_RUN","","",""
+"dark-surfaces-check","fixture","NOT_RUN","","",""
+"onboarding-check","fixture","NOT_RUN","","",""
+"phase10-ui-check","fixture","NOT_RUN","","",""
+"pickup-reminder-check","fixture","NOT_RUN","","",""
+"quick-actions-journey","live","NOT_RUN","","",""
+"home-overflow-check","live","NOT_RUN","","",""

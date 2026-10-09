@@ -1,0 +1,9 @@
+{
+  "journey": [
+    "Register and login owner"
+  ],
+  "viewports": [],
+  "javascriptErrors": [],
+  "result": "FAIL",
+  "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ 16.4768\n- 16.4745\n       ^\n"
+}
