@@ -22,7 +22,7 @@
 | ลำดับ | ชื่อ-นามสกุล | รหัสนักศึกษา | Section | Branch | หน้าที่รับผิดชอบ | Email |
 |:---:|---|---|:---:|---|---|---|
 | 1 | นางสาวกัญญาวี ศรีเหรา | 673380026-6 | 1 | `kanyawi_6733800266_01` |การสร้าง แก้ไข และปิดโพสต์อาหาร การแสดงรายการโพสต์และหน้ารายละเอียดโพสต์ | [kanyawi.s@kkumail.com](mailto:kanyawi.s@kkumail.com) |
-| 2 | นางสาวรสริน เมืองหงษ์ | 673380289-4 | 1 | `rossarin_6733802894_01` |  | [rossarin.m@kkumail.com](mailto:rossarin.m@kkumail.com) |
+| 2 | นางสาวรสริน เมืองหงษ์ | 673380289-4 | 1 | `rossarin_6733802894_01` | การจองและยกเลิกการจองอาหาร การจัดการสต็อก การยืนยันรับอาหารด้วย QR Code/รหัสรับอาหาร และระบบแจ้งเตือน | [rossarin.m@kkumail.com](mailto:rossarin.m@kkumail.com) |
 | 3 | นางสาวสโรชา เสาทอง | 673380296-7 | 1 | `sarocha_6733802967_01` |  ความคิดเห็น บันทึกโพสต์ โปรไฟล์ และหน้าจอทั่วไป | [sarocha.sao@kkumail.com](mailto:sarocha.sao@kkumail.com) |
 | 4 | นายปวริศร์ แพงมา | 673380048-7 | 1 | `pawarit_6733800487_01` |   | [pawarit.pan@kkumail.com](mailto:pawarit.pan@kkumail.com) |
 
