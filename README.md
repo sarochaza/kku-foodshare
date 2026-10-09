@@ -10,12 +10,6 @@
 เจ้าของยืนยันการรับด้วย QR หรือรหัสรับอาหาร พร้อมจัดการสต็อกและรายการแจกนอกเว็บ  
 ระบบรองรับความคิดเห็น บันทึกโพสต์ โปรไฟล์ และการแจ้งเตือน โดยออกแบบตามหลัก Software Design
 
-## Deployment URL
-
-| รายการ | URL |
-|---|---|
-| เว็บไซต์ | [https://kku-foodshare.onrender.com](https://kku-foodshare.onrender.com) |
-| Swagger UI | [https://kku-foodshare.onrender.com/swagger-ui/index.html](https://kku-foodshare.onrender.com/swagger-ui/index.html) |
 
 ## สมาชิกกลุ่ม
 
@@ -390,19 +384,35 @@ node --test code/src/test/js/*.test.mjs
 |---|---:|---:|---:|---:|
 | Java | 116 | 116 | 0 | 0 |
 | JavaScript | 123 | 123 | 0 | 0 |
-| **รวม** | **239** | **239** | **0** | **0** |
+| **รวมของรอบนี้** | **239** | **239** | **0** | **0** |
 
 Java แสดง `BUILD SUCCESS` และสร้าง executable JAR สำเร็จบน Java 26.0.2 ของผู้จัดทำ ส่วน `pom.xml` กำหนด Java target 17
+
+ผลทดสอบเพิ่มเติม:
+
+| ชุดทดสอบ | วันที่รัน | หน่วยนับ | ผ่าน | ไม่ผ่าน / Errors | ข้าม / ไม่ได้รัน |
+|---|---|---|---:|---:|---:|
+| Java/JUnit ร่วมกับ PostgreSQL ใน Docker | 9 ตุลาคม 2026 | กรณีทดสอบ | 48 | 0 | 0 |
+| Browser automation | 9 ตุลาคม 2026 | สคริปต์ทดสอบ | 9 | 0 | 0 |
+
+ชุด PostgreSQL รันบน Java 17 เชื่อมต่อฐานข้อมูลจริงใน Docker และใช้ Flyway migrations ครบ 10 รายการ โดยจบด้วย `BUILD SUCCESS`
+
+Browser automation ผ่านครบทั้ง 9 scripts แต่ละ script อาจมีหลายกรณีทดสอบ โดยมีทั้งการตรวจ source การใช้ข้อมูลจำลอง และการทดสอบเว็บที่ `http://localhost:8081`
+
+ไม่รวมจำนวนข้ามรอบเข้าด้วยกัน เนื่องจากอาจมีกรณีทดสอบซ้ำ และใช้หน่วยนับต่างกัน ผลทดสอบในเครื่องไม่ได้ยืนยันการทำงานของ deployment สาธารณะโดยอัตโนมัติ
 
 - [Test Reports](https://github.com/sarochaza/kku-foodshare/tree/main/test/reports)
 - [คู่มือ Browser และ PostgreSQL checks](test/README.md)
 - [สถานะผลตรวจและหลักฐาน](test/reports/verification.md)
 
-ก่อนส่งให้เติม commit ที่ทดสอบ หากแก้ source ให้รันใหม่และปรับรายงานตามผลจริง ยังไม่มีหลักฐาน browser journeys, PostgreSQL/Flyway และ public deployment ของรุ่นนี้ การมี GitHub Actions workflow ไม่แทนหลักฐานว่า CI ผ่านแล้ว
 
 
-> **รอยืนยันรุ่นส่ง:** ทีมต้องตรวจว่าเว็บและ Swagger เปิดได้จริง และใช้ source/commit ที่ส่งงาน หากเปลี่ยน URL ให้แก้ตารางนี้ตามระบบจริง
+## Deployment URL
 
+| รายการ | URL |
+|---|---|
+| เว็บไซต์ | [https://kku-foodshare.onrender.com](https://kku-foodshare.onrender.com) |
+| Swagger UI | [https://kku-foodshare.onrender.com/swagger-ui/index.html](https://kku-foodshare.onrender.com/swagger-ui/index.html) |
 ดู [Deployment Guide](doc/deployment.md) สำหรับการตั้งค่าฐานข้อมูล รูปภาพ และอีเมล ระบบมี `Dockerfile` และ `docker-compose.yml` ส่วน workflow ปัจจุบันยังไม่มีขั้น deploy อัตโนมัติ
 
 ## Project Structure
