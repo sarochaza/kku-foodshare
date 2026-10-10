@@ -418,28 +418,85 @@ Browser automation ผ่านครบทั้ง 9 scripts แต่ละ s
 
 ## Project Structure
 
-| ตำแหน่ง | เนื้อหา |
-|---|---|
-| `README.md` | ภาพรวม สมาชิก วิธีติดตั้ง รัน ทดสอบ และ deployment |
-| `code/pom.xml` | Dependencies และ Maven build configuration |
-| `code/src/main/java/com/kku/foodshare/` | Production Java: config, controller, domain, dto, exception, mapper, repository, security, service |
-| `code/src/main/resources/templates/` | หน้าเว็บ Thymeleaf |
-| `code/src/main/resources/static/` | JavaScript, CSS, รูปภาพ, fonts และ vendor assets |
-| `code/src/main/resources/db/migration/` | Flyway migrations V1–V10 |
-| `code/src/test/java/` | Java test sources |
-| `code/src/test/js/` | JavaScript test sources |
-| `code/src/test/resources/` | Java test configuration |
-| `test/browser/` | Browser journeys และ UI/fixture checks |
-| `test/reports/java/` | Maven console log และ Surefire XML/TXT |
-| `test/reports/javascript/` | Node test runner log |
-| `test/reports/source-review/` | หลักฐานตรวจโครงสร้างระหว่างพัฒนา |
-| `test/reports/test-report.md` | รายงานสรุปผลทดสอบ |
-| `doc/` | SOLID, Patterns, API, Data Dictionary และ Deployment |
-| `doc/diagrams/` | Use Case, Domain, Class, Sequence, Activity, ER, Component, Deployment และ State |
-| `doc/slide/` | โฟลเดอร์สไลด์นำเสนอของทีม ยังต้องเพิ่มไฟล์สไลด์จริง |
-| `img/` | ภาพประกอบและหลักฐานภาพของระบบ |
-| `scripts/` | ตั้งค่า environment และ backup/restore |
-| `.github/workflows/` | GitHub Actions verification |
-| `Dockerfile`, `docker-compose.yml` | Build และรันระบบด้วย container |
+## Project Structure
 
-[Third-party notices](doc/third-party.md) · [รายการ source changes จากต้นฉบับ](test/reports/source-review/source-changes.csv)
+```text
+kku-foodshare/
+├── code/                              # Source code และการตั้งค่าแอปพลิเคชัน
+│   ├── src/main/java/com/kku/foodshare/
+│   │   ├── FoodshareApplication.java   # จุดเริ่มต้นของ Spring Boot
+│   │   ├── controller/
+│   │   │   ├── api/                    # REST API Controllers
+│   │   │   └── web/                    # Controllers สำหรับหน้า Thymeleaf
+│   │   ├── service/                    # Service interfaces
+│   │   │   ├── impl/                   # Business logic ของระบบ
+│   │   │   ├── discovery/              # Strategy สำหรับเรียงและค้นหาอาหาร
+│   │   │   ├── event/                  # Events และการตอบสนองต่อเหตุการณ์
+│   │   │   └── storage/                # จัดเก็บภาพแบบ Local และ Cloudinary
+│   │   ├── repository/                 # Spring Data JPA repositories
+│   │   ├── domain/
+│   │   │   ├── entity/                 # JPA Entities ที่เชื่อมกับตารางฐานข้อมูล
+│   │   │   ├── enums/                  # ค่าประเภทและสถานะที่ระบบใช้
+│   │   │   └── state/                  # การจัดการพฤติกรรมตามสถานะ
+│   │   ├── dto/
+│   │   │   ├── request/                # ข้อมูลรับเข้าและ Bean Validation
+│   │   │   └── response/               # ข้อมูลตอบกลับจาก API
+│   │   ├── mapper/                     # แปลงข้อมูลระหว่าง Entity และ DTO
+│   │   ├── exception/                  # Custom exceptions และ Global Exception Handler
+│   │   ├── config/                     # Configuration และการประกาศ Beans
+│   │   └── security/                   # Authentication, Authorization และ Google OAuth2
+│   ├── src/main/resources/
+│   │   ├── application.properties      # การตั้งค่าหลักของระบบ
+│   │   ├── application-google.properties # การตั้งค่า Google login
+│   │   ├── db/
+│   │   │   └── migration/              # Flyway database migrations
+│   │   ├── templates/                  # หน้าเว็บและ fragments ของ Thymeleaf
+│   │   └── static/                     # CSS, JavaScript, รูปภาพ และ assets
+│   ├── src/test/
+│   │   ├── java/com/kku/foodshare/      # Java tests: JUnit, Mockito และ integration tests
+│   │   └── resources/                  # Configuration และข้อมูลประกอบการทดสอบ
+│   ├── pom.xml                         # Maven dependencies และ build configuration
+│   ├── mvnw                            # Maven Wrapper สำหรับ Linux/macOS
+│   └── mvnw.cmd                        # Maven Wrapper สำหรับ Windows
+├── test/                               # Browser tests และหลักฐานผลทดสอบ
+│   ├── browser-tests/                  # สคริปต์ Browser automation และ checks (.cjs)
+│   ├── reports/
+│   │   ├── browser/                    # Browser logs, screenshots และ summary
+│   │   ├── junit-test-results/         # ผล JUnit แบบ XML/TXT และ Java logs
+│   │   ├── javascript-test-results/    # ผลทดสอบ JavaScript
+│   │   └── postgres-test-results/      # ผลทดสอบร่วมกับ PostgreSQL ใน Docker
+│   ├── run-browser-tests.cjs           # จุดเรียกชุดทดสอบ Browser
+│   ├── package.json                    # Dependencies และคำสั่งทดสอบ Node.js
+│   ├── package-lock.json               # ล็อกเวอร์ชัน dependencies
+│   └── README.md                       # คู่มือรันและอ่านผลทดสอบ
+├── doc/                                # เอกสารประกอบโครงการ
+│   ├── diagrams/                       # Use Case, Class, Sequence, Activity, ER และอื่น ๆ
+│   ├── slide/                          # สไลด์นำเสนอ
+│   ├── data-dictionary.md              # รายละเอียดตารางและคอลัมน์ฐานข้อมูล
+│   ├── solid-analysis.md               # วิเคราะห์ SOLID พร้อมอ้างอิงโค้ด
+│   ├── design-patterns.md              # Design Patterns และเหตุผลที่ใช้
+│   ├── api.md                          # เอกสาร API
+│   ├── API_REFERENCE.md                # รายละเอียดการเรียก API
+│   ├── comment-crud.md                 # คู่มือและกรณีตรวจ Comment CRUD
+│   ├── deployment.md                   # คู่มือ deployment
+│   └── third-party.md                  # บริการและ dependencies ภายนอก
+├── img/                                # ภาพและสื่อประกอบเอกสาร
+├── scripts/                            # สคริปต์ช่วยรันและทดสอบระบบ
+├── .github/
+│   └── workflows/                      # GitHub Actions workflows
+├── .dockerignore                       # ไฟล์ที่ไม่ส่งเข้า Docker build context
+├── .env.example                        # ตัวอย่าง environment variables
+├── .gitattributes                      # การตั้งค่าการจัดการไฟล์ของ Git
+├── .gitignore                          # ไฟล์ที่ไม่ติดตามด้วย Git
+├── Dockerfile                          # สร้าง Docker image ของแอปพลิเคชัน
+├── Caddyfile                           # การตั้งค่า Caddy reverse proxy
+├── compose.yaml                        # Docker Compose สำหรับรันระบบในเครื่อง
+├── docker-compose.yml                  # Docker Compose อีกชื่อที่มีใน repository
+├── compose.production.yaml             # Configuration สำหรับ production
+├── compose.test.yaml                   # Java, JavaScript และ PostgreSQL test services
+├── compose.mail-local.yaml             # Configuration สำหรับระบบอีเมลในเครื่อง
+├── compose.mail-test.yaml               # Configuration สำหรับทดสอบอีเมล
+└── README.md                           # ภาพรวม สมาชิก วิธีรัน และลิงก์เอกสาร
+```
+
+Java tests อยู่ใน `code/src/test/` ตามโครงสร้าง Maven ส่วน Browser scripts และรายงานที่เก็บเป็นหลักฐานอยู่ใน `test/`
